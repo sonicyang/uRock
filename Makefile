@@ -1,5 +1,7 @@
 PROJECT = main
 
+TOOLDIR = tool
+
 OUTDIR = build
 EXECUTABLE = $(OUTDIR)/$(PROJECT).elf
 BIN_IMAGE = $(OUTDIR)/$(PROJECT).bin
@@ -103,4 +105,8 @@ clean:
 	rm -rf $(OUTDIR)/*
 
 dbg: $(EXECUTABLE)
-	(openocd -f board/stm32f429discovery.cfg 2> /dev/null & arm-none-eabi-gdb $^ -x gdbscript && pkill openocd 2>/dev/null)
+	openocd -f board/stm32f429discovery.cfg >/dev/null & \
+    echo $$! > $(OUTDIR)/openocd_pid && \
+    $(CROSS_COMPILE)gdb -x $(TOOLDIR)/gdbscript && \
+    cat $(OUTDIR)/openocd_pid |`xargs kill 2>/dev/null || test true` && \
+    rm -f $(OUTDIR)/openocd_pid
