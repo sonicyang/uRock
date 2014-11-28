@@ -350,6 +350,11 @@ static void SystemClock_Config(void){
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;  
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
 	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+
+    __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+
+    __HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
+    __HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
 static void Error_Handler(void){

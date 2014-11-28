@@ -1,3 +1,7 @@
 target extended-remote localhost:3333
 file build/main.elf
 load
+monitor reset
+monitor halt
+
+b moveRelativly
