@@ -29,10 +29,14 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f429i_discovery.h"
 
+#include "cmsis_os.h"
+
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
+static void LED_Thread1(void const *argument);
 
 /* Private variables ---------------------------------------------------------*/
+osThreadId LEDThread1Handle, shellThread;
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_dac2;
 ADC_HandleTypeDef hadc1;
@@ -192,8 +196,28 @@ int main(void){
     //HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value[0], 256);
     //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) value[0], 256, DAC_ALIGN_8B_R);
 
+	/* Thread 1 definition */
+	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	/* Start thread 1 */
+	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+
+	osKernelStart (NULL, NULL);
+
 	/* We should never get here as control is now taken by the scheduler */
 	for(;;);
+}
+
+static void LED_Thread1(void const *argument){
+	uint32_t count = 0;
+	(void) argument;
+
+	for(;;){
+		for (count = osKernelSysTick() + 5000 ; count >= osKernelSysTick() ; osDelay(200))	// Toggle LED3 every 200 ms for 5s
+			BSP_LED_Toggle(LED3);
+		BSP_LED_Off(LED3);
+		for (count = osKernelSysTick() + 5000 ; count >= osKernelSysTick() ; osDelay(400))	// Toggle LED3 every 400 ms for 5s
+		  BSP_LED_Toggle(LED3);
+	}
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
@@ -207,12 +231,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
         index = 0;
 
     HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY0);
-
     
     for(; i < 256; i++){
         value[oindex][i] <<= 1;
     }
-    
 
     return;  
 }
@@ -228,12 +250,10 @@ void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
         index = 1;
 
     HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY1);
-
     
     for(; i < 256; i++){
         value[oindex][i] <<= 1;
     }
-    
 
     return;  
 }
