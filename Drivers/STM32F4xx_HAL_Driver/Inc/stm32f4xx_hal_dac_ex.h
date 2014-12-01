@@ -156,11 +156,13 @@ HAL_StatusTypeDef HAL_DACEx_NoiseWaveGenerate(DAC_HandleTypeDef* hdac, uint32_t 
 HAL_StatusTypeDef HAL_DACEx_DualSetValue(DAC_HandleTypeDef* hdac, uint32_t Alignment, uint32_t Data1, uint32_t Data2);
 
 void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac);
+void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac);
 void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef* hdac);
 void HAL_DACEx_ErrorCallbackCh2(DAC_HandleTypeDef* hdac);
 void HAL_DACEx_DMAUnderrunCallbackCh2(DAC_HandleTypeDef* hdac);
 
 void DAC_DMAConvCpltCh2(DMA_HandleTypeDef *hdma);
+void DAC_DMAConvM1CpltCh2(DMA_HandleTypeDef *hdma);
 void DAC_DMAErrorCh2(DMA_HandleTypeDef *hdma);
 void DAC_DMAHalfConvCpltCh2(DMA_HandleTypeDef *hdma); 
 

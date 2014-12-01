@@ -275,6 +275,19 @@ __weak void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac)
 }
 
 /**
+  * @brief  Conversion complete callback in non blocking mode for Channel2 
+  * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
+  *         the configuration information for the specified DAC.
+  * @retval None
+  */
+__weak void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac)
+{
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the HAL_DAC_ConvCpltCallback could be implemented in the user file
+   */
+}
+
+/**
   * @brief  Conversion half DMA transfer callback in non blocking mode for Channel2 
   * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
   *         the configuration information for the specified DAC.
@@ -324,6 +337,21 @@ void DAC_DMAConvCpltCh2(DMA_HandleTypeDef *hdma)
   DAC_HandleTypeDef* hdac = ( DAC_HandleTypeDef* )((DMA_HandleTypeDef* )hdma)->Parent;
   
   HAL_DACEx_ConvCpltCallbackCh2(hdac); 
+  
+  hdac->State= HAL_DAC_STATE_READY;
+}
+
+/**
+  * @brief  DMA conversion complete callback. 
+  * @param  hdma: pointer to a DMA_HandleTypeDef structure that contains
+  *                the configuration information for the specified DMA module.
+  * @retval None
+  */
+void DAC_DMAConvM1CpltCh2(DMA_HandleTypeDef *hdma)   
+{
+  DAC_HandleTypeDef* hdac = ( DAC_HandleTypeDef* )((DMA_HandleTypeDef* )hdma)->Parent;
+  
+  HAL_DACEx_ConvM1CpltCallbackCh2(hdac); 
   
   hdac->State= HAL_DAC_STATE_READY;
 }

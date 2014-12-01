@@ -190,6 +190,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void DAC_DMAConvCpltCh1(DMA_HandleTypeDef *hdma);
+static void DAC_DMAConvM1CpltCh1(DMA_HandleTypeDef *hdma);
 static void DAC_DMAErrorCh1(DMA_HandleTypeDef *hdma);
 static void DAC_DMAHalfConvCpltCh1(DMA_HandleTypeDef *hdma); 
 
@@ -545,6 +546,134 @@ HAL_StatusTypeDef HAL_DAC_Start_DMA(DAC_HandleTypeDef* hdac, uint32_t Channel, u
 }
 
 /**
+  * @brief  Enables DAC and starts conversion of channel.
+  * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
+  *         the configuration information for the specified DAC.
+  * @param  Channel: The selected DAC channel. 
+  *          This parameter can be one of the following values:
+  *            @arg DAC_CHANNEL_1: DAC Channel1 selected
+  *            @arg DAC_CHANNEL_2: DAC Channel2 selected
+  * @param  pData: The destination peripheral Buffer address.
+  * @param  Length: The length of data to be transferred from memory to DAC peripheral
+  * @param  Alignment: Specifies the data alignment for DAC channel.
+  *          This parameter can be one of the following values:
+  *            @arg DAC_ALIGN_8B_R: 8bit right data alignment selected
+  *            @arg DAC_ALIGN_12B_L: 12bit left data alignment selected
+  *            @arg DAC_ALIGN_12B_R: 12bit right data alignment selected
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_DAC_Start_DMA_DoubleBuffer(DAC_HandleTypeDef* hdac, uint32_t Channel, uint32_t* pData, uint32_t* SecData, uint32_t Length, uint32_t Alignment)
+{
+  uint32_t tmpreg = 0;
+    
+  /* Check the parameters */
+  assert_param(IS_DAC_CHANNEL(Channel));
+  assert_param(IS_DAC_ALIGN(Alignment));
+  
+  /* Process locked */
+  __HAL_LOCK(hdac);
+  
+  /* Change DAC state */
+  hdac->State = HAL_DAC_STATE_BUSY;
+
+  if(Channel == DAC_CHANNEL_1)
+  {
+    /* Set the DMA transfer complete callback for channel1 */
+    hdac->DMA_Handle1->XferCpltCallback = DAC_DMAConvCpltCh1;
+    hdac->DMA_Handle1->XferM1CpltCallback = DAC_DMAConvM1CpltCh1;
+
+    /* Set the DMA half transfer complete callback for channel1 */
+    hdac->DMA_Handle1->XferHalfCpltCallback = DAC_DMAHalfConvCpltCh1;
+
+    /* Set the DMA error callback for channel1 */
+    hdac->DMA_Handle1->XferErrorCallback = DAC_DMAErrorCh1;
+
+    /* Enable the selected DAC channel1 DMA request */
+    hdac->Instance->CR |= DAC_CR_DMAEN1;
+    
+    /* Case of use of channel 1 */
+    switch(Alignment)
+    {
+      case DAC_ALIGN_12B_R:
+        /* Get DHR12R1 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR12R1;
+        break;
+      case DAC_ALIGN_12B_L:
+        /* Get DHR12L1 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR12L1;
+        break;
+      case DAC_ALIGN_8B_R:
+        /* Get DHR8R1 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR8R1;
+        break;
+      default:
+        break;
+    }
+  }
+  else
+  {
+    /* Set the DMA transfer complete callback for channel2 */
+    hdac->DMA_Handle2->XferCpltCallback = DAC_DMAConvCpltCh2;
+    hdac->DMA_Handle2->XferM1CpltCallback = DAC_DMAConvM1CpltCh2;
+
+    /* Set the DMA half transfer complete callback for channel2 */
+    hdac->DMA_Handle2->XferHalfCpltCallback = DAC_DMAHalfConvCpltCh2;
+
+    /* Set the DMA error callback for channel2 */
+    hdac->DMA_Handle2->XferErrorCallback = DAC_DMAErrorCh2;
+
+    /* Enable the selected DAC channel2 DMA request */
+    hdac->Instance->CR |= DAC_CR_DMAEN2;
+
+    /* Case of use of channel 2 */
+    switch(Alignment)
+    {
+      case DAC_ALIGN_12B_R:
+        /* Get DHR12R2 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR12R2;
+        break;
+      case DAC_ALIGN_12B_L:
+        /* Get DHR12L2 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR12L2;
+        break;
+      case DAC_ALIGN_8B_R:
+        /* Get DHR8R2 address */
+        tmpreg = (uint32_t)&hdac->Instance->DHR8R2;
+        break;
+      default:
+        break;
+    }
+  }
+  
+  /* Enable the DMA Stream */
+  if(Channel == DAC_CHANNEL_1)
+  {
+    /* Enable the DAC DMA underrun interrupt */
+    __HAL_DAC_ENABLE_IT(hdac, DAC_IT_DMAUDR1);
+    
+    /* Enable the DMA Stream */
+    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle1, (uint32_t)pData, (uint32_t)SecData, tmpreg, Length);
+  } 
+  else
+  {
+    /* Enable the DAC DMA underrun interrupt */
+    __HAL_DAC_ENABLE_IT(hdac, DAC_IT_DMAUDR2);
+    
+    /* Enable the DMA Stream */
+    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle2, (uint32_t)pData, (uint32_t)SecData, tmpreg, Length);
+  }
+  
+  /* Enable the Peripharal */
+  __HAL_DAC_ENABLE(hdac, Channel);
+  
+  /* Process Unlocked */
+  __HAL_UNLOCK(hdac);
+  
+  /* Return function status */
+  return HAL_OK;
+}
+
+/**
   * @brief  Disables DAC and stop conversion of channel.
   * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
   *         the configuration information for the specified DAC.
@@ -672,6 +801,19 @@ void HAL_DAC_IRQHandler(DAC_HandleTypeDef* hdac)
   * @retval None
   */
 __weak void HAL_DAC_ConvCpltCallbackCh1(DAC_HandleTypeDef* hdac)
+{
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the HAL_DAC_ConvCpltCallback could be implemented in the user file
+   */
+}
+
+/**
+  * @brief  Conversion complete callback in non blocking mode for Channel1 
+  * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
+  *         the configuration information for the specified DAC.
+  * @retval None
+  */
+__weak void HAL_DAC_ConvM1CpltCallbackCh1(DAC_HandleTypeDef* hdac)
 {
   /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_DAC_ConvCpltCallback could be implemented in the user file
@@ -888,6 +1030,21 @@ static void DAC_DMAConvCpltCh1(DMA_HandleTypeDef *hdma)
   DAC_HandleTypeDef* hdac = ( DAC_HandleTypeDef* )((DMA_HandleTypeDef* )hdma)->Parent;
   
   HAL_DAC_ConvCpltCallbackCh1(hdac); 
+  
+  hdac->State= HAL_DAC_STATE_READY;
+}
+
+/**
+  * @brief  DMA conversion complete callback. 
+  * @param  hdma: pointer to a DMA_HandleTypeDef structure that contains
+  *                the configuration information for the specified DMA module.
+  * @retval None
+  */
+static void DAC_DMAConvM1CpltCh1(DMA_HandleTypeDef *hdma)   
+{
+  DAC_HandleTypeDef* hdac = ( DAC_HandleTypeDef* )((DMA_HandleTypeDef* )hdma)->Parent;
+  
+  HAL_DAC_ConvM1CpltCallbackCh1(hdac); 
   
   hdac->State= HAL_DAC_STATE_READY;
 }
