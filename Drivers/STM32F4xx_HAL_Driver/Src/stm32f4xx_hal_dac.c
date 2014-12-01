@@ -652,7 +652,7 @@ HAL_StatusTypeDef HAL_DAC_Start_DMA_DoubleBuffer(DAC_HandleTypeDef* hdac, uint32
     __HAL_DAC_ENABLE_IT(hdac, DAC_IT_DMAUDR1);
     
     /* Enable the DMA Stream */
-    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle1, (uint32_t)pData, (uint32_t)SecData, tmpreg, Length);
+    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle1, (uint32_t)pData, tmpreg, (uint32_t)SecData, Length);
   } 
   else
   {
@@ -660,7 +660,7 @@ HAL_StatusTypeDef HAL_DAC_Start_DMA_DoubleBuffer(DAC_HandleTypeDef* hdac, uint32
     __HAL_DAC_ENABLE_IT(hdac, DAC_IT_DMAUDR2);
     
     /* Enable the DMA Stream */
-    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle2, (uint32_t)pData, (uint32_t)SecData, tmpreg, Length);
+    HAL_DMAEx_MultiBufferStart_IT(hdac->DMA_Handle2, (uint32_t)pData, tmpreg, (uint32_t)SecData, Length);
   }
   
   /* Enable the Peripharal */

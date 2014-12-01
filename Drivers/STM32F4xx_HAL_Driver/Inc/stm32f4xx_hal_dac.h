@@ -295,7 +295,7 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac);
 HAL_StatusTypeDef HAL_DAC_Start(DAC_HandleTypeDef* hdac, uint32_t Channel);
 HAL_StatusTypeDef HAL_DAC_Stop(DAC_HandleTypeDef* hdac, uint32_t Channel);
 HAL_StatusTypeDef HAL_DAC_Start_DMA(DAC_HandleTypeDef* hdac, uint32_t Channel, uint32_t* pData, uint32_t Length, uint32_t Alignment);
-HAL_StatusTypeDef HAL_DAC_Start_DMA_MultiBuffer(DAC_HandleTypeDef* hdac, uint32_t Channel, uint32_t* pData, uint32_t* SecData, uint32_t Length, uint32_t Alignment);
+HAL_StatusTypeDef HAL_DAC_Start_DMA_DoubleBuffer(DAC_HandleTypeDef* hdac, uint32_t Channel, uint32_t* pData, uint32_t* SecData, uint32_t Length, uint32_t Alignment);
 HAL_StatusTypeDef HAL_DAC_Stop_DMA(DAC_HandleTypeDef* hdac, uint32_t Channel);
 uint32_t HAL_DAC_GetValue(DAC_HandleTypeDef* hdac, uint32_t Channel);
 

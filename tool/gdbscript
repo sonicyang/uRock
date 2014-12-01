@@ -4,4 +4,5 @@ load
 monitor reset
 monitor halt
 
-b moveRelativly
+b main
+b HAL_DMA_IRQHandler

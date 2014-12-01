@@ -29,10 +29,12 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f429i_discovery.h"
 
-static void Error_Handler(void);
+//static void Error_Handler(void);
 static void SystemClock_Config(void);
 
 /* Private variables ---------------------------------------------------------*/
+DMA_HandleTypeDef hdma_adc1;
+DMA_HandleTypeDef hdma_dac2;
 ADC_HandleTypeDef hadc1;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
@@ -127,6 +129,10 @@ void MX_DMA_Init(void) {
   /* DMA controller clock enable */
   __DMA2_CLK_ENABLE();
   __DMA1_CLK_ENABLE();
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 }
  
 /** Configure pins as
@@ -144,6 +150,16 @@ void MX_GPIO_Init(void) {
 }
 /* USER CODE END 0 */
 
+void DMA2_Stream0_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_adc1);
+    return;
+}
+
+void DMA1_Stream6_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_dac2);
+    return;
+}
+
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -155,8 +171,10 @@ int main(void){
 	HAL_Init();  
 
 	/* Initialize LEDs */
-//	BSP_LED_Init(LED3);
-//	BSP_LED_Init(LED4);
+	BSP_LED_Init(LED3);
+	BSP_LED_Init(LED4);
+    BSP_LED_On(LED3);
+    BSP_LED_On(LED4);
 
 	/* Configure the system clock to 180 Mhz */
 	SystemClock_Config();
@@ -170,9 +188,31 @@ int main(void){
     HAL_TIM_Base_Start(&htim2);
     HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)value[0], (uint32_t*)value[1], 256);
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) value[1], (uint32_t*) value[0], 256, DAC_ALIGN_8B_R);
+    //HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value[0], 256);
+    //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) value[0], 256, DAC_ALIGN_8B_R);
 
 	/* We should never get here as control is now taken by the scheduler */
 	for(;;);
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+//    BSP_LED_On(LED3);
+    return;  
+}
+
+void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
+    BSP_LED_Off(LED3);
+    return;  
+}
+
+void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
+  //  BSP_LED_On(LED4);
+    return;  
+}
+
+void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
+    BSP_LED_Off(LED4);
+    return;  
 }
 
 /**
@@ -236,11 +276,12 @@ static void SystemClock_Config(void){
     __HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
+/*
 static void Error_Handler(void){
-    /* Turn LED4 (RED) on */
     BSP_LED_On(LED4);
     while(1);
 }
+*/
 
 #ifdef  USE_FULL_ASSERT
 
