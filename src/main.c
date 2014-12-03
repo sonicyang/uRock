@@ -31,6 +31,9 @@
 
 #include "cmsis_os.h"
 
+#define ARM_MATH_CM4
+#include "arm_math.h"
+
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 static void LED_Thread1(void const *argument);
