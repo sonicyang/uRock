@@ -71,21 +71,27 @@ INCLUDES = $(addprefix -I,$(INCDIR))
 all: $(BIN_IMAGE)
 
 $(BIN_IMAGE): $(EXECUTABLE)
-	$(OBJCOPY) -O binary $^ $@
-	$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
-	$(OBJDUMP) -h -S -D $^ > $(LIST_FILE)
-	$(SIZE) $(EXECUTABLE)
+	@$(OBJCOPY) -O binary $^ $@
+	@$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
+	@$(OBJDUMP) -h -S -D $^ > $(LIST_FILE)
+	@echo "	OBJCOPY	"$@	
+	@echo "	OBJCOPY	"$(HEX_IMAGEX)	
+	@echo "	OBJDUMP	"$(LIST_FILE)
+	@$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "	LD	"$@	
 
 $(OUTDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@echo "	CC	"$@	
 
 $(OUTDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@echo "	CC	"$@	
 
 flash:
 	st-flash write $(BIN_IMAGE) 0x8000000
