@@ -31,4 +31,6 @@
 *.swp
 *.swo
 
-build/
+*.lst
+*.bin
+*.map
