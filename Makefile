@@ -44,9 +44,11 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 #files
 SRCDIR = src \
 		 Drivers/STM32F4xx_HAL_Driver/Src \
+		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
+		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
+		 Utilities/Common
 		 
 INCDIR = inc \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
@@ -55,7 +57,8 @@ INCDIR = inc \
 		 Drivers/STM32F4xx_HAL_Driver/Inc \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source/include \
-		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
+		 Utilities/Common
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))
