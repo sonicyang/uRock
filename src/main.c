@@ -28,27 +28,33 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "stm32f429i_discovery.h"
+#include "stm32f429i_discovery_sdram.h"
 
 #include "cmsis_os.h"
 
 #define ARM_MATH_CM4
 #include "arm_math.h"
 
+#define STAGE_NUM 8
+
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
-static void LED_Thread1(void const *argument);
+//static void LED_Thread1(void const *argument);
+static void stage01(void const *argument);
 
 /* Private variables ---------------------------------------------------------*/
-osThreadId LEDThread1Handle, shellThread;
+osThreadId LEDThread1Handle;
+
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_dac2;
 ADC_HandleTypeDef hadc1;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
-volatile uint8_t value[8][256]; 
-volatile uint8_t value2[8] = {255, 255, 255, 255, 0, 0, 0, 0}; 
-volatile uint8_t buffer_index = 0;
+//osSemaphoreId stageCtrl[STAGE_NUM];
+osThreadId stages[STAGE_NUM];
+volatile uint32_t stagesCtrl[STAGE_NUM] = {1};
+volatile uint8_t value[STAGE_NUM][256]; 
 
 /* USER CODE BEGIN 0 */
  
@@ -178,6 +184,8 @@ int main(void){
 	 */
 	HAL_Init();  
 
+    //BSP_SDRAM_Init();
+
 	/* Initialize LEDs */
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
@@ -196,13 +204,16 @@ int main(void){
     HAL_TIM_Base_Start(&htim2);
     HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)value[0], (uint32_t*)value[1], 256);
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) value[1], (uint32_t*) value[2], 256, DAC_ALIGN_8B_R);
-    //HAL_ADC_Start_DMA(&hadc1, (uint32_t*)value[0], 256);
-    //HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, (uint32_t*) value[0], 256, DAC_ALIGN_8B_R);
 
-	/* Thread 1 definition */
-	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-	/* Start thread 1 */
-	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+    //osSemaphoreDef(STG1SEM);
+    //stageCtrl[0] = osSemaphoreCreate(osSemaphore(STG1SEM), 1);
+
+
+	//osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	//LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+
+	osThreadDef(STG1, stage01, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
+    stages[0] = osThreadCreate (osThread(STG1), NULL);
 
 	osKernelStart (NULL, NULL);
 
@@ -210,6 +221,27 @@ int main(void){
 	for(;;);
 }
 
+static void stage01(void const *argument){
+    uint32_t index = 0;
+    uint32_t i;
+    
+    /* An processing Example, We make indvidual changes from the upper part of data, let other stages process data, in case we need to use old data for computation */
+
+    while(1){
+        //osSemaphoreWait(stageCtrl[0], 0);
+        while(stagesCtrl[0]);
+        stagesCtrl[0] = 1;
+
+        for(i = 0; i < 256; i++){
+            value[index][i] <<= 1;
+        }
+
+        index+=1;
+        if(index >= STAGE_NUM)
+            index = 0;
+    }
+}
+/*
 static void LED_Thread1(void const *argument){
 	uint32_t count = 0;
 	(void) argument;
@@ -222,42 +254,32 @@ static void LED_Thread1(void const *argument){
 		  BSP_LED_Toggle(LED3);
 	}
 }
-
+*/
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
-    uint32_t i = 0;
-    uint32_t oindex;
 
-    oindex = index;
     index += 2;
-    if(index > 7)
+    if(index >= STAGE_NUM)
         index = 0;
 
     HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY0);
-    
-    for(; i < 256; i++){
-        value[oindex][i] <<= 1;
-    }
 
+    //osSemaphoreRelease(stageCtrl[0]);
+    stagesCtrl[0] = 0;
     return;  
 }
 
 void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 1;
-    uint32_t i = 0;
-    uint32_t oindex;
 
-    oindex = index;
     index += 2;
-    if(index > 7)
+    if(index >= STAGE_NUM)
         index = 1;
 
     HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY1);
     
-    for(; i < 256; i++){
-        value[oindex][i] <<= 1;
-    }
-
+    //osSemaphoreRelease(stageCtrl[0]);
+    stagesCtrl[0] = 0;
     return;  
 }
 
@@ -265,7 +287,7 @@ void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
     static uint32_t index = 1;
 
     index += 2;
-    if(index > 7)
+    if(index >= STAGE_NUM)
         index = 1;
 
     HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)value[index], MEMORY0);
@@ -277,7 +299,7 @@ void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
     static uint32_t index = 2;
 
     index += 2;
-    if(index > 7)
+    if(index >= STAGE_NUM)
         index = 0;
 
     HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)value[index], MEMORY1);

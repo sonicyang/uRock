@@ -5,4 +5,4 @@ monitor reset
 monitor halt
 
 b main
-b HAL_DMA_IRQHandler
+b main.c:236
