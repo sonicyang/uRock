@@ -35,144 +35,29 @@
 #define ARM_MATH_CM4
 #include "arm_math.h"
 
+#include "audio-effects.h"
+#include "MspInit.h"
+
 #define STAGE_NUM 8
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
-//static void LED_Thread1(void const *argument);
 
 /* Private variables ---------------------------------------------------------*/
-osThreadId LEDThread1Handle;
-
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_dac2;
 ADC_HandleTypeDef hadc1;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
+osThreadId LEDThread1Handle;
+static void LED_Thread1(void const *argument);
+
 osThreadId SPUid;
-volatile uint32_t SPU_Hold = 0;
 static void SignalProcessingUnit(void const *argument);
-volatile uint8_t SignalPipe[STAGE_NUM][256]; 
-
-/* USER CODE BEGIN 0 */
- 
-/* ADC1 init function */
-void MX_ADC1_Init(void)
-{
-  ADC_ChannelConfTypeDef sConfig;
-  ADC_MultiModeTypeDef multimode;
- 
-  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
-  hadc1.Init.Resolution = ADC_RESOLUTION8b;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfDiscConversion = 1;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.EOCSelection = EOC_SINGLE_CONV;
-  HAL_ADC_Init(&hadc1);
- 
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
- 
-  /**Configure the ADC multi-mode
-  */
-  multimode.Mode = ADC_MODE_INDEPENDENT;
-  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
-  HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode);
- 
-}
- 
-/* DAC init function */
-void MX_DAC_Init(void)
-{
-  DAC_ChannelConfTypeDef sConfig;
- 
-  /**DAC Initialization
-  */
-  hdac.Instance = DAC;
-  HAL_DAC_Init(&hdac);
- 
-  /**DAC channel OUT2 config
-  */
-  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
-  HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2);
- 
-}
- 
-/* TIM2 init function */
-void MX_TIM2_Init(void)
-{
-  TIM_ClockConfigTypeDef sClockSourceConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
- 
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 100 - 1;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  HAL_TIM_Base_Init(&htim2);
- 
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
- 
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
- 
-}
- 
-/**
-  * Enable DMA controller clock
-  */
-void MX_DMA_Init(void) {
-  /* DMA controller clock enable */
-  __DMA2_CLK_ENABLE();
-  __DMA1_CLK_ENABLE();
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-}
- 
-/** Configure pins as
-        * Analog
-        * Input
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
-void MX_GPIO_Init(void) {
- 
-  /* GPIO Ports Clock Enable */
-  __GPIOH_CLK_ENABLE();
-  __GPIOA_CLK_ENABLE();
-}
-/* USER CODE END 0 */
-
-void DMA2_Stream0_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_adc1);
-    return;
-}
-
-void DMA1_Stream6_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_dac2);
-    return;
-}
-
+volatile uint32_t SPU_Hold = 0;
+volatile int8_t SignalPipe[STAGE_NUM][SAMPLE_NUM]; 
+effect EffectStages[STAGE_NUM - 4] = {NULL};
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -181,18 +66,15 @@ int main(void){
 	   - Set NVIC Group Priority to 4
 	   - Global MSP (MCU Support Package) initialization
 	 */
-	HAL_Init();  
-
-    //BSP_SDRAM_Init();
-
-	/* Initialize LEDs */
-	BSP_LED_Init(LED3);
-	BSP_LED_Init(LED4);
-    BSP_LED_On(LED3);
-    BSP_LED_On(LED4);
 
 	/* Configure the system clock to 180 Mhz */
 	SystemClock_Config();
+
+	HAL_Init();  
+    
+    BSP_SDRAM_Init();
+	BSP_LED_Init(LED3);
+	BSP_LED_Init(LED4);
 
     MX_GPIO_Init();
     MX_DMA_Init();
@@ -200,12 +82,9 @@ int main(void){
     MX_ADC1_Init();
     MX_DAC_Init();
 
-    HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalPipe[0], (uint32_t*)SignalPipe[1], 256);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalPipe[1], (uint32_t*) SignalPipe[2], 256, DAC_ALIGN_8B_R);
 
-	//osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-	//LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
     SPUid = osThreadCreate (osThread(SPU), NULL);
@@ -220,13 +99,27 @@ static void SignalProcessingUnit(void const *argument){
     uint32_t index = 0;
     uint32_t i;
     
-    /* An processing Example, We make indvidual changes from the upper part of data, let other stages process data, in case we need to use old data for computation */
-
+    /* Init */
+    HAL_TIM_Base_Start(&htim2);
+    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalPipe[0], (uint32_t*)SignalPipe[1], SAMPLE_NUM);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalPipe[1], (uint32_t*) SignalPipe[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
+   
+    /* Effect Stage Setting*/ 
+    EffectStages[0] = Gain;
+    
+    /* Process */
     while(1){
         if(SPU_Hold){
             SPU_Hold--;
+
+            NormalizeData(SignalPipe[index]);
             
-            stage1(SignalPipe[index]);
+            for(i = 0; i < 4; i++){
+                if(EffectStages[i] != NULL)
+                    EffectStages[i](SignalPipe[(index - 1 - i) % STAGE_NUM], 2);
+            }
+
+            DenormalizeData(SignalPipe[(index - 5) % STAGE_NUM]);
 
             index+=1;
             if(index >= STAGE_NUM)
@@ -235,17 +128,6 @@ static void SignalProcessingUnit(void const *argument){
     }
 }
 
-void Gain(uint8_t* pData, float g){
-    uint32_t i = 0;
-
-    for(; i < 256; i++){
-        pData[i] *= g;
-    }
-
-    return;
-}
-
-/*
 static void LED_Thread1(void const *argument){
 	uint32_t count = 0;
 	(void) argument;
@@ -258,7 +140,18 @@ static void LED_Thread1(void const *argument){
 		  BSP_LED_Toggle(LED3);
 	}
 }
-*/
+
+/* Double Buffer Swapping Callbacks */
+void DMA2_Stream0_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_adc1);
+    return;
+}
+
+void DMA1_Stream6_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_dac2);
+    return;
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
 
