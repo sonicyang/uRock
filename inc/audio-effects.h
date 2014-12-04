@@ -3,13 +3,20 @@
 
 #include <stdint.h>
 
+#include "stm32f4xx_hal.h"
+
+#define ARM_MATH_CM4
+#include "arm_math.h"
+#include "core_cmInstr.h"
+
 #define SAMPLE_NUM 256
 
-void NormalizeData(volatile int8_t * pData);
-void DenormalizeData(volatile int8_t * pData);
+void NormalizeData(volatile int8_t * pData, volatile float* tData);
 
-typedef void(*effect)(volatile int8_t*, float);
+void DenormalizeData(volatile float* tData, volatile int8_t * pData);
 
-void Gain(volatile int8_t* pData, float g);
+typedef void(*effect)(volatile float*, float);
+
+void Gain(volatile float* pData, float g);
 
 #endif //__AUDIO_EFFECT_H__

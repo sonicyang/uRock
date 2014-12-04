@@ -32,13 +32,11 @@
 
 #include "cmsis_os.h"
 
-#define ARM_MATH_CM4
-#include "arm_math.h"
-
 #include "audio-effects.h"
 #include "MspInit.h"
 
-#define STAGE_NUM 8
+#define BUFFER_NUM 4
+#define STAGE_NUM 4
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -56,8 +54,9 @@ static void LED_Thread1(void const *argument);
 osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
-volatile int8_t SignalPipe[STAGE_NUM][SAMPLE_NUM]; 
-effect EffectStages[STAGE_NUM - 4] = {NULL};
+volatile int8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
+volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
+effect EffectStages[STAGE_NUM] = {NULL};
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -97,12 +96,13 @@ int main(void){
 
 static void SignalProcessingUnit(void const *argument){
     uint32_t index = 0;
+    uint32_t pipeindex = 0;
     uint32_t i;
     
     /* Init */
     HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalPipe[0], (uint32_t*)SignalPipe[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalPipe[1], (uint32_t*) SignalPipe[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
+    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
    
     /* Effect Stage Setting*/ 
     EffectStages[0] = Gain;
@@ -112,18 +112,21 @@ static void SignalProcessingUnit(void const *argument){
         if(SPU_Hold){
             SPU_Hold--;
 
-            NormalizeData(SignalPipe[index]);
+            NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
             for(i = 0; i < 4; i++){
                 if(EffectStages[i] != NULL)
-                    EffectStages[i](SignalPipe[(index - 1 - i) % STAGE_NUM], 2);
+                    EffectStages[i](SignalPipe[(pipeindex - i) % STAGE_NUM], 2);
             }
 
-            DenormalizeData(SignalPipe[(index - 5) % STAGE_NUM]);
+            DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
 
             index+=1;
-            if(index >= STAGE_NUM)
+            if(index >= BUFFER_NUM)
                 index = 0;
+            pipeindex+=1;
+            if(pipeindex >= STAGE_NUM)
+                pipeindex = 0;
         }
     }
 }
@@ -156,10 +159,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
 
     index += 2;
-    if(index >= STAGE_NUM)
+    if(index >= BUFFER_NUM)
         index = 0;
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalPipe[index], MEMORY0);
+    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
 
     SPU_Hold++;
     return;  
@@ -169,10 +172,10 @@ void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 1;
 
     index += 2;
-    if(index >= STAGE_NUM)
+    if(index >= BUFFER_NUM)
         index = 1;
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalPipe[index], MEMORY1);
+    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
     
     SPU_Hold++;
     return;  
@@ -182,10 +185,10 @@ void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
     static uint32_t index = 1;
 
     index += 2;
-    if(index >= STAGE_NUM)
+    if(index >= BUFFER_NUM)
         index = 1;
 
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalPipe[index], MEMORY0);
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY0);
 
     return;  
 }
@@ -194,10 +197,10 @@ void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
     static uint32_t index = 2;
 
     index += 2;
-    if(index >= STAGE_NUM)
+    if(index >= BUFFER_NUM)
         index = 0;
 
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalPipe[index], MEMORY1);
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY1);
 
     return;  
 }
