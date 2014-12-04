@@ -40,7 +40,6 @@
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 //static void LED_Thread1(void const *argument);
-static void stage01(void const *argument);
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId LEDThread1Handle;
@@ -51,10 +50,10 @@ ADC_HandleTypeDef hadc1;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
-//osSemaphoreId stageCtrl[STAGE_NUM];
-osThreadId stages[STAGE_NUM];
-volatile uint32_t stagesCtrl[STAGE_NUM] = {1};
-volatile uint8_t value[STAGE_NUM][256]; 
+osThreadId SPUid;
+volatile uint32_t SPU_Hold = 0;
+static void SignalProcessingUnit(void const *argument);
+volatile uint8_t SignalPipe[STAGE_NUM][256]; 
 
 /* USER CODE BEGIN 0 */
  
@@ -202,18 +201,14 @@ int main(void){
     MX_DAC_Init();
 
     HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)value[0], (uint32_t*)value[1], 256);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) value[1], (uint32_t*) value[2], 256, DAC_ALIGN_8B_R);
-
-    //osSemaphoreDef(STG1SEM);
-    //stageCtrl[0] = osSemaphoreCreate(osSemaphore(STG1SEM), 1);
-
+    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalPipe[0], (uint32_t*)SignalPipe[1], 256);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalPipe[1], (uint32_t*) SignalPipe[2], 256, DAC_ALIGN_8B_R);
 
 	//osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	//LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
-	osThreadDef(STG1, stage01, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
-    stages[0] = osThreadCreate (osThread(STG1), NULL);
+	osThreadDef(SPU, SignalProcessingUnit, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
+    SPUid = osThreadCreate (osThread(SPU), NULL);
 
 	osKernelStart (NULL, NULL);
 
@@ -221,26 +216,35 @@ int main(void){
 	for(;;);
 }
 
-static void stage01(void const *argument){
+static void SignalProcessingUnit(void const *argument){
     uint32_t index = 0;
     uint32_t i;
     
     /* An processing Example, We make indvidual changes from the upper part of data, let other stages process data, in case we need to use old data for computation */
 
     while(1){
-        //osSemaphoreWait(stageCtrl[0], 0);
-        while(stagesCtrl[0]);
-        stagesCtrl[0] = 1;
+        if(SPU_Hold){
+            SPU_Hold--;
+            
+            stage1(SignalPipe[index]);
 
-        for(i = 0; i < 256; i++){
-            value[index][i] <<= 1;
+            index+=1;
+            if(index >= STAGE_NUM)
+                index = 0;
         }
-
-        index+=1;
-        if(index >= STAGE_NUM)
-            index = 0;
     }
 }
+
+void Gain(uint8_t* pData, float g){
+    uint32_t i = 0;
+
+    for(; i < 256; i++){
+        pData[i] *= g;
+    }
+
+    return;
+}
+
 /*
 static void LED_Thread1(void const *argument){
 	uint32_t count = 0;
@@ -262,10 +266,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     if(index >= STAGE_NUM)
         index = 0;
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY0);
+    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalPipe[index], MEMORY0);
 
-    //osSemaphoreRelease(stageCtrl[0]);
-    stagesCtrl[0] = 0;
+    SPU_Hold++;
     return;  
 }
 
@@ -276,10 +279,9 @@ void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
     if(index >= STAGE_NUM)
         index = 1;
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)value[index], MEMORY1);
+    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalPipe[index], MEMORY1);
     
-    //osSemaphoreRelease(stageCtrl[0]);
-    stagesCtrl[0] = 0;
+    SPU_Hold++;
     return;  
 }
 
@@ -290,7 +292,7 @@ void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
     if(index >= STAGE_NUM)
         index = 1;
 
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)value[index], MEMORY0);
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalPipe[index], MEMORY0);
 
     return;  
 }
@@ -302,7 +304,7 @@ void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
     if(index >= STAGE_NUM)
         index = 0;
 
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)value[index], MEMORY1);
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalPipe[index], MEMORY1);
 
     return;  
 }
@@ -335,7 +337,7 @@ static void SystemClock_Config(void){
 	__PWR_CLK_ENABLE();
 
 	/* The voltage scaling allows optimizing the power consumption when the device is 
-	 clocked below the maximum system frequency, to update the voltage scaling value 
+	 clocked below the maximum system frequency, to update the voltage scaling SignalPipe 
 	 regarding system frequency refer to product datasheet.  */
 	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
@@ -386,7 +388,7 @@ static void Error_Handler(void){
   */
 void assert_failed(uint8_t* file, uint32_t line){
 	/* User can add his own implementation to report the file name and line number,
-	 ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	 ex: printf("Wrong parameters SignalPipe: file %s on line %d\r\n", file, line) */
 
 	/* Infinite loop */
 	while (1);
