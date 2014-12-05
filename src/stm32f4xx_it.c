@@ -28,6 +28,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx_hal.h"
 #include "stm32f4xx_it.h"
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
@@ -127,6 +128,7 @@ void SysTick_Handler(void)
   {
     xPortSysTickHandler();
   }
+  HAL_IncTick();
 }
 
 /******************************************************************************/

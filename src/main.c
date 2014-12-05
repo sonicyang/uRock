@@ -54,7 +54,7 @@ static void LED_Thread1(void const *argument);
 osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
-volatile int8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
+volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
 effect EffectStages[STAGE_NUM] = {NULL};
 
@@ -105,7 +105,7 @@ static void SignalProcessingUnit(void const *argument){
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
    
     /* Effect Stage Setting*/ 
-    EffectStages[0] = Gain;
+    //EffectStages[0] = Gain;
     
     /* Process */
     while(1){
@@ -114,9 +114,9 @@ static void SignalProcessingUnit(void const *argument){
 
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
-            for(i = 0; i < 4; i++){
+            for(i = 0; i < STAGE_NUM; i++){
                 if(EffectStages[i] != NULL)
-                    EffectStages[i](SignalPipe[(pipeindex - i) % STAGE_NUM], 2);
+                    EffectStages[i](SignalPipe[(pipeindex - i) % STAGE_NUM], 20);
             }
 
             DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
