@@ -204,7 +204,7 @@ uint32_t BSP_LCD_ReadPixel(uint16_t Xpos, uint16_t Ypos);
 void     BSP_LCD_DrawPixel(uint16_t Xpos, uint16_t Ypos, uint32_t pixel);
 void     BSP_LCD_Clear(uint32_t Color);
 void     BSP_LCD_ClearStringLine(uint32_t Line);
-void     BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr);
+//void     BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr);
 void     BSP_LCD_DisplayStringAt(uint16_t X, uint16_t Y, uint8_t *pText, Text_AlignModeTypdef mode);
 void     BSP_LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii);
 
