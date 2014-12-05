@@ -11,9 +11,9 @@
 
 #define SAMPLE_NUM 256
 
-void NormalizeData(volatile int8_t * pData, volatile float* tData);
+void NormalizeData(volatile uint8_t * pData, volatile float* tData);
 
-void DenormalizeData(volatile float* tData, volatile int8_t * pData);
+void DenormalizeData(volatile float* tData, volatile uint8_t * pData);
 
 typedef void(*effect)(volatile float*, float);
 
