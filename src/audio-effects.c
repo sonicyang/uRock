@@ -34,3 +34,16 @@ void Gain(volatile float* pData, float g){
 
     return;
 }
+
+void HardClipping(volatile float* pData, float clip){
+    register uint32_t i;
+    for(i = 0; i < SAMPLE_NUM; i++){
+        if (pData[i] > clip){
+            pData[i] = clip;
+        }
+        else if (pData[i] < -clip){
+            pData[i] = -clip;
+        }
+    }
+    return;
+}
