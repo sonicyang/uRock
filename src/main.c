@@ -50,6 +50,8 @@ ADC_HandleTypeDef hadc2;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
+float map(float value, float iupper, float ilower, float oupper, float olower);
+
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
 
@@ -62,7 +64,6 @@ struct Effect EffectStages[STAGE_NUM];
 
 osThreadId UIid;
 static void UserInterface(void const *argument);
-float map(float value, float iupper, float ilower, float oupper, float olower);
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -92,8 +93,11 @@ int main(void){
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
-	osThreadDef(SPU, SignalProcessingUnit, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
+	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
     SPUid = osThreadCreate (osThread(SPU), NULL);
+
+	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+    UIid = osThreadCreate (osThread(UI), NULL);
 
 	osKernelStart (NULL, NULL);
 
@@ -111,11 +115,15 @@ static void SignalProcessingUnit(void const *argument){
     HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
    
+    for(i = 0; i < STAGE_NUM; i++){
+        EffectStages[i].func = NULL;
+    }
+
     /* Effect Stage Setting*/ 
     EffectStages[0].func = Gain;
-    EffectStages[1].parameter[0].value = 1.0f;
-    EffectStages[1].parameter[0].upperBound = 2.0f;
-    EffectStages[1].parameter[0].lowerBound = 0.0f;
+    EffectStages[0].parameter[0].value = 1.0f;
+    EffectStages[0].parameter[0].upperBound = 2.0f;
+    EffectStages[0].parameter[0].lowerBound = 0.0f;
     
     /* Process */
     while(1){
@@ -144,10 +152,13 @@ static void SignalProcessingUnit(void const *argument){
 static void UserInterface(void const *argument){
     uint8_t values[3];
 
-    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values[0], 3);
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);
+    
+    osDelay(10);
 
     while(1){
-        
+        EffectStages[0].parameter[0].value = map(values[0], 0, 255, 0, 2);
+        osDelay(100);
     }
 }
 
@@ -290,7 +301,7 @@ static void SystemClock_Config(void){
 }
 
 float map(float value, float iupper, float ilower, float oupper, float olower){
-    
+   return olower + 1.0f * (oupper - olower) / (iupper - ilower) * (value - ilower);
 }
 
 /*
