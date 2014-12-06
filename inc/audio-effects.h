@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "stm32f4xx_hal.h"
+#include "stm32f429i_discovery_sdram.h"
 
 #include "math.h"
 
@@ -32,5 +33,6 @@ struct Effect{
 
 void Gain(volatile float* pData, float g);
 void HardClipping(volatile float* pData, float clip);
+void Delay(volatile float* pData, float dealy);
 
 #endif //__AUDIO_EFFECT_H__
