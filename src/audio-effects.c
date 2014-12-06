@@ -2,6 +2,32 @@
 
 int __errno; //For the sake of math.h
 
+static uint32_t allocateDealyLine(){
+    static uint32_t addr = 0x00100000;
+    addr += 0x00100000;
+    return addr; 
+}
+
+inline static void Combine(volatile float* pData, volatile float* sData){
+    register uint32_t i;
+
+    for(i = 0; i < SAMPLE_NUM; i++){
+        pData[i] += sData[i];
+    }
+
+    return;
+}
+
+inline static void LinearGain(volatile float* pData, float g){
+    register uint32_t i;
+
+    for(i = 0; i < SAMPLE_NUM; i++){
+        pData[i] = pData[i] * g;
+    }
+
+    return;
+}
+
 void NormalizeData(volatile uint8_t * pData, volatile float* tData){
     register uint32_t i;
 
@@ -28,15 +54,13 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
 }
 
 void Gain(volatile float* pData, float g){
-    register uint32_t i;
     register float gg = powf(10, g);
 
-    for(i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * gg;
-    }
+    LinearGain(pData, gg);
 
     return;
 }
+
 
 void HardClipping(volatile float* pData, float clip){
     register uint32_t i;
