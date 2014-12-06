@@ -11,7 +11,7 @@
 #include "arm_math.h"
 #include "core_cmInstr.h"
 
-#define SAMPLE_NUM 256
+#include "setting.h"
 
 void NormalizeData(volatile uint8_t * pData, volatile float* tData);
 
