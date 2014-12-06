@@ -43,8 +43,10 @@ static void SystemClock_Config(void);
 
 /* Private variables ---------------------------------------------------------*/
 DMA_HandleTypeDef hdma_adc1;
+DMA_HandleTypeDef hdma_adc2;
 DMA_HandleTypeDef hdma_dac2;
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
@@ -56,7 +58,11 @@ static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
 volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
-effect EffectStages[STAGE_NUM] = {NULL};
+struct Effect EffectStages[STAGE_NUM];
+
+osThreadId UIid;
+static void UserInterface(void const *argument);
+float map(float value, float iupper, float ilower, float oupper, float olower);
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -79,6 +85,7 @@ int main(void){
     MX_DMA_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
+    MX_ADC2_Init();
     MX_DAC_Init();
 
 
@@ -105,7 +112,10 @@ static void SignalProcessingUnit(void const *argument){
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
    
     /* Effect Stage Setting*/ 
-    //EffectStages[0] = Gain;
+    EffectStages[0].func = Gain;
+    EffectStages[1].parameter[0].value = 1.0f;
+    EffectStages[1].parameter[0].upperBound = 2.0f;
+    EffectStages[1].parameter[0].lowerBound = 0.0f;
     
     /* Process */
     while(1){
@@ -115,8 +125,8 @@ static void SignalProcessingUnit(void const *argument){
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
             for(i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i] != NULL)
-                    EffectStages[i](SignalPipe[(pipeindex - i) % STAGE_NUM], 20);
+                if(EffectStages[i].func != NULL)
+                    EffectStages[i].func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i].parameter[0].value);
             }
 
             DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
@@ -128,6 +138,16 @@ static void SignalProcessingUnit(void const *argument){
             if(pipeindex >= STAGE_NUM)
                 pipeindex = 0;
         }
+    }
+}
+
+static void UserInterface(void const *argument){
+    uint8_t values[3];
+
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values[0], 3);
+
+    while(1){
+        
     }
 }
 
@@ -157,27 +177,30 @@ void DMA1_Stream6_IRQHandler(void){
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
+    if(hadc->Instance == ADC1){
+        index += 2;
+        if(index >= BUFFER_NUM)
+            index = 0;
 
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 0;
+        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
-
-    SPU_Hold++;
+        SPU_Hold++;
+    }
     return;  
 }
 
 void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 1;
 
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 1;
+    if(hadc->Instance == ADC1){
+        index += 2;
+        if(index >= BUFFER_NUM)
+            index = 1;
 
-    HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
-    
-    SPU_Hold++;
+        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
+        
+        SPU_Hold++;
+    }
     return;  
 }
 
@@ -264,6 +287,10 @@ static void SystemClock_Config(void){
 
     __HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
     __HAL_FLASH_DATA_CACHE_ENABLE();
+}
+
+float map(float value, float iupper, float ilower, float oupper, float olower){
+    
 }
 
 /*

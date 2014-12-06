@@ -4,6 +4,7 @@
 #include "stm32f4xx_hal.h"
 
 void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
 void MX_DAC_Init(void);
 void MX_TIM2_Init(void);
 void MX_DMA_Init(void);
