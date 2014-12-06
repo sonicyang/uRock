@@ -19,7 +19,7 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
         else if(*tData < -128)
             *tData = -128;
 
-        *pData = *tData + 128;
+        *pData = *tData + 128.5f;
     }
 
     return;
@@ -29,7 +29,7 @@ void Gain(volatile float* pData, float g){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * g + 0.5f; //Rounding makes sense
+        pData[i] = pData[i] * g; //Rounding makes sense
     }
 
     return;
