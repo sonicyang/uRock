@@ -5,6 +5,8 @@
 
 #include "stm32f4xx_hal.h"
 
+#include "math.h"
+
 #define ARM_MATH_CM4
 #include "arm_math.h"
 #include "core_cmInstr.h"
@@ -29,5 +31,6 @@ struct Effect{
 };
 
 void Gain(volatile float* pData, float g);
+void HardClipping(volatile float* pData, float clip);
 
 #endif //__AUDIO_EFFECT_H__

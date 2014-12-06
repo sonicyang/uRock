@@ -56,8 +56,7 @@ void MX_ADC2_Init(void)
   hadc2.Instance = ADC2;
   hadc2.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
   hadc2.Init.Resolution = ADC_RESOLUTION8b;
-  hadc2.Init.ScanConvMode = DISABLE;
-  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.ScanConvMode = ENABLE;
   hadc2.Init.DiscontinuousConvMode = DISABLE;
   hadc2.Init.NbrOfDiscConversion = 1;
   hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -65,7 +64,7 @@ void MX_ADC2_Init(void)
   hadc2.Init.NbrOfConversion = 3;
   hadc2.Init.ContinuousConvMode = ENABLE;
   hadc2.Init.DMAContinuousRequests = ENABLE;
-  hadc2.Init.EOCSelection = EOC_SEQ_CONV;
+  hadc2.Init.EOCSelection = EOC_SINGLE_CONV;
   HAL_ADC_Init(&hadc2);
  
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.

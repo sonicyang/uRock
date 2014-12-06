@@ -4,5 +4,4 @@ load
 monitor reset
 monitor halt
 
-b main
-b Gain
+b main.c:166

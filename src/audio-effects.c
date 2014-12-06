@@ -1,5 +1,7 @@
 #include "audio-effects.h"
 
+int __errno; //For the sake of math.h
+
 void NormalizeData(volatile uint8_t * pData, volatile float* tData){
     register uint32_t i;
 
@@ -27,9 +29,10 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
 
 void Gain(volatile float* pData, float g){
     register uint32_t i;
+    register float gg = powf(10, g);
 
     for(i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * g; //Rounding makes sense
+        pData[i] = pData[i] * gg;
     }
 
     return;

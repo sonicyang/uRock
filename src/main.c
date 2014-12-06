@@ -120,10 +120,16 @@ static void SignalProcessingUnit(void const *argument){
     }
 
     /* Effect Stage Setting*/ 
-    EffectStages[0].func = Gain;
-    EffectStages[0].parameter[0].value = 1.0f;
-    EffectStages[0].parameter[0].upperBound = 2.0f;
-    EffectStages[0].parameter[0].lowerBound = 0.0f;
+    EffectStages[0].func = HardClipping;
+    EffectStages[0].parameter[0].value = 32;
+    EffectStages[0].parameter[0].upperBound = 128;
+    EffectStages[0].parameter[0].lowerBound = 0;
+
+    EffectStages[1].func = Gain;
+    EffectStages[1].parameter[0].value = 1.0f;
+    EffectStages[1].parameter[0].upperBound = 2.0f;
+    EffectStages[1].parameter[0].lowerBound = 0.0f;
+
     
     /* Process */
     while(1){
@@ -157,7 +163,8 @@ static void UserInterface(void const *argument){
     osDelay(10);
 
     while(1){
-        EffectStages[0].parameter[0].value = map(values[0], 0, 255, 0, 2);
+        EffectStages[1].parameter[0].value = map(values[0], 0, 255, 0, 3);
+        EffectStages[0].parameter[0].value = map(values[1], 0, 255, 0, 2);
         osDelay(100);
     }
 }
