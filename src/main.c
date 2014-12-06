@@ -35,9 +35,6 @@
 #include "audio-effects.h"
 #include "MspInit.h"
 
-#define BUFFER_NUM 4
-#define STAGE_NUM 4
-
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 
