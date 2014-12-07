@@ -51,8 +51,9 @@
 #include "stm32f4xx_hal_ltdc.h"
 #include "stm32f4xx_hal_dma2d.h"
 #include "fonts.h"
+
 /* Include LCD component driver */
-#include "../Components/ili9341/ili9341.h"   
+#include "../Components/ili9341/ili9341.h"
 
 /** @addtogroup BSP
   * @{

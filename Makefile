@@ -49,7 +49,7 @@ SRCDIR = src \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
 		 Utilities/Common
-		 
+
 INCDIR = inc \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
 		 Drivers/CMSIS/Include \
@@ -66,6 +66,10 @@ SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 SRC += Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.c
 
 SRC += Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
+
+SRC += Drivers/BSP/Components/ili9341/ili9341.c
+
+SRC += Drivers/BSP/Components/stmpe811/stmpe811.c
 
 OBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(SRC:.c=.o)))
 

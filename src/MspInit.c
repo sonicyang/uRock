@@ -227,4 +227,8 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base){
  
   }
 }
+void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc){
+}
 
+void HAL_LTDC_MspDeInit(LTDC_HandleTypeDef* hltdc){
+}
