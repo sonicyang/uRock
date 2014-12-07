@@ -101,3 +101,44 @@ void HardClipping(volatile float* pData, float clip){
     }
     return;
 }
+uint8_t pre_status = 0;
+uint32_t count = 0;
+float pre_r;
+void Compressor(volatile float* pData, float threshold, float ratio, float attack){
+    float rRatio = 1.0f / ratio;
+    float volume = 0.0f;
+    float dbvolume;
+    float dbthreshold;
+    float rate = 1.0f;
+    uint8_t status = 0;
+    float aData;
+    for (int i = 0; i < SAMPLE_NUM; i++){
+        if (pData[i] < 0.0f)
+            aData = 0.0f - pData[i];
+        if (aData > volume){
+            volume = aData;
+            if (aData > threshold)
+                status = 1;
+        }
+    }
+    dbvolume = logf(volume / 127.0f);
+    dbthreshold = logf(threshold / 127.0f);
+    if (pre_status != status){
+        count = 0;
+        pre_status = status;
+    }
+    if (count <= attack){
+        rate = count / attack;
+    }
+    float tmp;
+    if (status == 1){
+        pre_r = dbvolume - dbthreshold;
+        tmp = powf(10, -pre_r * rRatio * rate);
+    }else{
+        tmp = powf(10, -pre_r * rRatio + pre_r * rRatio * rate);
+    }
+    for (int i = 0; i < SAMPLE_NUM; i++){
+        pData[i] = pData[i] * tmp;
+    }
+    count ++;
+}
