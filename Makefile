@@ -87,7 +87,7 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS)
-	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -o $@ $^
+	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 	@echo "	LD	"$@	
 
 $(OUTDIR)/%.o: %.c

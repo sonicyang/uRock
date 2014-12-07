@@ -4,5 +4,4 @@ load
 monitor reset
 monitor halt
 
-b main
-b SysTick_Handler
+b main.c:82

@@ -1,0 +1,9 @@
+-I inc
+-I Drivers/CMSIS/Device/ST/STM32F4xx/Include
+-I Drivers/CMSIS/Include
+-I Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
+-I Drivers/STM32F4xx_HAL_Driver/Inc
+-I Drivers/BSP/STM32F429I-Discovery
+-I Middlewares/Third_Party/FreeRTOS/Source/include
+-I Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+-I Utilities/Common

@@ -1,9 +1,12 @@
 #include "MspInit.h"
+#include "setting.h"
 
 extern DMA_HandleTypeDef hdma_adc1;
+extern DMA_HandleTypeDef hdma_adc2;
 extern DMA_HandleTypeDef hdma_dac2;
 
 extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
 extern DAC_HandleTypeDef hdac;
 extern TIM_HandleTypeDef htim2;
 
@@ -44,6 +47,51 @@ void MX_ADC1_Init(void)
  
 }
  
+void MX_ADC2_Init(void)
+{
+  ADC_ChannelConfTypeDef sConfig;
+  ADC_MultiModeTypeDef multimode;
+ 
+  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+  hadc2.Init.Resolution = ADC_RESOLUTION8b;
+  hadc2.Init.ScanConvMode = ENABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.NbrOfDiscConversion = 1;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 3;
+  hadc2.Init.ContinuousConvMode = ENABLE;
+  hadc2.Init.DMAContinuousRequests = ENABLE;
+  hadc2.Init.EOCSelection = EOC_SINGLE_CONV;
+  HAL_ADC_Init(&hadc2);
+ 
+  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_12;
+  sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_13;
+  sConfig.Rank = 3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+ 
+  /**Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
+  HAL_ADCEx_MultiModeConfigChannel(&hadc2, &multimode);
+ 
+}
 /* DAC init function */
 void MX_DAC_Init(void)
 {
@@ -69,7 +117,7 @@ void MX_TIM2_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig;
  
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 100 - 1;
+  htim2.Init.Prescaler = (45000 / SAMPLING_RATE) - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -142,6 +190,31 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
  
     __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
  
+  }else if(hadc->Instance==ADC2){
+    /* Peripheral clock enable */
+    __ADC2_CLK_ENABLE();
+ 
+    GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+ 
+    /* Peripheral DMA init*/
+ 
+    hdma_adc2.Instance = DMA2_Stream2;
+    hdma_adc2.Init.Channel = DMA_CHANNEL_1;
+    hdma_adc2.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc2.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc2.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_adc2.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_adc2.Init.Mode = DMA_CIRCULAR;
+    hdma_adc2.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    HAL_DMA_Init(&hdma_adc2);
+ 
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc2);
+ 
   }
 }
  
@@ -155,6 +228,17 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc){
   PA0/WKUP   ------> ADC1_IN0
   */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
+ 
+    /* Peripheral DMA DeInit*/
+     HAL_DMA_DeInit(hadc->DMA_Handle);
+  }else if(hadc->Instance==ADC2)
+  {
+    /* Peripheral clock disable */
+    __ADC2_CLK_DISABLE();
+ 
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_1);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_2);
  
     /* Peripheral DMA DeInit*/
      HAL_DMA_DeInit(hadc->DMA_Handle);

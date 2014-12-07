@@ -39,10 +39,28 @@
 static void SystemClock_Config(void);
 
 /* Private variables ---------------------------------------------------------*/
+DMA_HandleTypeDef hdma_adc1;
+DMA_HandleTypeDef hdma_adc2;
+DMA_HandleTypeDef hdma_dac2;
+ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
+DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
-osThreadId LEDThreadId;
-static void LEDThread(void const *argument);
+float map(float value, float iupper, float ilower, float oupper, float olower);
+
+osThreadId LEDThread1Handle;
+static void LED_Thread1(void const *argument);
+
+osThreadId SPUid;
+static void SignalProcessingUnit(void const *argument);
+volatile uint32_t SPU_Hold = 0;
+volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
+volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
+struct Effect EffectStages[STAGE_NUM];
+
+osThreadId UIid;
+static void UserInterface(void const *argument);
 
 osThreadId RenderingThreadId;
 static void RenderingThread(void const *argument);
@@ -50,15 +68,16 @@ static void RenderingThread(void const *argument);
 int
 main(void)
 {
-	/* Configure the system clock to 180 Mhz */
-	SystemClock_Config();
-
 	/* STM32F4xx HAL library initialization:
 	   - Configure the Flash prefetch, instruction and Data caches
 	   - Configure the Systick to generate an interrupt each 1 msec
 	   - Set NVIC Group Priority to 4
 	   - Global MSP (MCU Support Package) initialization
 	   */
+
+	/* Configure the system clock to 180 Mhz */
+	SystemClock_Config();
+
 	HAL_Init();
 
 	BSP_LCD_Init();
@@ -73,24 +92,110 @@ main(void)
 
 	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
-	BSP_SDRAM_Init();
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
 
-	osThreadDef(LED, LEDThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-	LEDThreadId = osThreadCreate (osThread(LED), NULL);
-
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_TIM2_Init();
+    MX_ADC1_Init();
+    MX_ADC2_Init();
+    MX_DAC_Init();
+    
 	osThreadDef(RENDERING, RenderingThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	RenderingThreadId = osThreadCreate (osThread(RENDERING), NULL);
 
+	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+
+	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+    SPUid = osThreadCreate (osThread(SPU), NULL);
+
+	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+    UIid = osThreadCreate (osThread(UI), NULL);
+
 	osKernelStart (NULL, NULL);
 
-	/* We should never get here as control is now taken by the scheduler */
-	while (1)
-		;
+	while (1);
 }
 
-static void LEDThread(void const *argument){
+static void SignalProcessingUnit(void const *argument){
+    uint32_t index = 0;
+    uint32_t pipeindex = 0;
+    uint32_t i;
+    
+    /* Init */
+    HAL_TIM_Base_Start(&htim2);
+    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
+   
+    for(i = 0; i < STAGE_NUM; i++){
+        EffectStages[i].func = NULL;
+    }
+
+    /* Effect Stage Setting*/ 
+    EffectStages[1].func = Delay;
+    EffectStages[1].parameter[0].value = 500;
+    EffectStages[1].parameter[0].upperBound = 500;
+    EffectStages[1].parameter[0].lowerBound = 50;
+    EffectStages[1].parameter[1].value = 0.5f;
+    EffectStages[1].parameter[1].upperBound = 0.8f;
+    EffectStages[1].parameter[1].lowerBound = 0.1f;
+
+    EffectStages[0].func = Gain;
+    EffectStages[0].parameter[0].value = 1.0f;
+    EffectStages[0].parameter[0].upperBound = 2.0f;
+    EffectStages[0].parameter[0].lowerBound = 0.1f;
+
+    
+    /* Process */
+    while(1){
+        if(SPU_Hold){
+            SPU_Hold--;
+
+            NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
+            
+            for(i = 0; i < STAGE_NUM; i++){
+                if(EffectStages[i].func != NULL)
+                    EffectStages[i].func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i].parameter);
+            }
+
+            DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
+
+            index+=1;
+            if(index >= BUFFER_NUM)
+                index = 0;
+            pipeindex+=1;
+            if(pipeindex >= STAGE_NUM)
+                pipeindex = 0;
+        }
+    }
+}
+
+static void LinkPot(struct parameter_t *p, float value){
+    p->value = map(value, 0, 255, p->lowerBound, p->upperBound);
+    return;
+}
+
+static void UserInterface(void const *argument){
+    uint8_t values[3];
+
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);
+    
+    osDelay(10);
+
+    while(1){
+        LinkPot(EffectStages[0].parameter + 0, values[0]);
+        LinkPot(EffectStages[1].parameter + 0, values[1]);
+        LinkPot(EffectStages[1].parameter + 1, values[2]);
+        osDelay(200);
+    }
+}
+
+static void LED_Thread1(void const *argument){
+	uint32_t count = 0;
+	(void) argument;
+
 	for(;;){
 		osDelay(300);
 		BSP_LED_Toggle(LED3);
@@ -127,6 +232,69 @@ static void RenderingThread(void const *argument){
 		BSP_LCD_FillRect(x, y, 30, 30);
 		osDelay(10);
 	}
+
+/* Double Buffer Swapping Callbacks */
+void DMA2_Stream0_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_adc1);
+    return;
+}
+
+void DMA1_Stream6_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_dac2);
+    return;
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+    static uint32_t index = 0;
+    if(hadc->Instance == ADC1){
+        index += 2;
+        if(index >= BUFFER_NUM)
+            index = 0;
+
+        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
+
+        SPU_Hold++;
+    }
+    return;  
+}
+
+void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
+    static uint32_t index = 1;
+
+    if(hadc->Instance == ADC1){
+        index += 2;
+        if(index >= BUFFER_NUM)
+            index = 1;
+
+        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
+        
+        SPU_Hold++;
+    }
+    return;  
+}
+
+void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
+    static uint32_t index = 1;
+
+    index += 2;
+    if(index >= BUFFER_NUM)
+        index = 1;
+
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY0);
+
+    return;  
+}
+
+void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
+    static uint32_t index = 2;
+
+    index += 2;
+    if(index >= BUFFER_NUM)
+        index = 0;
+
+    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY1);
+
+    return;  
 }
 
 /**
@@ -188,6 +356,10 @@ static void SystemClock_Config(void){
 
 	__HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
 	__HAL_FLASH_DATA_CACHE_ENABLE();
+}
+
+float map(float value, float iupper, float ilower, float oupper, float olower){
+   return olower + ((oupper - olower) / (iupper - ilower)) * (value - ilower);
 }
 
 /*
