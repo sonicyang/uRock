@@ -135,19 +135,18 @@ static void SignalProcessingUnit(void const *argument){
     strcpy(EffectStages[0].name, "Gain");
     EffectStages[0].func = Gain;
     EffectStages[0].parameter[0].value = 1.0f;
-    EffectStages[0].parameter[0].upperBound = 2.0f;
+    EffectStages[0].parameter[0].upperBound = 4.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
 
     strcpy(EffectStages[1].name, "Clipping");
     EffectStages[1].func = HardClipping;
-    EffectStages[1].parameter[0].value = 255.0f;
-    EffectStages[1].parameter[0].upperBound = 255.0f;
-    EffectStages[1].parameter[0].lowerBound = 0.1f;
+    EffectStages[1].parameter[0].value = 3.0f;
+    EffectStages[1].parameter[0].upperBound = 3.0f;
+    EffectStages[1].parameter[0].lowerBound = 0.0f;
 
 
     strcpy(EffectStages[2].name, "Delay");
-    EffectStages[1].func = HardClipping;
-    EffectStages[2].func = Delay;
+    EffectStages[2].func = NULL;
     EffectStages[2].parameter[0].value = 500;
     EffectStages[2].parameter[0].upperBound = 500;
     EffectStages[2].parameter[0].lowerBound = 50;

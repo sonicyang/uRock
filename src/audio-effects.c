@@ -90,13 +90,14 @@ void Delay(volatile float* pData, struct parameter_t *p){
 
 
 void HardClipping(volatile float* pData, struct parameter_t* p){
+    register float gg = powf(10, log2f(p[0].value));
+
     register uint32_t i;
     for(i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > p[0].value){
-            pData[i] = p[0].value;
-        }
-        else if (pData[i] < -p[0].value){
-            pData[i] = -p[0].value;
+        if (pData[i] > gg){
+            pData[i] = gg;
+        }else if (pData[i] < -gg){
+            pData[i] = -gg;
         }
     }
     return;
