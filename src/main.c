@@ -86,6 +86,18 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
 
+    uint32_t a = 0; 
+    BSP_SDRAM_ReadData(0xD0000000, &a, 1);
+
+    a = 40;
+    BSP_SDRAM_WriteData(0xD0000000, &a, 1);
+
+    HAL_Delay(10);
+
+    a = 20;
+    BSP_SDRAM_ReadData(0xD0000000, &a, 1);
+
+
 
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
@@ -117,15 +129,18 @@ static void SignalProcessingUnit(void const *argument){
     }
 
     /* Effect Stage Setting*/ 
-    EffectStages[0].func = Delay;
-    EffectStages[0].parameter[0].value = 40;
-    EffectStages[0].parameter[0].upperBound = 128;
-    EffectStages[0].parameter[0].lowerBound = 0;
+    EffectStages[1].func = Delay;
+    EffectStages[1].parameter[0].value = 500;
+    EffectStages[1].parameter[0].upperBound = 500;
+    EffectStages[1].parameter[0].lowerBound = 50;
+    EffectStages[1].parameter[1].value = 0.5f;
+    EffectStages[1].parameter[1].upperBound = 0.8f;
+    EffectStages[1].parameter[1].lowerBound = 0.1f;
 
-    EffectStages[1].func = Gain;
-    EffectStages[1].parameter[0].value = 1.0f;
-    EffectStages[1].parameter[0].upperBound = 2.0f;
-    EffectStages[1].parameter[0].lowerBound = 0.1f;
+    EffectStages[0].func = Gain;
+    EffectStages[0].parameter[0].value = 1.0f;
+    EffectStages[0].parameter[0].upperBound = 2.0f;
+    EffectStages[0].parameter[0].lowerBound = 0.1f;
 
     
     /* Process */
@@ -137,7 +152,7 @@ static void SignalProcessingUnit(void const *argument){
             
             for(i = 0; i < STAGE_NUM; i++){
                 if(EffectStages[i].func != NULL)
-                    EffectStages[i].func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i].parameter[0].value);
+                    EffectStages[i].func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i].parameter);
             }
 
             DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
@@ -152,6 +167,11 @@ static void SignalProcessingUnit(void const *argument){
     }
 }
 
+static void LinkPot(struct parameter_t *p, float value){
+    p->value = map(value, 0, 255, p->lowerBound, p->upperBound);
+    return;
+}
+
 static void UserInterface(void const *argument){
     uint8_t values[3];
 
@@ -160,8 +180,10 @@ static void UserInterface(void const *argument){
     osDelay(10);
 
     while(1){
-        EffectStages[1].parameter[0].value = map(values[0], 0, 255, 0, 8);
-        osDelay(100);
+        LinkPot(EffectStages[0].parameter + 0, values[0]);
+        LinkPot(EffectStages[1].parameter + 0, values[1]);
+        LinkPot(EffectStages[1].parameter + 1, values[2]);
+        osDelay(200);
     }
 }
 
@@ -304,7 +326,7 @@ static void SystemClock_Config(void){
 }
 
 float map(float value, float iupper, float ilower, float oupper, float olower){
-   return olower + 1.0f * (oupper - olower) / (iupper - ilower) * (value - ilower);
+   return olower + ((oupper - olower) / (iupper - ilower)) * (value - ilower);
 }
 
 /*
