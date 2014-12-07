@@ -86,19 +86,6 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
 
-    uint32_t a = 0; 
-    BSP_SDRAM_ReadData(0xD0000000, &a, 1);
-
-    a = 40;
-    BSP_SDRAM_WriteData(0xD0000000, &a, 1);
-
-    HAL_Delay(10);
-
-    a = 20;
-    BSP_SDRAM_ReadData(0xD0000000, &a, 1);
-
-
-
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
