@@ -64,12 +64,7 @@ struct Effect EffectStages[STAGE_NUM];
 osThreadId UIid;
 static void UserInterface(void const *argument);
 
-osThreadId RenderingThreadId;
-static void RenderingThread(void const *argument);
-
-int
-main(void)
-{
+int main(void){
 	/* STM32F4xx HAL library initialization:
 	   - Configure the Flash prefetch, instruction and Data caches
 	   - Configure the Systick to generate an interrupt each 1 msec
@@ -103,11 +98,6 @@ main(void)
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_DAC_Init();
-   
-     
-	osThreadDef(RENDERING, RenderingThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-	RenderingThreadId = osThreadCreate (osThread(RENDERING), NULL);
-    
 
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
@@ -138,18 +128,25 @@ static void SignalProcessingUnit(void const *argument){
     }
 
     /* Effect Stage Setting*/ 
-    EffectStages[1].func = Delay;
-    EffectStages[1].parameter[0].value = 500;
-    EffectStages[1].parameter[0].upperBound = 500;
-    EffectStages[1].parameter[0].lowerBound = 50;
-    EffectStages[1].parameter[1].value = 0.5f;
-    EffectStages[1].parameter[1].upperBound = 0.8f;
-    EffectStages[1].parameter[1].lowerBound = 0.1f;
 
     EffectStages[0].func = Gain;
     EffectStages[0].parameter[0].value = 1.0f;
     EffectStages[0].parameter[0].upperBound = 2.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
+
+    EffectStages[1].func = HardClipping;
+    EffectStages[1].parameter[0].value = 255.0f;
+    EffectStages[1].parameter[0].upperBound = 255.0f;
+    EffectStages[1].parameter[0].lowerBound = 0.1f;
+
+
+    EffectStages[2].func = Delay;
+    EffectStages[2].parameter[0].value = 500;
+    EffectStages[2].parameter[0].upperBound = 500;
+    EffectStages[2].parameter[0].lowerBound = 50;
+    EffectStages[2].parameter[1].value = 0.5f;
+    EffectStages[2].parameter[1].upperBound = 0.8f;
+    EffectStages[2].parameter[1].lowerBound = 0.1f;
 
     
     /* Process */
@@ -181,17 +178,119 @@ static void LinkPot(struct parameter_t *p, float value){
     return;
 }
 
+void reverse(char s[])
+{
+    int i, j;
+    char c;
+
+    for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+        c = s[i];
+        s[i] = s[j];
+        s[j] = c;
+    }
+}
+
+void itoa(int n, char s[])
+{
+    int i, sign;
+
+    if ((sign = n) < 0)  /* record sign */
+        n = -n;          /* make n positive */
+    i = 0;
+    do {       /* generate digits in reverse order */
+        s[i++] = n % 10 + '0';   /* get next digit */
+    } while ((n /= 10) > 0);     /* delete it */
+    if (sign < 0)
+        s[i++] = '-';
+    s[i] = '\0';
+    reverse(s);
+}
+
+int intToStr(int x, char str[], int d)
+{
+    int i = 0;
+    while (x)
+    {
+        str[i++] = (x%10) + '0';
+        x = x/10;
+    }
+ 
+    // If number of digits required is more, then
+    // add 0s at the beginning
+    while (i < d)
+        str[i++] = '0';
+ 
+    str[i] = '\0';
+    reverse(str);
+    return i;
+}
+
+void ftoa(float n, char *res, int afterpoint)
+{
+    // Extract integer part
+    int ipart = (int)n;
+ 
+    // Extract floating part
+    float fpart = n - (float)ipart;
+ 
+    // convert integer part to string
+    int i = intToStr(ipart, res, 0);
+ 
+    // check for display option after point
+    if (afterpoint != 0)
+    {
+        res[i] = '.';  // add dot
+ 
+        // Get the value of fraction part upto given no.
+        // of points after dot. The third parameter is needed
+        // to handle cases like 233.007
+        fpart = fpart * pow(10, afterpoint);
+ 
+        intToStr((int)fpart, res + i + 1, afterpoint);
+    }
+}
+
 static void UserInterface(void const *argument){
     uint8_t values[3];
+    char buf[16];
+
+	TS_StateTypeDef tp;
+    uint32_t controllingStage = 0;
 
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);
+    BSP_LCD_Clear(LCD_COLOR_WHITE);
+    BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
+    BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Gain", CENTER_MODE);
     
     osDelay(10);
+	while (1) {
+		BSP_TS_GetState(&tp);
+		if (tp.TouchDetected == 1) {
+            controllingStage++;
+            if(controllingStage >= 4)
+                controllingStage = 0;
+		}
 
-    while(1){
-        LinkPot(EffectStages[0].parameter + 0, values[0]);
-        LinkPot(EffectStages[1].parameter + 0, values[1]);
-        LinkPot(EffectStages[1].parameter + 1, values[2]);
+        LinkPot(EffectStages[controllingStage].parameter + 0, values[0]);
+        LinkPot(EffectStages[controllingStage].parameter + 1, values[1]);
+        LinkPot(EffectStages[controllingStage].parameter + 2, values[2]);
+
+        BSP_LCD_Clear(LCD_COLOR_WHITE);
+        BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
+        if(controllingStage == 0){
+            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Gain", CENTER_MODE);
+        }else if(controllingStage == 1){
+            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Clipping", CENTER_MODE);
+        }else if(controllingStage == 2){
+            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Delay", CENTER_MODE);
+        }
+
+        ftoa(EffectStages[controllingStage].parameter[0].value, buf, 2);
+        BSP_LCD_DisplayStringAt(0, 3 * 16, (uint8_t*) buf, CENTER_MODE);
+        ftoa(EffectStages[controllingStage].parameter[1].value, buf, 2);
+        BSP_LCD_DisplayStringAt(0, 4 * 16, (uint8_t*) buf, CENTER_MODE);
+        
+
         osDelay(200);
     }
 }
@@ -202,38 +301,6 @@ static void LED_Thread1(void const *argument){
 	for(;;){
 		osDelay(300);
 		BSP_LED_Toggle(LED3);
-	}
-}
-
-static void RenderingThread(void const *argument){
-	TS_StateTypeDef tp;
-	uint16_t x = 50;
-	uint16_t y = 50;
-	int8_t vx = 1;
-	int8_t vy = 1;
-
-	//BSP_LCD_SetFont(Font8x8);
-
-	while (1) {
-		BSP_TS_GetState(&tp);
-		if (tp.TouchDetected == 1) {
-			BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-		} else {
-			BSP_LCD_SetTextColor(LCD_COLOR_BLUE);
-		}
-
-		x += vx;
-		y += vy;
-
-		if (x == 0 || x + 30 == BSP_LCD_GetXSize() - 1)
-			vx *= -1;
-		if (y == 0 || y + 30 == BSP_LCD_GetYSize() - 1)
-			vy *= -1;
-
-		BSP_LCD_Clear(LCD_COLOR_WHITE);
-		BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "123456789", CENTER_MODE);
-		BSP_LCD_FillRect(x, y, 30, 30);
-		osDelay(10);
 	}
 }
 

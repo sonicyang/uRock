@@ -27,8 +27,9 @@ struct parameter_t{
 typedef void(*EffectFunc)(volatile float*, struct parameter_t*);
 
 struct Effect{
+    char name[16];
     EffectFunc func;
-    struct parameter_t parameter[4];
+    struct parameter_t parameter[4]; //TODO: Use GNU C no length Array
 };
 
 void Gain(volatile float* pData, struct parameter_t*);

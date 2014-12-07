@@ -48,7 +48,8 @@ SRCDIR = src \
 		 Middlewares/Third_Party/FreeRTOS/Source \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-		 Utilities/Common
+		 Utilities/Fonts \
+		 Utilities/CPU
 
 INCDIR = inc \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
@@ -58,7 +59,8 @@ INCDIR = inc \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source/include \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-		 Utilities/Common
+		 Utilities/Fonts \
+		 Utilities/CPU
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))

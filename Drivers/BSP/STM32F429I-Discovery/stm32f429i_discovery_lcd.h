@@ -50,7 +50,7 @@
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f4xx_hal_ltdc.h"
 #include "stm32f4xx_hal_dma2d.h"
-#include "fonts.h"
+#include "../../../Utilities/Fonts/fonts.h"
 
 /* Include LCD component driver */
 #include "../Components/ili9341/ili9341.h"
@@ -147,7 +147,7 @@ typedef enum
 /** 
   * @brief LCD default font 
   */ 
-#define LCD_DEFAULT_FONT         Font16x24
+#define LCD_DEFAULT_FONT         Font16
 
 /** 
   * @brief  LCD Layer  

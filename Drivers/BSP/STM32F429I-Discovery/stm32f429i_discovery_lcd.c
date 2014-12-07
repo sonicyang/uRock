@@ -75,7 +75,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f429i_discovery_lcd.h"
-#include "../../../Utilities/Common/fonts.h"
+#include "../../../Utilities/Fonts/fonts.h"
 
 /** @addtogroup BSP
   * @{
@@ -278,7 +278,7 @@ void BSP_LCD_LayerDefaultInit(uint16_t LayerIndex, uint32_t FB_Address)
   HAL_LTDC_ConfigLayer(&LtdcHandler, &Layercfg, LayerIndex); 
 
   DrawProp[LayerIndex].BackColor = LCD_COLOR_WHITE;
-  DrawProp[LayerIndex].pFont     = &Font16x24;
+  DrawProp[LayerIndex].pFont     = &LCD_DEFAULT_FONT;
   DrawProp[LayerIndex].TextColor = LCD_COLOR_BLACK; 
 
   /* Dithering activation */
