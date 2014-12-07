@@ -26,6 +26,8 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
+#include "string.h"
+
 #include "stm32f4xx_hal.h"
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_lcd.h"
@@ -36,6 +38,7 @@
 #include "MspInit.h"
 #include "setting.h"
 #include "audio-effects.h"
+
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -129,17 +132,21 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/ 
 
+    strcpy(EffectStages[0].name, "Gain");
     EffectStages[0].func = Gain;
     EffectStages[0].parameter[0].value = 1.0f;
     EffectStages[0].parameter[0].upperBound = 2.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
 
+    strcpy(EffectStages[1].name, "Clipping");
     EffectStages[1].func = HardClipping;
     EffectStages[1].parameter[0].value = 255.0f;
     EffectStages[1].parameter[0].upperBound = 255.0f;
     EffectStages[1].parameter[0].lowerBound = 0.1f;
 
 
+    strcpy(EffectStages[2].name, "Delay");
+    EffectStages[1].func = HardClipping;
     EffectStages[2].func = Delay;
     EffectStages[2].parameter[0].value = 500;
     EffectStages[2].parameter[0].upperBound = 500;
@@ -277,13 +284,8 @@ static void UserInterface(void const *argument){
 
         BSP_LCD_Clear(LCD_COLOR_WHITE);
         BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-        if(controllingStage == 0){
-            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Gain", CENTER_MODE);
-        }else if(controllingStage == 1){
-            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Clipping", CENTER_MODE);
-        }else if(controllingStage == 2){
-            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Delay", CENTER_MODE);
-        }
+        BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) EffectStages[controllingStage].name, CENTER_MODE);
+        
 
         ftoa(EffectStages[controllingStage].parameter[0].value, buf, 2);
         BSP_LCD_DisplayStringAt(0, 3 * 16, (uint8_t*) buf, CENTER_MODE);
