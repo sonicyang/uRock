@@ -5,7 +5,10 @@
 #define STAGE_NUM 4
 #define SAMPLE_NUM 256
 
-#define SAMPLING_RATE 200 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLE_PREIOD 1 / SAMPLE_RATE
+
+#define BLOCK_PREIOD SAMPLE_NUM / SAMPLING_RATE * 0.001f
 
 #define DELAY_BANK(x) DELAY_BANK_##x
 

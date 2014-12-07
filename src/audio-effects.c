@@ -30,10 +30,10 @@ inline static void LinearGain(volatile float* pData, float g){
 
 inline static uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr){
     
-    delayblock = (bankptr - delayblock) % 400;
-    BSP_SDRAM_ReadData(BaseAddr + delayblock * SAMPLE_NUM, (uint32_t*)bData, SAMPLE_NUM / 4);
+    BSP_SDRAM_WriteData(BaseAddr + bankptr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
 
-    BSP_SDRAM_WriteData(BaseAddr + bankptr * SAMPLE_NUM, (uint32_t*)pData, SAMPLE_NUM / 4);
+    delayblock = (bankptr - delayblock) % 400;
+    BSP_SDRAM_ReadData(BaseAddr + delayblock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
     bankptr++;
 
@@ -68,35 +68,36 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
     return;
 }
 
-void Gain(volatile float* pData, float g){
-    register float gg = powf(10, logf(g));
+void Gain(volatile float* pData, struct parameter_t *p){
+    register float gg = powf(10, log2f(p[0].value));
 
     LinearGain(pData, gg);
 
     return;
 }
 
-void Delay(volatile float* pData, float delay){
+void Delay(volatile float* pData, struct parameter_t *p){
     static uint32_t baseAddr = DELAY_BANK_0; 
     static uint32_t ptr = 0;
     static volatile float bData[256];
 
-    ptr = SDRAM_Delay(pData, ptr, bData, (uint32_t)(delay / 1.280f), baseAddr);
-    Gain(bData, 0.5);
+    ptr = SDRAM_Delay(pData, ptr, bData, (uint32_t)(p[0].value / (BLOCK_PREIOD)), baseAddr);
+    Gain(bData, p + 1);
     Combine(pData, bData);
 
     return;
 }
 
 
-void HardClipping(volatile float* pData, float clip){
+void HardClipping(volatile float* pData, struct parameter_t* p){
+    register float gg = powf(10, log2f(p[0].value));
+
     register uint32_t i;
     for(i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > clip){
-            pData[i] = clip;
-        }
-        else if (pData[i] < -clip){
-            pData[i] = -clip;
+        if (pData[i] > gg){
+            pData[i] = gg;
+        }else if (pData[i] < -gg){
+            pData[i] = -gg;
         }
     }
     return;

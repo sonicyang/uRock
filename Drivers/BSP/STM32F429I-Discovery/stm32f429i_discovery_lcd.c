@@ -75,7 +75,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f429i_discovery_lcd.h"
-#include "../../../Utilities/Common/fonts.h"
+#include "../../../Utilities/Fonts/fonts.h"
 
 /** @addtogroup BSP
   * @{
@@ -278,7 +278,7 @@ void BSP_LCD_LayerDefaultInit(uint16_t LayerIndex, uint32_t FB_Address)
   HAL_LTDC_ConfigLayer(&LtdcHandler, &Layercfg, LayerIndex); 
 
   DrawProp[LayerIndex].BackColor = LCD_COLOR_WHITE;
-  DrawProp[LayerIndex].pFont     = &Font16x24;
+  DrawProp[LayerIndex].pFont     = &LCD_DEFAULT_FONT;
   DrawProp[LayerIndex].TextColor = LCD_COLOR_BLACK; 
 
   /* Dithering activation */
@@ -513,7 +513,7 @@ void BSP_LCD_ClearStringLine(uint32_t Line)
   */
 void BSP_LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii)
 {
-  DrawChar(Xpos, Ypos, &DrawProp[ActiveLayer].pFont->table[(Ascii-' ') * DrawProp[ActiveLayer].pFont->Height * ((DrawProp[ActiveLayer].pFont->Width + 7) / 8)]);
+  DrawChar(Xpos, Ypos, (const uint8_t*) &DrawProp[ActiveLayer].pFont->table[(Ascii-' ') * DrawProp[ActiveLayer].pFont->Height * ((DrawProp[ActiveLayer].pFont->Width + 7) / 8)]);
 }
 
 /**
@@ -583,10 +583,10 @@ void BSP_LCD_DisplayStringAt(uint16_t X, uint16_t Y, uint8_t *pText, Text_AlignM
   * @param  ptr: pointer to string to display on LCD
   * @retval None
   */
-void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr)
+/*void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr)
 {
   BSP_LCD_DisplayStringAt(0, LINE(Line), ptr, LEFT_MODE);
-}
+}*/
 
 /**
   * @brief  Displays an horizontal line.

@@ -50,9 +50,10 @@
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f4xx_hal_ltdc.h"
 #include "stm32f4xx_hal_dma2d.h"
-#include "fonts.h"
+#include "../../../Utilities/Fonts/fonts.h"
+
 /* Include LCD component driver */
-#include "../Components/ili9341/ili9341.h"   
+#include "../Components/ili9341/ili9341.h"
 
 /** @addtogroup BSP
   * @{
@@ -146,7 +147,7 @@ typedef enum
 /** 
   * @brief LCD default font 
   */ 
-#define LCD_DEFAULT_FONT         Font16x24
+#define LCD_DEFAULT_FONT         Font16
 
 /** 
   * @brief  LCD Layer  
@@ -204,7 +205,7 @@ uint32_t BSP_LCD_ReadPixel(uint16_t Xpos, uint16_t Ypos);
 void     BSP_LCD_DrawPixel(uint16_t Xpos, uint16_t Ypos, uint32_t pixel);
 void     BSP_LCD_Clear(uint32_t Color);
 void     BSP_LCD_ClearStringLine(uint32_t Line);
-void     BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr);
+//void     BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr);
 void     BSP_LCD_DisplayStringAt(uint16_t X, uint16_t Y, uint8_t *pText, Text_AlignModeTypdef mode);
 void     BSP_LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii);
 

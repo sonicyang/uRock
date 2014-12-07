@@ -25,7 +25,7 @@ CFLAGS += -mlittle-endian -mthumb
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 # Basic configurations
-CFLAGS += -g3 -std=c99 -Wall -Werror \
+CFLAGS += -g3 -std=c99 -Wall  \
 		  -DUSER_NAME=\"$(USER)\"
 
 # Optimizations
@@ -48,8 +48,9 @@ SRCDIR = src \
 		 Middlewares/Third_Party/FreeRTOS/Source \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-		 Utilities/Common
-		 
+		 Utilities/Fonts \
+		 Utilities/CPU
+
 INCDIR = inc \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
 		 Drivers/CMSIS/Include \
@@ -58,7 +59,8 @@ INCDIR = inc \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source/include \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-		 Utilities/Common
+		 Utilities/Fonts \
+		 Utilities/CPU
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))
@@ -66,6 +68,10 @@ SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 SRC += Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.c
 
 SRC += Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
+
+SRC += Drivers/BSP/Components/ili9341/ili9341.c
+
+SRC += Drivers/BSP/Components/stmpe811/stmpe811.c
 
 OBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(SRC:.c=.o)))
 

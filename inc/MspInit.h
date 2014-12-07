@@ -2,6 +2,7 @@
 #define __MSPINIT_H__
 
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_ltdc.h"
 
 void MX_ADC1_Init(void);
 void MX_ADC2_Init(void);
