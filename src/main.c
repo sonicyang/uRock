@@ -34,6 +34,8 @@
 #include "cmsis_os.h"
 
 #include "MspInit.h"
+#include "setting.h"
+#include "audio-effects.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -193,7 +195,6 @@ static void UserInterface(void const *argument){
 }
 
 static void LED_Thread1(void const *argument){
-	uint32_t count = 0;
 	(void) argument;
 
 	for(;;){
@@ -209,7 +210,7 @@ static void RenderingThread(void const *argument){
 	int8_t vx = 1;
 	int8_t vy = 1;
 
-	BSP_LCD_SetFont(Font8x8);
+	//BSP_LCD_SetFont(Font8x8);
 
 	while (1) {
 		BSP_TS_GetState(&tp);
@@ -232,6 +233,7 @@ static void RenderingThread(void const *argument){
 		BSP_LCD_FillRect(x, y, 30, 30);
 		osDelay(10);
 	}
+}
 
 /* Double Buffer Swapping Callbacks */
 void DMA2_Stream0_IRQHandler(void){
