@@ -25,7 +25,7 @@ CFLAGS += -mlittle-endian -mthumb
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 # Basic configurations
-CFLAGS += -g3 -std=c99 -Wall -Werror \
+CFLAGS += -g3 -std=c99 -Wall  \
 		  -DUSER_NAME=\"$(USER)\"
 
 # Optimizations
