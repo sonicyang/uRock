@@ -101,9 +101,23 @@ void HardClipping(volatile float* pData, float clip){
     }
     return;
 }
+
+void SoftClipping(volatile float* pData, float clip){
+    register uint32_t i;
+    for (i = 0; i < SAMPLE_NUM; i++){
+        if (pData[i] > clip)
+            pData[i] = clip + sqrtf((pData[i] - clip));
+        else if (pData[i] < -clip)
+            pData[i] = -clip + sqrtf((-pData[i] - clip));
+    }
+    return;
+}
+
+
 uint8_t pre_status = 0;
 uint32_t count = 0;
 float pre_r;
+
 void Compressor(volatile float* pData, float threshold, float ratio, float attack){
     float rRatio = 1.0f / ratio;
     float volume = 0.0f;
