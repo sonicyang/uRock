@@ -90,9 +90,11 @@ void Delay(volatile float* pData, struct parameter_t *p){
 
 
 void HardClipping(volatile float* pData, struct parameter_t* p){
+    register uint32_t i;
     register float gg = powf(10, log2f(p[0].value));
 
-    register uint32_t i;
+    Gain(pData, p);
+
     for(i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] > gg){
             pData[i] = gg;
@@ -107,13 +109,15 @@ void SoftClipping(volatile float* pData, struct parameter_t* p){
     register uint32_t i;
     float ff;
 
+    Gain(pData, p);
+
     for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > p[0].value){
-            arm_sqrt_f32((pData[i] - p[0].value), &ff);
-            pData[i] = p[0].value + ff;
-        }else if (pData[i] < -p[0].value){
-            arm_sqrt_f32((-pData[i] - p[0].value), &ff);
-            pData[i] = -p[0].value + ff;
+        if (pData[i] > p[1].value){
+            arm_sqrt_f32((pData[i] - p[1].value), &ff);
+            pData[i] = p[1].value + ff;
+        }else if (pData[i] < -p[1].value){
+            arm_sqrt_f32((-pData[i] - p[1].value), &ff);
+            pData[i] = -p[1].value + ff;
         }
     }
     return;
@@ -130,6 +134,8 @@ void Compressor(volatile float* pData, struct parameter_t* p){
     float rate = 1.0f;
     uint8_t status = 0;
     float aData;
+    float attack_block_count = p[1].value / BLOCK_PREIOD;
+
     for (int i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] < 0.0f)
             aData = 0.0f - pData[i];
@@ -145,8 +151,8 @@ void Compressor(volatile float* pData, struct parameter_t* p){
         count = 0;
         pre_status = status;
     }
-    if (count <= p[2].value){
-        rate = count / p[2].value;
+    if (count <= attack_block_count){
+        rate = count / attack_block_count;
     }
     float tmp;
     if (status == 1){

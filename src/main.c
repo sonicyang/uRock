@@ -138,9 +138,9 @@ static void SignalProcessingUnit(void const *argument){
     EffectStages[0].parameter[0].upperBound = 4.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
 
-    strcpy(EffectStages[1].name, "Compress");
-    EffectStages[1].func = Compressor;
-    EffectStages[1].parameter[0].value = 127.0f;
+    strcpy(EffectStages[1].name, "SoftClipping");
+    EffectStages[1].func = SoftClipping;
+    EffectStages[1].parameter[0].value = 255.0f;
     EffectStages[1].parameter[0].upperBound = 127.0f;
     EffectStages[1].parameter[0].lowerBound = 1.0f;
     EffectStages[1].parameter[1].value = 2.0f;
