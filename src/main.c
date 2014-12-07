@@ -138,11 +138,17 @@ static void SignalProcessingUnit(void const *argument){
     EffectStages[0].parameter[0].upperBound = 4.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
 
-    strcpy(EffectStages[1].name, "Clipping");
-    EffectStages[1].func = HardClipping;
-    EffectStages[1].parameter[0].value = 3.0f;
-    EffectStages[1].parameter[0].upperBound = 3.0f;
-    EffectStages[1].parameter[0].lowerBound = 0.0f;
+    strcpy(EffectStages[1].name, "Compress");
+    EffectStages[1].func = Compressor;
+    EffectStages[1].parameter[0].value = 127.0f;
+    EffectStages[1].parameter[0].upperBound = 127.0f;
+    EffectStages[1].parameter[0].lowerBound = 1.0f;
+    EffectStages[1].parameter[1].value = 2.0f;
+    EffectStages[1].parameter[1].upperBound = 5.0f;
+    EffectStages[1].parameter[1].lowerBound = 0.0f;
+    EffectStages[1].parameter[2].value = 10.0f;
+    EffectStages[1].parameter[2].upperBound = 30.0f;
+    EffectStages[1].parameter[2].lowerBound = 1.0f;
 
 
     strcpy(EffectStages[2].name, "Delay");
@@ -290,6 +296,8 @@ static void UserInterface(void const *argument){
         BSP_LCD_DisplayStringAt(0, 3 * 16, (uint8_t*) buf, CENTER_MODE);
         ftoa(EffectStages[controllingStage].parameter[1].value, buf, 2);
         BSP_LCD_DisplayStringAt(0, 4 * 16, (uint8_t*) buf, CENTER_MODE);
+        ftoa(EffectStages[controllingStage].parameter[2].value, buf, 2);
+        BSP_LCD_DisplayStringAt(0, 5 * 16, (uint8_t*) buf, CENTER_MODE);
         
 
         osDelay(200);

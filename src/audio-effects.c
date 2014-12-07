@@ -103,24 +103,27 @@ void HardClipping(volatile float* pData, struct parameter_t* p){
     return;
 }
 
-void SoftClipping(volatile float* pData, float clip){
+void SoftClipping(volatile float* pData, struct parameter_t* p){
     register uint32_t i;
+    float ff;
+
     for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > clip)
-            pData[i] = clip + sqrtf((pData[i] - clip));
-        else if (pData[i] < -clip)
-            pData[i] = -clip + sqrtf((-pData[i] - clip));
+        if (pData[i] > p[0].value){
+            arm_sqrt_f32((pData[i] - p[0].value), &ff);
+            pData[i] = p[0].value + ff;
+        }else if (pData[i] < -p[0].value){
+            arm_sqrt_f32((-pData[i] - p[0].value), &ff);
+            pData[i] = -p[0].value + ff;
+        }
     }
     return;
 }
 
-
-uint8_t pre_status = 0;
-uint32_t count = 0;
-float pre_r;
-
-void Compressor(volatile float* pData, float threshold, float ratio, float attack){
-    float rRatio = 1.0f / ratio;
+void Compressor(volatile float* pData, struct parameter_t* p){
+    static uint8_t pre_status = 0;
+    static uint32_t count = 0;
+    static float pre_r;
+    float rRatio = 1.0f / p[1].value;
     float volume = 0.0f;
     float dbvolume;
     float dbthreshold;
@@ -132,18 +135,18 @@ void Compressor(volatile float* pData, float threshold, float ratio, float attac
             aData = 0.0f - pData[i];
         if (aData > volume){
             volume = aData;
-            if (aData > threshold)
+            if (aData > p[0].value)
                 status = 1;
         }
     }
     dbvolume = logf(volume / 127.0f);
-    dbthreshold = logf(threshold / 127.0f);
+    dbthreshold = logf(p[0].value / 127.0f);
     if (pre_status != status){
         count = 0;
         pre_status = status;
     }
-    if (count <= attack){
-        rate = count / attack;
+    if (count <= p[2].value){
+        rate = count / p[2].value;
     }
     float tmp;
     if (status == 1){

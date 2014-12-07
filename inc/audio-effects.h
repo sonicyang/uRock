@@ -35,5 +35,7 @@ struct Effect{
 void Gain(volatile float* pData, struct parameter_t*);
 void HardClipping(volatile float* pData, struct parameter_t*);
 void Delay(volatile float* pData, struct parameter_t*);
+void SoftClipping(volatile float* pData, struct parameter_t* p);
+void Compressor(volatile float* pData, struct parameter_t* p);
 
 #endif //__AUDIO_EFFECT_H__
