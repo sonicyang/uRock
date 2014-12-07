@@ -104,15 +104,15 @@ main(void)
     MX_ADC2_Init();
     MX_DAC_Init();
    
-    /* 
+     
 	osThreadDef(RENDERING, RenderingThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	RenderingThreadId = osThreadCreate (osThread(RENDERING), NULL);
-    */
+    
 
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
-	osThreadDef(SPU, SignalProcessingUnit, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
+	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
 	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);

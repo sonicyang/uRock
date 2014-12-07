@@ -81,7 +81,7 @@ void Delay(volatile float* pData, struct parameter_t *p){
     static uint32_t ptr = 0;
     static volatile float bData[256];
 
-    ptr = SDRAM_Delay(pData, ptr, bData, (uint32_t)(p[0].value / 1.280f), baseAddr);
+    ptr = SDRAM_Delay(pData, ptr, bData, (uint32_t)(p[0].value / (BLOCK_PREIOD)), baseAddr);
     Gain(bData, p + 1);
     Combine(pData, bData);
 
