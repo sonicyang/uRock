@@ -10,10 +10,18 @@
 
 int __errno; //For the sake of math.h
 
-inline static uint32_t allocateDelayLine(){
-    static uint32_t addr = 0x00100000;
-    addr += 0x00100000;
-    return addr; 
+uint32_t delayLineStat[7] = {0, 0, 0, 0, 0, 0, 0};
+
+int32_t allocateDelayLine(){
+    register uint32_t i = 0;
+
+    for(; i < 7; i++){
+        if(delayLineStat[i] == 0){
+            delayLineStat[i] = 1;
+            return 0x00100000 * i;
+        }
+    }
+    return -1; 
 }
 
 void Combine(volatile float* pData, volatile float* sData){
@@ -69,7 +77,7 @@ void SoftClipping(volatile float* pData, float threshold){
     return;
 }
 
-inline static uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr){
+uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr){
     
     BSP_SDRAM_WriteData(BaseAddr + bankptr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
 
@@ -105,22 +113,6 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
 
         *pData = *tData + SAMPLE_MAX + 0.5f;
     }
-
-    return;
-}
-
-
-/*
- * P1 : Atuneation
- */
-void Delay(volatile float* pData, struct parameter_t *p){
-    static uint32_t baseAddr = DELAY_BANK_0; 
-    static uint32_t ptr = 0;
-    static volatile float bData[256];
-
-    ptr = SDRAM_Delay(pData, ptr, bData, (uint32_t)(p[0].value / (BLOCK_PREIOD)), baseAddr);
-    Gain(bData, p[0].value);
-    Combine(pData, bData);
 
     return;
 }

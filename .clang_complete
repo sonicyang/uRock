@@ -1,4 +1,5 @@
 -I inc
+-I inc/audio-effects
 -I Drivers/CMSIS/Device/ST/STM32F4xx/Include
 -I Drivers/CMSIS/Include
 -I Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
