@@ -19,12 +19,13 @@ void NormalizeData(volatile uint8_t * pData, volatile float* tData);
 void DenormalizeData(volatile float* tData, volatile uint8_t * pData);
 
 struct parameter_t{
+    char name[16];
     float value;
     float upperBound;
     float lowerBound;
 };
 
-typedef void(*EffectFunc)(volatile float*, struct parameter_t*);
+typedef void(*EffectFunc)(volatile float*, float, float, float);
 
 struct Effect{
     char name[16];
@@ -32,10 +33,8 @@ struct Effect{
     struct parameter_t parameter[4]; //TODO: Use GNU C no length Array
 };
 
-void Gain(volatile float* pData, struct parameter_t*);
-void HardClipping(volatile float* pData, struct parameter_t*);
+void Volume(volatile float* pData, struct parameter_t*);
 void Delay(volatile float* pData, struct parameter_t*);
-void SoftClipping(volatile float* pData, struct parameter_t* p);
 void Compressor(volatile float* pData, struct parameter_t* p);
 
 #endif //__AUDIO_EFFECT_H__

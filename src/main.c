@@ -62,7 +62,7 @@ static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
 volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
-struct Effect EffectStages[STAGE_NUM];
+struct Effect *EffectStages[STAGE_NUM];
 
 osThreadId UIid;
 static void UserInterface(void const *argument);
@@ -133,7 +133,7 @@ static void SignalProcessingUnit(void const *argument){
     /* Effect Stage Setting*/ 
 
     strcpy(EffectStages[0].name, "Gain");
-    EffectStages[0].func = Gain;
+    EffectStages[0].func = Volume;
     EffectStages[0].parameter[0].value = 1.0f;
     EffectStages[0].parameter[0].upperBound = 4.0f;
     EffectStages[0].parameter[0].lowerBound = 0.1f;
