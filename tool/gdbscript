@@ -4,4 +4,4 @@ load
 monitor reset
 monitor halt
 
-b main.c:82
+b HardFault_Handler

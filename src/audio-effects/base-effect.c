@@ -12,13 +12,13 @@ int __errno; //For the sake of math.h
 
 uint32_t delayLineStat[7] = {0, 0, 0, 0, 0, 0, 0};
 
-int32_t allocateDelayLine(){
+uint32_t allocateDelayLine(){
     register uint32_t i = 0;
 
     for(; i < 7; i++){
         if(delayLineStat[i] == 0){
             delayLineStat[i] = 1;
-            return 0x00100000 * i;
+            return 0x00100000 * i + 0xD0200000;
         }
     }
     return -1; 
@@ -83,11 +83,13 @@ void SoftClipping(volatile float* pData, float threshold){
 }
 
 uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr){
-    
+    int32_t relativeBlock = (bankptr - delayblock);
+    if(relativeBlock < 0)
+        relativeBlock += 400;
+
     BSP_SDRAM_WriteData(BaseAddr + bankptr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
 
-    delayblock = (bankptr - delayblock) % 400;
-    BSP_SDRAM_ReadData(BaseAddr + delayblock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
+    BSP_SDRAM_ReadData(BaseAddr + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
     bankptr++;
 

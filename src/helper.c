@@ -2,6 +2,15 @@
 #include "math.h"
 #include "helper.h"
 
+float map(float value, float iupper, float ilower, float oupper, float olower){
+   return olower + ((oupper - olower) / (iupper - ilower)) * (value - ilower);
+}
+
+void LinkPot(struct parameter_t *p, float value){
+    p->value = map(value, 0, 255, p->lowerBound, p->upperBound);
+    return;
+}
+
 void reverse(char s[])
 {
     int i, j;

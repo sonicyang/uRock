@@ -14,7 +14,7 @@
 
 #include "setting.h"
 
-int32_t allocateDelayLine();
+uint32_t allocateDelayLine();
 void releaseDelayLine(uint32_t);
 
 void NormalizeData(volatile uint8_t * pData, volatile float* tData);
@@ -30,11 +30,13 @@ struct parameter_t{
 
 typedef void(*EffectFunc)(volatile float*, void*);
 typedef void(*DeleteFunc)(void*);
+typedef void(*adjustFunc)(void*, uint8_t*);
 
 struct Effect_t{
     char name[16];
     EffectFunc func;
     DeleteFunc del;
+    adjustFunc adj;
 };
 
 void Combine(volatile float* pData, volatile float* sData);

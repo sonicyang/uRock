@@ -38,8 +38,10 @@
 #include "MspInit.h"
 #include "helper.h"
 #include "setting.h"
+
 #include "base-effect.h"
 #include "volume.h"
+#include "delay.h"
 
 
 //static void Error_Handler(void);
@@ -54,7 +56,8 @@ ADC_HandleTypeDef hadc2;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
-float map(float value, float iupper, float ilower, float oupper, float olower);
+struct Volume_t vol;
+struct Delay_t delay;
 
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
@@ -94,6 +97,8 @@ int main(void){
 
 	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
+	BSP_SDRAM_Init();
+
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
 
@@ -107,7 +112,7 @@ int main(void){
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
 
-	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 1024);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
 	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
@@ -133,9 +138,9 @@ static void SignalProcessingUnit(void const *argument){
     }
 
     /* Effect Stage Setting*/ 
-    struct Volume_t vol;
 
     EffectStages[0] = new_Volume(&vol);
+    EffectStages[1] = new_Delay(&delay);
     
     /* Process */
     while(1){
@@ -145,8 +150,9 @@ static void SignalProcessingUnit(void const *argument){
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
             for(i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i] != NULL)
+                if(EffectStages[i] != NULL){
                     EffectStages[i]->func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i]);
+                }
             }
 
             DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
@@ -159,13 +165,9 @@ static void SignalProcessingUnit(void const *argument){
                 pipeindex = 0;
         }
     }
+
+    while(1);
 }
-/*
-static void LinkPot(struct parameter_t *p, float value){
-    p->value = map(value, 0, 255, p->lowerBound, p->upperBound);
-    return;
-}
-*/
 
 static void UserInterface(void const *argument){
     uint8_t values[3];
@@ -177,7 +179,6 @@ static void UserInterface(void const *argument){
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);
     BSP_LCD_Clear(LCD_COLOR_WHITE);
     BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-    BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) "Gain", CENTER_MODE);
     
     osDelay(10);
 	while (1) {
@@ -188,16 +189,18 @@ static void UserInterface(void const *argument){
                 controllingStage = 0;
 		}
 
-        //LinkPot(EffectStages[controllingStage].parameter + 0, values[0]);
-        //LinkPot(EffectStages[controllingStage].parameter + 1, values[1]);
-        //LinkPot(EffectStages[controllingStage].parameter + 2, values[2]);
-
-        /*
         BSP_LCD_Clear(LCD_COLOR_WHITE);
-        BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-        BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) EffectStages[controllingStage].name, CENTER_MODE);
-        
 
+        if(EffectStages[controllingStage] == NULL){
+            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
+        }else{
+            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
+            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
+
+            EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
+        }
+
+       /* 
         ftoa(EffectStages[controllingStage].parameter[0].value, buf, 2);
         BSP_LCD_DisplayStringAt(0, 3 * 16, (uint8_t*) buf, CENTER_MODE);
         ftoa(EffectStages[controllingStage].parameter[1].value, buf, 2);
@@ -344,9 +347,6 @@ static void SystemClock_Config(void){
 	__HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
-float map(float value, float iupper, float ilower, float oupper, float olower){
-   return olower + ((oupper - olower) / (iupper - ilower)) * (value - ilower);
-}
 
 /*
 static void Error_Handler(void){
