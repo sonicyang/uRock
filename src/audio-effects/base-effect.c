@@ -1,4 +1,4 @@
-#include "audio-effects.h"
+#include "base-effect.h"
 
 /*
  * The file contains All audio Effects, Parameter are stats for each effect
@@ -16,7 +16,7 @@ inline static uint32_t allocateDelayLine(){
     return addr; 
 }
 
-inline static void Combine(volatile float* pData, volatile float* sData){
+void Combine(volatile float* pData, volatile float* sData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
@@ -26,7 +26,7 @@ inline static void Combine(volatile float* pData, volatile float* sData){
     return;
 }
 
-inline static void Gain(volatile float* pData, float gain_dB){
+void Gain(volatile float* pData, float gain_dB){
     register float multipier = powf(10, (gain_dB / 10.0f));
     register uint32_t i;
 
@@ -37,7 +37,7 @@ inline static void Gain(volatile float* pData, float gain_dB){
     return;
 }
 
-inline static void HardClipping(volatile float* pData, float threshold){
+void HardClipping(volatile float* pData, float threshold){
     register uint32_t i;
     register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
 
@@ -52,7 +52,7 @@ inline static void HardClipping(volatile float* pData, float threshold){
     return;
 }
 
-inline static void SoftClipping(volatile float* pData, float threshold){
+void SoftClipping(volatile float* pData, float threshold){
     register uint32_t i;
     register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
     float ff;
@@ -109,24 +109,6 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
     return;
 }
 
-struct Effect_t* new_Volume(struct Volume_t* opaque){
-    opaque->gain.upperBound = 0.0f;
-    opaque->gain.lowerBound = -30.0f;
-    opaque->gain.value = 0.0f;
-
-    opaque->parent.func = Volume;
-
-    return (struct Effect_t*)opaque;
-}
-
-/*
- * P1 : Atuneation
- */
-void Volume(volatile float* pData, void *opaque){
-    struct Volume_t *tmp = opaque;
-    Gain(pData, tmp->gain.value);
-    return;
-}
 
 /*
  * P1 : Atuneation

@@ -38,7 +38,8 @@
 #include "MspInit.h"
 #include "helper.h"
 #include "setting.h"
-#include "audio-effects.h"
+#include "base-effect.h"
+#include "volume.h"
 
 
 //static void Error_Handler(void);

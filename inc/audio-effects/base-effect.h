@@ -34,14 +34,11 @@ struct Effect_t{
     DeleteFunc del;
 };
 
-struct Volume_t{
-    struct Effect_t parent;
-    struct parameter_t gain;
-};
+void Combine(volatile float* pData, volatile float* sData);
+void Gain(volatile float* pData, float gain_dB);
+void HardClipping(volatile float* pData, float threshold);
+void SoftClipping(volatile float* pData, float threshold);
 
-struct Effect_t* new_Volume(struct Volume_t*);
-
-void Volume(volatile float* pData, void *opaque);
 void Delay(volatile float* pData, struct parameter_t*);
 void Compressor(volatile float* pData, struct parameter_t* p);
 

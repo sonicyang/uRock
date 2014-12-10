@@ -43,7 +43,7 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 
 #files
 SRCDIR = src \
-		 src/audio-effect \
+		 src/audio-effects \
 		 Drivers/STM32F4xx_HAL_Driver/Src \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source \
@@ -53,7 +53,7 @@ SRCDIR = src \
 		 Utilities/CPU
 
 INCDIR = inc \
-		 inc/audio-effect \
+		 inc/audio-effects \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
 		 Drivers/CMSIS/Include \
 		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
