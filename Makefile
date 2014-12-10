@@ -43,6 +43,7 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 
 #files
 SRCDIR = src \
+		 src/audio-effect \
 		 Drivers/STM32F4xx_HAL_Driver/Src \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source \
@@ -52,6 +53,7 @@ SRCDIR = src \
 		 Utilities/CPU
 
 INCDIR = inc \
+		 inc/audio-effect \
 		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
 		 Drivers/CMSIS/Include \
 		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
@@ -89,18 +91,18 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS)
-	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 	@echo "	LD	"$@	
+	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
+	@echo "	CC	"$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
-	@echo "	CC	"$@	
 
 $(OUTDIR)/%.o: %.s
+	@echo "	CC	"$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
-	@echo "	CC	"$@	
 
 flash:
 	st-flash write $(BIN_IMAGE) 0x8000000
