@@ -15,6 +15,7 @@
 #include "setting.h"
 
 int32_t allocateDelayLine();
+void releaseDelayLine(uint32_t);
 
 void NormalizeData(volatile uint8_t * pData, volatile float* tData);
 

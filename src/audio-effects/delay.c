@@ -10,6 +10,12 @@ void Delay(volatile float* pData, void *opaque){
 
     return;
 }
+
+void delete_Delay(void *opaque){
+    struct Delay_t *tmp = (struct Delay_t*)opaque;
+    releaseDelayLine(tmp->baseAddress);
+}
+
 struct Effect_t* new_Delay(struct Delay_t* opaque){
     opaque->attenuation.upperBound = 0.0f;
     opaque->attenuation.lowerBound = -30.0f;
@@ -26,7 +32,9 @@ struct Effect_t* new_Delay(struct Delay_t* opaque){
         return NULL;
 
     opaque->parent.func = Delay;
+    opaque->parent.del = delete_Delay;
 
     return (struct Effect_t*)opaque;
 }
+
 

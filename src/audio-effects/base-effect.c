@@ -24,6 +24,11 @@ int32_t allocateDelayLine(){
     return -1; 
 }
 
+void releaseDelayLine(uint32_t address){
+    delayLineStat[address / 0x00100000] = 0;
+    return;
+}
+
 void Combine(volatile float* pData, volatile float* sData){
     register uint32_t i;
 
