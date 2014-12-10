@@ -109,11 +109,22 @@ void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
     return;
 }
 
+struct Effect_t* new_Volume(struct Volume_t* opaque){
+    opaque->gain.upperBound = 0.0f;
+    opaque->gain.lowerBound = -30.0f;
+    opaque->gain.value = 0.0f;
+
+    opaque->parent.func = Volume;
+
+    return (struct Effect_t*)opaque;
+}
+
 /*
  * P1 : Atuneation
  */
-void Volume(volatile float* pData, struct parameter_t *p){
-    Gain(pData, p[0].value);
+void Volume(volatile float* pData, void *opaque){
+    struct Volume_t *tmp = opaque;
+    Gain(pData, tmp->gain.value);
     return;
 }
 

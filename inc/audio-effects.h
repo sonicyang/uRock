@@ -25,15 +25,23 @@ struct parameter_t{
     float lowerBound;
 };
 
-typedef void(*EffectFunc)(volatile float*, float, float, float);
+typedef void(*EffectFunc)(volatile float*, void*);
+typedef void(*DeleteFunc)(void*);
 
-struct Effect{
+struct Effect_t{
     char name[16];
     EffectFunc func;
-    struct parameter_t parameter[4]; //TODO: Use GNU C no length Array
+    DeleteFunc del;
 };
 
-void Volume(volatile float* pData, struct parameter_t*);
+struct Volume_t{
+    struct Effect_t parent;
+    struct parameter_t gain;
+};
+
+struct Effect_t* new_Volume(struct Volume_t*);
+
+void Volume(volatile float* pData, void *opaque);
 void Delay(volatile float* pData, struct parameter_t*);
 void Compressor(volatile float* pData, struct parameter_t* p);
 

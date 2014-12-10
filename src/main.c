@@ -36,6 +36,7 @@
 #include "cmsis_os.h"
 
 #include "MspInit.h"
+#include "helper.h"
 #include "setting.h"
 #include "audio-effects.h"
 
@@ -62,7 +63,7 @@ static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
 volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
-struct Effect *EffectStages[STAGE_NUM];
+struct Effect_t *EffectStages[STAGE_NUM];
 
 osThreadId UIid;
 static void UserInterface(void const *argument);
@@ -127,39 +128,13 @@ static void SignalProcessingUnit(void const *argument){
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
    
     for(i = 0; i < STAGE_NUM; i++){
-        EffectStages[i].func = NULL;
+        EffectStages[i] = NULL;
     }
 
     /* Effect Stage Setting*/ 
+    struct Volume_t vol;
 
-    strcpy(EffectStages[0].name, "Gain");
-    EffectStages[0].func = Volume;
-    EffectStages[0].parameter[0].value = 1.0f;
-    EffectStages[0].parameter[0].upperBound = 4.0f;
-    EffectStages[0].parameter[0].lowerBound = 0.1f;
-
-    strcpy(EffectStages[1].name, "SoftClipping");
-    EffectStages[1].func = NULL;
-    EffectStages[1].parameter[0].value = 255.0f;
-    EffectStages[1].parameter[0].upperBound = 127.0f;
-    EffectStages[1].parameter[0].lowerBound = 1.0f;
-    EffectStages[1].parameter[1].value = 2.0f;
-    EffectStages[1].parameter[1].upperBound = 5.0f;
-    EffectStages[1].parameter[1].lowerBound = 0.0f;
-    EffectStages[1].parameter[2].value = 10.0f;
-    EffectStages[1].parameter[2].upperBound = 30.0f;
-    EffectStages[1].parameter[2].lowerBound = 1.0f;
-
-
-    strcpy(EffectStages[2].name, "Delay");
-    EffectStages[2].func = NULL;
-    EffectStages[2].parameter[0].value = 500;
-    EffectStages[2].parameter[0].upperBound = 500;
-    EffectStages[2].parameter[0].lowerBound = 50;
-    EffectStages[2].parameter[1].value = 0.5f;
-    EffectStages[2].parameter[1].upperBound = 0.8f;
-    EffectStages[2].parameter[1].lowerBound = 0.1f;
-
+    EffectStages[0] = new_Volume(&vol);
     
     /* Process */
     while(1){
@@ -169,8 +144,8 @@ static void SignalProcessingUnit(void const *argument){
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
             for(i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i].func != NULL)
-                    EffectStages[i].func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i].parameter);
+                if(EffectStages[i] != NULL)
+                    EffectStages[i]->func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i]);
             }
 
             DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
@@ -184,83 +159,12 @@ static void SignalProcessingUnit(void const *argument){
         }
     }
 }
-
+/*
 static void LinkPot(struct parameter_t *p, float value){
     p->value = map(value, 0, 255, p->lowerBound, p->upperBound);
     return;
 }
-
-void reverse(char s[])
-{
-    int i, j;
-    char c;
-
-    for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
-}
-
-void itoa(int n, char s[])
-{
-    int i, sign;
-
-    if ((sign = n) < 0)  /* record sign */
-        n = -n;          /* make n positive */
-    i = 0;
-    do {       /* generate digits in reverse order */
-        s[i++] = n % 10 + '0';   /* get next digit */
-    } while ((n /= 10) > 0);     /* delete it */
-    if (sign < 0)
-        s[i++] = '-';
-    s[i] = '\0';
-    reverse(s);
-}
-
-int intToStr(int x, char str[], int d)
-{
-    int i = 0;
-    while (x)
-    {
-        str[i++] = (x%10) + '0';
-        x = x/10;
-    }
- 
-    // If number of digits required is more, then
-    // add 0s at the beginning
-    while (i < d)
-        str[i++] = '0';
- 
-    str[i] = '\0';
-    reverse(str);
-    return i;
-}
-
-void ftoa(float n, char *res, int afterpoint)
-{
-    // Extract integer part
-    int ipart = (int)n;
- 
-    // Extract floating part
-    float fpart = n - (float)ipart;
- 
-    // convert integer part to string
-    int i = intToStr(ipart, res, 0);
- 
-    // check for display option after point
-    if (afterpoint != 0)
-    {
-        res[i] = '.';  // add dot
- 
-        // Get the value of fraction part upto given no.
-        // of points after dot. The third parameter is needed
-        // to handle cases like 233.007
-        fpart = fpart * pow(10, afterpoint);
- 
-        intToStr((int)fpart, res + i + 1, afterpoint);
-    }
-}
+*/
 
 static void UserInterface(void const *argument){
     uint8_t values[3];
@@ -283,10 +187,11 @@ static void UserInterface(void const *argument){
                 controllingStage = 0;
 		}
 
-        LinkPot(EffectStages[controllingStage].parameter + 0, values[0]);
-        LinkPot(EffectStages[controllingStage].parameter + 1, values[1]);
-        LinkPot(EffectStages[controllingStage].parameter + 2, values[2]);
+        //LinkPot(EffectStages[controllingStage].parameter + 0, values[0]);
+        //LinkPot(EffectStages[controllingStage].parameter + 1, values[1]);
+        //LinkPot(EffectStages[controllingStage].parameter + 2, values[2]);
 
+        /*
         BSP_LCD_Clear(LCD_COLOR_WHITE);
         BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
         BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) EffectStages[controllingStage].name, CENTER_MODE);
@@ -298,7 +203,7 @@ static void UserInterface(void const *argument){
         BSP_LCD_DisplayStringAt(0, 4 * 16, (uint8_t*) buf, CENTER_MODE);
         ftoa(EffectStages[controllingStage].parameter[2].value, buf, 2);
         BSP_LCD_DisplayStringAt(0, 5 * 16, (uint8_t*) buf, CENTER_MODE);
-        
+        */
 
         osDelay(200);
     }
