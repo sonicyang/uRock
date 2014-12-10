@@ -85,22 +85,22 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@$(OBJCOPY) -O binary $^ $@
 	@$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
 	@$(OBJDUMP) -h -S -D $^ > $(LIST_FILE)
-	@echo "	OBJCOPY	"$@	
-	@echo "	OBJCOPY	"$(HEX_IMAGEX)	
-	@echo "	OBJDUMP	"$(LIST_FILE)
+	@echo "  OBJCOPY  "$@	
+	@echo "  OBJCOPY  "$(HEX_IMAGEX)	
+	@echo "  OBJDUMP  "$(LIST_FILE)
 	@$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS)
-	@echo "	LD	"$@	
+	@echo "    LD     "$@	
 	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
-	@echo "	CC	"$@	
+	@echo "    CC     "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
 
 $(OUTDIR)/%.o: %.s
-	@echo "	CC	"$@	
+	@echo "    CC     "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
 
