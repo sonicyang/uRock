@@ -105,7 +105,7 @@ void MX_DAC_Init(void)
   /**DAC channel OUT2 config
   */
   sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE;
   HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2);
  
 }

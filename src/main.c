@@ -140,7 +140,7 @@ static void SignalProcessingUnit(void const *argument){
     /* Effect Stage Setting*/ 
 
     EffectStages[0] = new_Volume(&vol);
-    EffectStages[1] = new_Delay(&delay);
+    //EffectStages[1] = new_Delay(&delay);
     
     /* Process */
     while(1){
