@@ -99,7 +99,7 @@ uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bD
     return bankptr;
 }
 
-void NormalizeData(volatile uint8_t * pData, volatile float* tData){
+void NormalizeData(volatile uint16_t * pData, volatile float* tData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
@@ -109,7 +109,7 @@ void NormalizeData(volatile uint8_t * pData, volatile float* tData){
     return;
 }
 
-void DenormalizeData(volatile float* tData, volatile uint8_t * pData){
+void DenormalizeData(volatile float* tData, volatile uint16_t * pData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){

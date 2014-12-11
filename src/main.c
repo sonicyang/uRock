@@ -65,7 +65,7 @@ static void LED_Thread1(void const *argument);
 osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
-volatile uint8_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
+volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
@@ -131,7 +131,7 @@ static void SignalProcessingUnit(void const *argument){
     /* Init */
     HAL_TIM_Base_Start(&htim2);
     HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_8B_R);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
    
     for(i = 0; i < STAGE_NUM; i++){
         EffectStages[i] = NULL;

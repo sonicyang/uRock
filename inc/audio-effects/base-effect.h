@@ -17,9 +17,9 @@
 uint32_t allocateDelayLine();
 void releaseDelayLine(uint32_t);
 
-void NormalizeData(volatile uint8_t * pData, volatile float* tData);
+void NormalizeData(volatile uint16_t * pData, volatile float* tData);
 
-void DenormalizeData(volatile float* tData, volatile uint8_t * pData);
+void DenormalizeData(volatile float* tData, volatile uint16_t * pData);
 
 struct parameter_t{
     char name[16];
