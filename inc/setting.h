@@ -5,7 +5,7 @@
 #define STAGE_NUM 4
 #define SAMPLE_NUM 256
 
-#define SAMPLE_MAX 1023
+#define SAMPLE_MAX 2047
 
 #define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PREIOD 1 / SAMPLE_RATE

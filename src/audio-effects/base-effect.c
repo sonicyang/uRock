@@ -113,10 +113,12 @@ void DenormalizeData(volatile float* tData, volatile uint16_t * pData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
+        
         if(*tData > SAMPLE_MAX)
             *tData = SAMPLE_MAX + 0.5f;
         else if(*tData < -SAMPLE_MAX)
             *tData = -SAMPLE_MAX - 0.5f;
+       
 
         *pData = *tData + SAMPLE_MAX;
     }
