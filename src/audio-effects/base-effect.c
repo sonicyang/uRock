@@ -25,7 +25,7 @@ uint32_t allocateDelayLine(){
 }
 
 void releaseDelayLine(uint32_t address){
-    delayLineStat[address / 0x00100000] = 0;
+    delayLineStat[(address - 0xD0200000) / 0x00100000] = 0;
     return;
 }
 
