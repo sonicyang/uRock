@@ -42,7 +42,7 @@ struct Effect_t* new_Delay(struct Delay_t* opaque){
     opaque->delayTime.value = 50.0f;
 
     opaque->blockPtr = 0;
-    opaque->baseAddress = DELAY_BANK_3;
+    opaque->baseAddress = allocateDelayLine();
 
     if(opaque->baseAddress < 0)
         return NULL;
