@@ -42,6 +42,7 @@
 #include "base-effect.h"
 #include "volume.h"
 #include "delay.h"
+#include "distortion.h"
 
 
 //static void Error_Handler(void);
@@ -57,6 +58,7 @@ DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
 
 struct Volume_t vol;
+struct Distortion_t distor;
 struct Delay_t delay;
 
 osThreadId LEDThread1Handle;
@@ -139,7 +141,8 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/ 
 
-    EffectStages[0] = new_Volume(&vol);
+    //EffectStages[0] = new_Volume(&vol);
+    EffectStages[0] = new_Distortion(&distor);
     //EffectStages[1] = new_Delay(&delay);
     
     /* Process */
