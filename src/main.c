@@ -43,6 +43,7 @@
 #include "volume.h"
 #include "delay.h"
 #include "distortion.h"
+#include "reverb.h"
 
 
 //static void Error_Handler(void);
@@ -59,7 +60,7 @@ TIM_HandleTypeDef htim2;
 
 struct Volume_t vol;
 struct Distortion_t distor;
-struct Delay_t delay;
+struct Reverb_t delay;
 
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
@@ -130,11 +131,6 @@ static void SignalProcessingUnit(void const *argument){
     uint32_t pipeindex = 0;
     uint32_t i;
     
-    /* Init */
-    HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
-   
     for(i = 0; i < STAGE_NUM; i++){
         EffectStages[i] = NULL;
     }
@@ -143,8 +139,13 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    EffectStages[0] = new_Delay(&delay);
-    
+    EffectStages[0] = new_Reverb(&delay);
+
+    /* Init */
+    HAL_TIM_Base_Start(&htim2);
+    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
+    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
+  
     /* Process */
     while(1){
         if(SPU_Hold){
