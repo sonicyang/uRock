@@ -18,7 +18,7 @@ void adjust_Overdrive(void *opaque, uint8_t* values){
     
     LinkPot(&(tmp->gain), values[0]);
     LinkPot(&(tmp->volume), values[1]);
-    LinkPot(&(tmp->ratio)), values[2]);
+    LinkPot(&(tmp->ratio), values[2]);
 
     return;
 }
