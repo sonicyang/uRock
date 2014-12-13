@@ -65,10 +65,9 @@ void HardClipping(volatile float* pData, float threshold){
     return;
 }
 
-void SoftClipping(volatile float* pData, float threshold){
+void SoftClipping(volatile float* pData, float threshold, float ratio){
     register uint32_t i;
     register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
-    float ratio = 1;
     float tmp = 1 / (ratio * gg);
     for (i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] > ratio * gg){
