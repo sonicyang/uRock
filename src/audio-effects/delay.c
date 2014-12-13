@@ -5,7 +5,19 @@ void Delay(volatile float* pData, void *opaque){
     struct Delay_t *tmp = (struct Delay_t*)opaque;
     volatile float bData[256];
 
-    tmp->blockPtr = SDRAM_Delay(pData, tmp->blockPtr, bData, (uint32_t)(tmp->delayTime.value / (BLOCK_PREIOD)), tmp->baseAddress);
+    int32_t relativeBlock = (tmp->blockPtr - (uint32_t)(tmp->delayTime.value / (BLOCK_PREIOD)));
+    if(relativeBlock < 0)
+        relativeBlock += 400;
+
+    BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
+
+    BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
+
+
+    tmp->blockPtr++;
+    if(tmp->blockPtr >= 400)
+        tmp->blockPtr = 0;
+
     Gain(bData, tmp->attenuation.value);
     Combine(pData, bData);
 

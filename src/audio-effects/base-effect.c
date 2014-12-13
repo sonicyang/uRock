@@ -82,23 +82,6 @@ void SoftClipping(volatile float* pData, float threshold){
     return;
 }
 
-uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr){
-    int32_t relativeBlock = (bankptr - delayblock);
-    if(relativeBlock < 0)
-        relativeBlock += 400;
-
-    BSP_SDRAM_WriteData(BaseAddr + bankptr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
-
-    BSP_SDRAM_ReadData(BaseAddr + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
-
-    bankptr++;
-
-    if(bankptr >= 400)
-        bankptr = 0;
-
-    return bankptr;
-}
-
 void NormalizeData(volatile uint16_t * pData, volatile float* tData){
     register uint32_t i;
 
