@@ -44,6 +44,7 @@
 #include "delay.h"
 #include "distortion.h"
 #include "reverb.h"
+#include "phaser.h"
 
 
 //static void Error_Handler(void);
@@ -61,6 +62,7 @@ TIM_HandleTypeDef htim2;
 struct Volume_t vol;
 struct Distortion_t distor;
 struct Reverb_t delay;
+struct Phaser_t phaser;
 
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
@@ -112,9 +114,10 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
 
+/*
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
-
+*/
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 1024);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
@@ -138,7 +141,7 @@ static void SignalProcessingUnit(void const *argument){
     /* Effect Stage Setting*/ 
 
     //EffectStages[0] = new_Volume(&vol);
-    EffectStages[0] = new_Distortion(&distor);
+    //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
 
     /* Init */
