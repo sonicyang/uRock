@@ -42,7 +42,7 @@ struct Effect_t{
 void Combine(volatile float* pData, volatile float* sData);
 void Gain(volatile float* pData, float gain_dB);
 void HardClipping(volatile float* pData, float threshold);
-void SoftClipping(volatile float* pData, float threshold);
+void SoftClipping(volatile float* pData, float threshold, float ratio);
 
 
 #endif //__AUDIO_EFFECT_H__

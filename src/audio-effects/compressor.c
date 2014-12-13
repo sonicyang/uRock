@@ -3,47 +3,42 @@
 
 void Compressor(volatile float* pData, void *opaque){
     struct Compressor_t *tmp = (struct Compressor_t*)opaque;
-    static uint8_t pre_status = 0;
-    static uint32_t count = 0;
-    static float pre_r;
     float rRatio = 1.0f / tmp->ratio.value;
     float volume = 0.0f;
     float dbvolume;
-    float dbthreshold;
+    float gg = powf(10, (tmp->threshold.value * 0.1f)) * SAMPLE_MAX;
     float rate = 1.0f;
     uint8_t status = 0;
     float aData;
     float attack_block_count = tmp->attack.value / BLOCK_PREIOD;
-
     for (int i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] < 0.0f)
             aData = 0.0f - pData[i];
         if (aData > volume){
             volume = aData;
-            if (aData > tmp->threshold.value)
+            if (aData > gg)
                 status = 1;
         }
     }
-    dbvolume = logf(volume / 127.0f);
-    dbthreshold = logf(tmp->threshold.value / 127.0f);
-    if (pre_status != status){
-        count = 0;
-        pre_status = status;
+    dbvolume = 10.0f * logf(volume / SAMPLE_MAX);
+    if (tmp->pre_status != status){
+        tmp->count = 0;
+        tmp->pre_status = status;
     }
-    if (count <= attack_block_count){
-        rate = count / attack_block_count;
+    if (tmp->count <= attack_block_count){
+        rate = tmp->count / attack_block_count;
     }
     float temp;
     if (status == 1){
-        pre_r = dbvolume - dbthreshold;
-        temp = powf(10, -pre_r * rRatio * rate);
+        tmp->pre_r = dbvolume - tmp->threshold.value;
+        temp = powf(10, -tmp->pre_r * rRatio * rate);
     }else{
-        temp = powf(10, -pre_r * rRatio + pre_r * rRatio * rate);
+        temp = powf(10, -tmp->pre_r * rRatio + tmp->pre_r * rRatio * rate);
     }
     for (int i = 0; i < SAMPLE_NUM; i++){
         pData[i] = pData[i] * temp;
     }
-    count ++;
+    tmp->count ++;
     
     
     return;
