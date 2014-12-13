@@ -43,7 +43,6 @@ void Combine(volatile float* pData, volatile float* sData);
 void Gain(volatile float* pData, float gain_dB);
 void HardClipping(volatile float* pData, float threshold);
 void SoftClipping(volatile float* pData, float threshold);
-uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr);
 
 
 #endif //__AUDIO_EFFECT_H__

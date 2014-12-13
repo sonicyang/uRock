@@ -28,13 +28,13 @@ struct Effect_t* new_Distortion(struct Distortion_t* opaque){
     opaque->parent.del = delete_Distortion;
     opaque->parent.adj = adjust_Distortion;
 
-    opaque->gain.upperBound = 10.0f;
+    opaque->gain.upperBound = 15.0f;
     opaque->gain.lowerBound = 0.0f;
     opaque->gain.value = 0.0f;
 
-    opaque->gain.upperBound = 0.0f;
-    opaque->gain.lowerBound = -30.0f;
-    opaque->gain.value = 0.0f;
+    opaque->volume.upperBound = 0.0f;
+    opaque->volume.lowerBound = -30.0f;
+    opaque->volume.value = 0.0f;
 
     return (struct Effect_t*)opaque;
 }
