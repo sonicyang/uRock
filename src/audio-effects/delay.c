@@ -9,17 +9,16 @@ void Delay(volatile float* pData, void *opaque){
     if(relativeBlock < 0)
         relativeBlock += 400;
 
-    BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
-
     BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
+    Gain(bData, tmp->attenuation.value);
+    Combine(pData, bData);
+
+    BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
 
     tmp->blockPtr++;
     if(tmp->blockPtr >= 400)
         tmp->blockPtr = 0;
-
-    Gain(bData, tmp->attenuation.value);
-    Combine(pData, bData);
 
     return;
 }
