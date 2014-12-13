@@ -78,8 +78,14 @@ static void UserInterface(void const *argument);
 osThreadId InputEventId;
 static void InputEvent(void const *argument);
 
+enum EventType{
+    EVENT_TP_PRESSED = 0x00,
+    EVENT_TP_RELEASED,
+};
+enum EventType eventType;
 uint32_t controllingStage = 0;
 uint8_t values[3];
+uint16_t touchX, touchY;
 
 int main(void){
     /* STM32F4xx HAL library initialization:
@@ -97,12 +103,14 @@ int main(void){
     BSP_LCD_Init();
     BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
     BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER + BUFFER_OFFSET);
-    BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-    BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+
+    BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
+    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 
     BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-    BSP_LCD_Clear(LCD_COLOR_RED);
-    BSP_LCD_FillCircle(150, 150, 40);
+    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 
     BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
@@ -128,7 +136,7 @@ int main(void){
     UIid = osThreadCreate (osThread(UI), NULL);
 
     osThreadDef(IE, InputEvent, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    UIid = osThreadCreate (osThread(IE), NULL);
+    InputEventId = osThreadCreate (osThread(IE), NULL);
 
     osKernelStart (NULL, NULL);
 
@@ -180,8 +188,39 @@ static void SignalProcessingUnit(void const *argument){
     while(1);
 }
 
+static void present(){
+    static uint32_t currentDrawLayer = LCD_BACKGROUND_LAYER;
+
+    if(currentDrawLayer == LCD_BACKGROUND_LAYER){
+        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
+        BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+        currentDrawLayer = LCD_FOREGROUND_LAYER;
+    }else{
+        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 255);
+        BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
+        currentDrawLayer = LCD_BACKGROUND_LAYER;
+    }
+}
+
 static void UserInterface(void const *argument){
-    while (1) {
+    BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
+    BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
+    BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
+
+    while(1){
+        /* Event part */
+        switch(eventType){
+        case EVENT_TP_PRESSED:
+            break;
+        case EVENT_TP_RELEASED:
+            controllingStage++;
+
+            if(controllingStage >= STAGE_NUM)
+                controllingStage = 0;
+            break;
+        }
+
+        /* Render part */
         BSP_LCD_Clear(LCD_COLOR_WHITE);
 
         if(EffectStages[controllingStage] == NULL){
@@ -193,24 +232,36 @@ static void UserInterface(void const *argument){
             EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
         }
 
-        osSignalWait(0, 0);
+        present();
+
+        osThreadResume(InputEventId);
+        osThreadSuspend(UIid);
     }
 }
 
 static void InputEvent(void const *argument){
     TS_StateTypeDef tp;
+    uint8_t lastTouchState = 0;
 
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);
 
-    while (1) {
+    while(1){
         BSP_TS_GetState(&tp);
-        if (tp.TouchDetected == 1) {
-            controllingStage++;
+        if(tp.TouchDetected != lastTouchState){
+            if(tp.TouchDetected == 1){
+                lastTouchState = 1;
+                eventType = EVENT_TP_PRESSED;
+                touchX = tp.X;
+                touchY = tp.Y;
+            }else if(tp.TouchDetected == 0){
+                lastTouchState = 0;
+                eventType = EVENT_TP_RELEASED;
+                touchX = tp.X;
+                touchY = tp.Y;
+            }
 
-            if(controllingStage >= 4)
-                controllingStage = 0;
-
-           osSignalSet(UIid, 0);
+            osThreadResume(UIid);
+            osThreadSuspend(InputEventId);
         }
 
         osDelay(50);
