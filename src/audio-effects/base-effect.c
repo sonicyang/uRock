@@ -68,17 +68,20 @@ void HardClipping(volatile float* pData, float threshold){
 void SoftClipping(volatile float* pData, float threshold){
     register uint32_t i;
     register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
-    float ff;
-
+    float ratio = 1;
+    float tmp = 1 / (ratio * gg);
     for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > gg){
-            arm_sqrt_f32((pData[i] - gg), &ff);
-            pData[i] = gg + ff;
-        }else if (pData[i] < -gg){
-            arm_sqrt_f32((-pData[i] - gg), &ff);
-            pData[i] = -gg + ff;
+        if (pData[i] > ratio * gg){
+            pData[i] = gg;
+        }
+        else if (pData[i] < -ratio * gg){
+            pData[i] = -gg;
+        }
+        else{
+            pData[i] = arm_sin_f32(PI * pData[i] * 0.5 * tmp) * gg;
         }
     }
+
     return;
 }
 
