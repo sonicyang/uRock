@@ -43,6 +43,7 @@
 #include "volume.h"
 #include "delay.h"
 #include "distortion.h"
+#include "overdrive.h"
 #include "reverb.h"
 #include "phaser.h"
 
@@ -61,6 +62,7 @@ TIM_HandleTypeDef htim2;
 
 struct Volume_t vol;
 struct Distortion_t distor;
+struct Overdrive_t overdrive;
 struct Reverb_t delay;
 struct Phaser_t phaser;
 
@@ -141,8 +143,9 @@ static void SignalProcessingUnit(void const *argument){
     /* Effect Stage Setting*/ 
 
     //EffectStages[0] = new_Volume(&vol);
+    //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
-    //EffectStages[0] = new_Reverb(&delay);
+    EffectStages[0] = new_Reverb(&delay);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);

@@ -33,6 +33,10 @@ struct Effect_t* new_Overdrive(struct Overdrive_t* opaque){
     opaque->gain.lowerBound = 0.0f;
     opaque->gain.value = 0.0f;
 
+    opaque->volume.upperBound = 0.0f;
+    opaque->volume.lowerBound = -30.0f;
+    opaque->volume.value = 0.0f;
+
     opaque->ratio.upperBound = 1.0f;
     opaque->ratio.lowerBound = 0.5f;
     opaque->ratio.value = 1.0f;
