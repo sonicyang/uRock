@@ -40,7 +40,7 @@ void Combine(volatile float* pData, volatile float* sData){
 }
 
 void Gain(volatile float* pData, float gain_dB){
-    register float multipier = powf(10, (gain_dB / 10.0f));
+    register float multipier = powf(10, (gain_dB * 0.1f));
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
@@ -52,7 +52,7 @@ void Gain(volatile float* pData, float gain_dB){
 
 void HardClipping(volatile float* pData, float threshold){
     register uint32_t i;
-    register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
+    register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
 
     for(i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] > gg){
@@ -67,7 +67,7 @@ void HardClipping(volatile float* pData, float threshold){
 
 void SoftClipping(volatile float* pData, float threshold){
     register uint32_t i;
-    register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
+    register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
     float ratio = 1;
     float tmp = 1 / (ratio * gg);
     for (i = 0; i < SAMPLE_NUM; i++){
