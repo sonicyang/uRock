@@ -109,10 +109,12 @@ int main(void){
     BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
     BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+    BSP_LCD_SetFont(&Font20);
 
     BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
     BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+    BSP_LCD_SetFont(&Font20);
 
     BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
@@ -156,9 +158,9 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/
 
-    //EffectStages[0] = new_Volume(&vol);
-    //EffectStages[0] = new_Distortion(&distor);
-    EffectStages[0] = new_Reverb(&delay);
+    EffectStages[0] = new_Volume(&vol);
+    EffectStages[1] = new_Distortion(&distor);
+    EffectStages[2] = new_Reverb(&delay);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -204,12 +206,20 @@ static void present(){
     }
 }
 
-static void testFunc()
+static void SelectNextStage()
 {
     controllingStage++;
 
-    if(controllingStage >= STAGE_NUM)
+    if(controllingStage == STAGE_NUM)
         controllingStage = 0;
+}
+
+static void SelectPrevStage()
+{
+    if(controllingStage == 0)
+        controllingStage = STAGE_NUM - 1;
+    else
+        controllingStage--;
 }
 
 static void UserInterface(void const *argument){
@@ -217,18 +227,34 @@ static void UserInterface(void const *argument){
     BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
     BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
 
-    Button btn_test;
-    gui_ButtonSetPos(&btn_test, 30, 30);
-    gui_ButtonSetSize(&btn_test, 40, 40);
-    gui_ButtonSetColor(&btn_test, LCD_COLOR_GREEN);
-    gui_ButtonSetRenderType(&btn_test, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_test, testFunc);
+    Button btn_NextStage;
+    gui_ButtonInit(&btn_NextStage);
+    gui_ButtonSetPos(&btn_NextStage, 5, 20);
+    gui_ButtonSetSize(&btn_NextStage, 40, 40);
+    gui_ButtonSetColor(&btn_NextStage, LCD_COLOR_RED);
+    gui_ButtonSetRenderType(&btn_NextStage, BUTTON_RENDER_TYPE_LINE);
+    gui_ButtonSetCallback(&btn_NextStage, SelectNextStage);
+
+    Button btn_PrevStage;
+    gui_ButtonInit(&btn_PrevStage);
+    gui_ButtonSetPos(&btn_PrevStage, (240 - 40 - 5), 20);
+    gui_ButtonSetSize(&btn_PrevStage, 40, 40);
+    gui_ButtonSetColor(&btn_PrevStage, LCD_COLOR_RED);
+    gui_ButtonSetRenderType(&btn_PrevStage, BUTTON_RENDER_TYPE_LINE);
+    gui_ButtonSetCallback(&btn_PrevStage, SelectPrevStage);
+
+    ValueBar vbar_test;
+    gui_ValueBarInit(&vbar_test);
+    gui_ValueBarSetPos(&vbar_test, 5, 100);
+    gui_ValueBarSetSize(&vbar_test, 200, 50);
 
     while(1){
         /* Event handle & update part */
         switch(eventType){
         case EVENT_TP_PRESSED:
-            gui_ButtonHandleEvent(&btn_test, touchX, touchY);
+            gui_ButtonHandleEvent(&btn_NextStage, touchX, touchY);
+            gui_ButtonHandleEvent(&btn_PrevStage, touchX, touchY);
+            gui_ValueBarHandleEvent(&vbar_test, touchX, touchY);
             break;
         case EVENT_TP_RELEASED:
             break;
@@ -237,16 +263,18 @@ static void UserInterface(void const *argument){
         /* Render part */
         BSP_LCD_Clear(LCD_COLOR_WHITE);
 
-        if(EffectStages[controllingStage] == NULL){
-            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-        }else{
-            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-            BSP_LCD_DisplayStringAt(0, 1 * 16, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
+        BSP_LCD_DisplayStringAt(5, 0, (uint8_t*) "uROCK", CENTER_MODE);
 
+        if(EffectStages[controllingStage] == NULL){
+            BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) "< None >", CENTER_MODE);
+        }else{
+            BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
             EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
         }
 
-        gui_ButtonRender(&btn_test);
+        gui_ButtonRender(&btn_NextStage);
+        gui_ButtonRender(&btn_PrevStage);
+        gui_ValueBarRender(&vbar_test);
 
         present();
 
