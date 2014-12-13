@@ -45,6 +45,5 @@ void HardClipping(volatile float* pData, float threshold);
 void SoftClipping(volatile float* pData, float threshold);
 uint32_t SDRAM_Delay(volatile float* pData, uint32_t bankptr, volatile float* bData, uint32_t delayblock, uint32_t BaseAddr);
 
-void Compressor(volatile float* pData, struct parameter_t* p);
 
 #endif //__AUDIO_EFFECT_H__
