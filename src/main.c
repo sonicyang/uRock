@@ -39,6 +39,8 @@
 #include "helper.h"
 #include "setting.h"
 
+#include "gui.h"
+
 #include "base-effect.h"
 #include "volume.h"
 #include "delay.h"
@@ -202,21 +204,33 @@ static void present(){
     }
 }
 
+static void testFunc()
+{
+    controllingStage++;
+
+    if(controllingStage >= STAGE_NUM)
+        controllingStage = 0;
+}
+
 static void UserInterface(void const *argument){
     BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
     BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
     BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
 
+    Button btn_test;
+    gui_ButtonSetPos(&btn_test, 30, 30);
+    gui_ButtonSetSize(&btn_test, 40, 40);
+    gui_ButtonSetColor(&btn_test, LCD_COLOR_GREEN);
+    gui_ButtonSetRenderType(&btn_test, BUTTON_RENDER_TYPE_LINE);
+    gui_ButtonSetCallback(&btn_test, testFunc);
+
     while(1){
-        /* Event part */
+        /* Event handle & update part */
         switch(eventType){
         case EVENT_TP_PRESSED:
+            gui_ButtonHandleEvent(&btn_test, touchX, touchY);
             break;
         case EVENT_TP_RELEASED:
-            controllingStage++;
-
-            if(controllingStage >= STAGE_NUM)
-                controllingStage = 0;
             break;
         }
 
@@ -231,6 +245,8 @@ static void UserInterface(void const *argument){
 
             EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
         }
+
+        gui_ButtonRender(&btn_test);
 
         present();
 
