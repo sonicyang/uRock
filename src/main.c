@@ -46,6 +46,7 @@
 #include "overdrive.h"
 #include "reverb.h"
 #include "phaser.h"
+#include "compressor.h"
 
 
 //static void Error_Handler(void);
@@ -65,6 +66,7 @@ struct Distortion_t distor;
 struct Overdrive_t overdrive;
 struct Reverb_t delay;
 struct Phaser_t phaser;
+struct Compressor_t compressor;
 
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
@@ -145,7 +147,8 @@ static void SignalProcessingUnit(void const *argument){
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
-    EffectStages[0] = new_Reverb(&delay);
+    //EffectStages[0] = new_Reverb(&delay);
+    EffectStages[0] = new_Compressor(&compressor);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
