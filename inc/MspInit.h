@@ -12,11 +12,11 @@ void MX_DMA_Init(void);
 void MX_GPIO_Init(void);
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc);
- 
+
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc);
- 
+
 void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac);
- 
+
 void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac);
 
 #endif //__MSPINIT_H__

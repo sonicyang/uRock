@@ -82,7 +82,7 @@ osThreadId InputEventId;
 static void InputEvent(void const *argument);
 
 Event event;
-uint32_t controllingStage = 0;
+volatile uint32_t controllingStage = 0;
 uint8_t values[3];
 
 enum Widget{

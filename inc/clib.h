@@ -12,7 +12,7 @@
 size_t fio_printf(int fd, const char *format, ...);
 int sprintf(char *, const char *, ...);
 
-/* I would like to rename itoa as to_string (idea from C++11) 
+/* I would like to rename itoa as to_string (idea from C++11)
  * however c doesn't allow function overloading */
 char *itoa(const char *numbox, int i, unsigned int base);
 char *utoa(const char *numbox, unsigned int i, unsigned int base);

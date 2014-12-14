@@ -13,8 +13,8 @@ void delete_Volume(void *opaque){
 
 void adjust_Volume(void *opaque, uint8_t* values){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
-    
-    LinkPot(&(tmp->gain), values[0]);  
+
+    LinkPot(&(tmp->gain), values[0]);
 
     return;
 }

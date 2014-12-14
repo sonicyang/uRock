@@ -6,7 +6,7 @@
 
 enum open_types_t {
     O_RDONLY = 0,
-    O_WRONLY = 1,                                                               
+    O_WRONLY = 1,
     O_RDWR = 2,
     O_CREAT = 4,
     O_TRUNC = 8,
