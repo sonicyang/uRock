@@ -43,8 +43,11 @@
 #include "volume.h"
 #include "delay.h"
 #include "distortion.h"
+#include "overdrive.h"
 #include "reverb.h"
-
+#include "phaser.h"
+#include "compressor.h"
+#include "flanger.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -60,7 +63,11 @@ TIM_HandleTypeDef htim2;
 
 struct Volume_t vol;
 struct Distortion_t distor;
+struct Overdrive_t overdrive;
 struct Reverb_t delay;
+struct Flanger_t flanger;
+struct Phaser_t phaser;
+struct Compressor_t compressor;
 
 osThreadId LEDThread1Handle;
 static void LED_Thread1(void const *argument);
@@ -112,9 +119,10 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
 
+/*
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
-
+*/
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 1024);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
@@ -138,8 +146,11 @@ static void SignalProcessingUnit(void const *argument){
     /* Effect Stage Setting*/ 
 
     //EffectStages[0] = new_Volume(&vol);
-    EffectStages[0] = new_Distortion(&distor);
+    //EffectStages[0] = new_Overdrive(&overdrive);
+    //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
+    //EffectStages[0] = new_Compressor(&compressor);
+    EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);

@@ -7,10 +7,10 @@
 
 #define SAMPLE_MAX 2047
 
-#define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
-#define SAMPLE_PREIOD 1 / SAMPLE_RATE
+#define SAMPLING_RATE 45 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLE_PERIOD 1 / SAMPLE_RATE
 
-#define BLOCK_PREIOD SAMPLE_NUM / SAMPLING_RATE
+#define BLOCK_PERIOD SAMPLE_NUM / SAMPLING_RATE
 
 #define DELAY_BANK(x) DELAY_BANK_##x
 
