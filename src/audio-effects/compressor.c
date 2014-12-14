@@ -5,7 +5,7 @@ void Compressor(volatile float* pData, void *opaque){
     struct Compressor_t *tmp = (struct Compressor_t*)opaque;
     float rRatio = 1.0f / tmp->ratio.value;
     float volume = 0.0f;
-    float dbvolume;
+    float dbvolume = -30.0f;
     float gg = powf(10, (tmp->threshold.value * 0.1f)) * SAMPLE_MAX;
     float rate = 1.0f;
     uint8_t status = 0;
@@ -20,7 +20,8 @@ void Compressor(volatile float* pData, void *opaque){
                 status = 1;
         }
     }
-    dbvolume = 10.0f * logf(volume / SAMPLE_MAX);
+    if (volume != 0)
+        dbvolume = 10.0f * logf(volume / SAMPLE_MAX);
     if (tmp->pre_status != status){
         tmp->count = 0;
         tmp->pre_status = status;
@@ -78,5 +79,6 @@ struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     
     opaque->pre_status = 0;
     opaque->count = 0;
+
     return (struct Effect_t*)opaque;
 }
