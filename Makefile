@@ -45,6 +45,8 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 SRCDIR = src \
 		 src/audio-effects \
 		 Drivers/STM32F4xx_HAL_Driver/Src \
+		 Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions \
+		 Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source \
 		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
