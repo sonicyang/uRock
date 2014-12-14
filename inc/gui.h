@@ -3,6 +3,7 @@
 
 #include "stm32f429i_discovery_lcd.h"
 
+#include "event.h"
 #include "helper.h"
 
 #define BUTTON_RENDER_TYPE_LINE 0x00
@@ -28,7 +29,7 @@ void gui_ButtonSetColor(Button* btn, uint32_t color);
 void gui_ButtonSetRenderType(Button* btn, uint8_t type);
 void gui_ButtonSetCallback(Button* btn, ButtonPressCallback cb);
 void gui_ButtonRender(Button* btn);
-void gui_ButtonHandleEvent(Button* btn, uint16_t touchX, uint16_t touchY);
+void gui_ButtonHandleEvent(Button* btn, Event* event);
 
 typedef void(*ValueBarSetValueCallback)(uint8_t value);
 typedef struct{
@@ -51,6 +52,6 @@ void gui_ValueBarSetSize(ValueBar* bar, uint16_t w, uint16_t h);
 void gui_ValueBarSetColor(ValueBar* bar, uint32_t inColor, uint32_t outColor);
 void gui_ValueBarSetCallback(ValueBar* bar, ValueBarSetValueCallback cb);
 void gui_ValueBarRender(ValueBar* bar);
-void gui_ValueBarHandleEvent(ValueBar* bar, uint16_t touchX, uint16_t touchY);
+void gui_ValueBarHandleEvent(ValueBar* bar, Event* event);
 
 #endif /* __GUI_H__ */

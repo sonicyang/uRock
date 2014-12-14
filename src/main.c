@@ -40,6 +40,7 @@
 #include "setting.h"
 
 #include "gui.h"
+#include "event.h"
 
 #include "base-effect.h"
 #include "volume.h"
@@ -80,14 +81,15 @@ static void UserInterface(void const *argument);
 osThreadId InputEventId;
 static void InputEvent(void const *argument);
 
-enum EventType{
-    EVENT_TP_PRESSED = 0x00,
-    EVENT_TP_RELEASED,
-};
-enum EventType eventType;
+Event event;
 uint32_t controllingStage = 0;
 uint8_t values[3];
-uint16_t touchX, touchY;
+
+enum Widget{
+    WIDGET_STAGE = 0x00000000,
+    WIDGET_PARAM
+};
+enum Widget widget = WIDGET_STAGE;
 
 int main(void){
     /* STM32F4xx HAL library initialization:
@@ -222,6 +224,16 @@ static void SelectPrevStage()
         controllingStage--;
 }
 
+static void SelectStageWidget()
+{
+    widget = WIDGET_STAGE;
+}
+
+static void SelectParamWidget()
+{
+    widget = WIDGET_PARAM;
+}
+
 static void UserInterface(void const *argument){
     BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
     BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
@@ -231,7 +243,7 @@ static void UserInterface(void const *argument){
     gui_ButtonInit(&btn_NextStage);
     gui_ButtonSetPos(&btn_NextStage, 5, 20);
     gui_ButtonSetSize(&btn_NextStage, 40, 40);
-    gui_ButtonSetColor(&btn_NextStage, LCD_COLOR_RED);
+    gui_ButtonSetColor(&btn_NextStage, LCD_COLOR_BLUE);
     gui_ButtonSetRenderType(&btn_NextStage, BUTTON_RENDER_TYPE_LINE);
     gui_ButtonSetCallback(&btn_NextStage, SelectNextStage);
 
@@ -239,42 +251,83 @@ static void UserInterface(void const *argument){
     gui_ButtonInit(&btn_PrevStage);
     gui_ButtonSetPos(&btn_PrevStage, (240 - 40 - 5), 20);
     gui_ButtonSetSize(&btn_PrevStage, 40, 40);
-    gui_ButtonSetColor(&btn_PrevStage, LCD_COLOR_RED);
+    gui_ButtonSetColor(&btn_PrevStage, LCD_COLOR_BLUE);
     gui_ButtonSetRenderType(&btn_PrevStage, BUTTON_RENDER_TYPE_LINE);
     gui_ButtonSetCallback(&btn_PrevStage, SelectPrevStage);
 
-    ValueBar vbar_test;
-    gui_ValueBarInit(&vbar_test);
-    gui_ValueBarSetPos(&vbar_test, 5, 100);
-    gui_ValueBarSetSize(&vbar_test, 200, 50);
+    Button btn_StageWidget;
+    gui_ButtonInit(&btn_StageWidget);
+    gui_ButtonSetPos(&btn_StageWidget,  5, (320 - 10 - 5));
+    gui_ButtonSetSize(&btn_StageWidget, ((240 - 5 * 3) / 2), 10);
+    gui_ButtonSetColor(&btn_StageWidget, LCD_COLOR_BLACK);
+    gui_ButtonSetRenderType(&btn_StageWidget, BUTTON_RENDER_TYPE_FILL);
+    gui_ButtonSetCallback(&btn_StageWidget, SelectStageWidget);
+
+    Button btn_ParamWidget;
+    gui_ButtonInit(&btn_ParamWidget);
+    gui_ButtonSetPos(&btn_ParamWidget, (240 - 5 - ((240 - 5 * 3) / 2)), (320 - 10 - 5));
+    gui_ButtonSetSize(&btn_ParamWidget, ((240 - 5 * 3) / 2), 10);
+    gui_ButtonSetColor(&btn_ParamWidget, LCD_COLOR_BLACK);
+    gui_ButtonSetRenderType(&btn_ParamWidget, BUTTON_RENDER_TYPE_FILL);
+    gui_ButtonSetCallback(&btn_ParamWidget, SelectParamWidget);
+
+    ValueBar vbar_param1;
+    gui_ValueBarInit(&vbar_param1);
+    gui_ValueBarSetPos(&vbar_param1, 5, 100);
+    gui_ValueBarSetSize(&vbar_param1, (240 - 10), 25);
+
+    ValueBar vbar_param2;
+    gui_ValueBarInit(&vbar_param2);
+    gui_ValueBarSetPos(&vbar_param2, 5, 160);
+    gui_ValueBarSetSize(&vbar_param2, (240 - 10), 25);
+
+    ValueBar vbar_param3;
+    gui_ValueBarInit(&vbar_param3);
+    gui_ValueBarSetPos(&vbar_param3, 5, 220);
+    gui_ValueBarSetSize(&vbar_param3, (240 - 10), 25);
 
     while(1){
-        /* Event handle & update part */
-        switch(eventType){
-        case EVENT_TP_PRESSED:
-            gui_ButtonHandleEvent(&btn_NextStage, touchX, touchY);
-            gui_ButtonHandleEvent(&btn_PrevStage, touchX, touchY);
-            gui_ValueBarHandleEvent(&vbar_test, touchX, touchY);
+
+
+        switch(widget){
+        case WIDGET_STAGE:
+            /* Event handle & update part */
+            gui_ButtonHandleEvent(&btn_NextStage, &event);
+            gui_ButtonHandleEvent(&btn_PrevStage, &event);
+
+            gui_ValueBarHandleEvent(&vbar_param1, &event);
+            gui_ValueBarHandleEvent(&vbar_param2, &event);
+            gui_ValueBarHandleEvent(&vbar_param3, &event);
+
+            /* Render part */
+            BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+            BSP_LCD_DisplayStringAt(5, 0, (uint8_t*) "uROCK", CENTER_MODE);
+
+            if(EffectStages[controllingStage] == NULL){
+                BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) "< None >", CENTER_MODE);
+            }else{
+                BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
+                EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
+            }
+
+            gui_ButtonRender(&btn_NextStage);
+            gui_ButtonRender(&btn_PrevStage);
+
+            gui_ValueBarRender(&vbar_param1);
+            gui_ValueBarRender(&vbar_param2);
+            gui_ValueBarRender(&vbar_param3);
             break;
-        case EVENT_TP_RELEASED:
+        case WIDGET_PARAM:
+            BSP_LCD_Clear(LCD_COLOR_YELLOW);
             break;
         }
 
-        /* Render part */
-        BSP_LCD_Clear(LCD_COLOR_WHITE);
+        gui_ButtonHandleEvent(&btn_StageWidget, &event);
+        gui_ButtonHandleEvent(&btn_ParamWidget, &event);
 
-        BSP_LCD_DisplayStringAt(5, 0, (uint8_t*) "uROCK", CENTER_MODE);
-
-        if(EffectStages[controllingStage] == NULL){
-            BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) "< None >", CENTER_MODE);
-        }else{
-            BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
-            EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
-        }
-
-        gui_ButtonRender(&btn_NextStage);
-        gui_ButtonRender(&btn_PrevStage);
-        gui_ValueBarRender(&vbar_test);
+        gui_ButtonRender(&btn_StageWidget);
+        gui_ButtonRender(&btn_ParamWidget);
 
         present();
 
@@ -294,14 +347,14 @@ static void InputEvent(void const *argument){
         if(tp.TouchDetected != lastTouchState){
             if(tp.TouchDetected == 1){
                 lastTouchState = 1;
-                eventType = EVENT_TP_PRESSED;
-                touchX = tp.X;
-                touchY = tp.Y;
+                event.eventType = TP_PRESSED;
+                event.touchX = tp.X;
+                event.touchY = tp.Y;
             }else if(tp.TouchDetected == 0){
                 lastTouchState = 0;
-                eventType = EVENT_TP_RELEASED;
-                touchX = tp.X;
-                touchY = tp.Y;
+                event.eventType = TP_RELEASED;
+                event.touchX = tp.X;
+                event.touchY = tp.Y;
             }
 
             osThreadResume(UIid);

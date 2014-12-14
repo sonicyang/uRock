@@ -59,12 +59,18 @@ void gui_ButtonRender(Button* btn)
     BSP_LCD_SetTextColor(storedTextColor);
 }
 
-void gui_ButtonHandleEvent(Button* btn, uint16_t touchX, uint16_t touchY)
+void gui_ButtonHandleEvent(Button* btn, Event* event)
 {
-    if ((touchX > btn->x) && (touchX < btn->x + btn->w) &&
-        (touchY > btn->y) && (touchY < btn->y + btn->h)){
+    switch(event->eventType){
+    case TP_PRESSED:
+        if ((event->touchX > btn->x) && (event->touchX < btn->x + btn->w) &&
+            (event->touchY > btn->y) && (event->touchY < btn->y + btn->h)){
 
-        btn->cb();
+            btn->cb();
+        }
+        break;
+    case TP_RELEASED:
+        break;
     }
 }
 
@@ -125,11 +131,12 @@ void gui_ValueBarRender(ValueBar* bar)
     BSP_LCD_SetTextColor(storedTextColor);
 }
 
-void gui_ValueBarHandleEvent(ValueBar* bar, uint16_t touchX, uint16_t touchY)
+void gui_ValueBarHandleEvent(ValueBar* bar, Event* event)
 {
-    if ((touchX > bar->x) && (touchX < bar->x + bar->w) &&
-        (touchY > bar->y) && (touchY < bar->y + bar->h)){
+    if ((event->eventType == TP_PRESSED) &&
+        (event->touchX > bar->x) && (event->touchX < bar->x + bar->w) &&
+        (event->touchY > bar->y) && (event->touchY < bar->y + bar->h)){
 
-        bar->currentValue = map(touchX - bar->x, 0, bar->w, 0, 255);
+        bar->currentValue = map(event->touchX - bar->x, 0, bar->w, 0, 255);
     }
 }
