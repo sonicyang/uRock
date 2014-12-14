@@ -12,7 +12,7 @@ void Flanger(volatile float* pData, void *opaque){
 
     BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
-    Cpoy(fData, pData);
+    Copy(fData, pData);
     Combine(pData, bData);
 
     Gain(bData, tmp->attenuation.value);
@@ -38,8 +38,10 @@ void adjust_Flanger(void *opaque, uint8_t* values){
     
     LinkPot(&(tmp->speed), values[0]);  
     LinkPot(&(tmp->attenuation), values[1]);  
+    LinkPot(&(tmp->depth), values[2]);  
 
-    adjust_LFO(&(tmp->lfo), tmp->speed.value);
+    adjust_LFO_speed(&(tmp->lfo), tmp->speed.value);
+    tmp->lfo.upperBound = tmp->depth.value;
 
     return;
 }
@@ -55,9 +57,13 @@ struct Effect_t* new_Flanger(struct Flanger_t* opaque){
     opaque->attenuation.lowerBound = -30.0f;
     opaque->attenuation.value = -10.0f;
 
-    opaque->speed.upperBound = 5000.0f;
-    opaque->speed.lowerBound = 500.0;
+    opaque->speed.upperBound = 500.0f;
+    opaque->speed.lowerBound = 5000.0;
     opaque->speed.value = 2000.0f;
+
+    opaque->depth.upperBound = 200.0f;
+    opaque->depth.lowerBound = 20.0;
+    opaque->depth.value = 25.0f;
 
     new_LFO(&(opaque->lfo), 25, 5, 1000);
 

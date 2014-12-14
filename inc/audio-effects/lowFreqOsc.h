@@ -18,6 +18,6 @@ struct LFO_t{
 };
 
 void new_LFO(struct LFO_t *opaque, float u, float l, uint32_t p);
-void adjust_LFO(struct LFO_t *opaque, uint32_t p);
+void adjust_LFO_speed(struct LFO_t *opaque, uint32_t p);
 
 #endif
