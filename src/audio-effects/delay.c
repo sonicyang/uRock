@@ -5,7 +5,7 @@ void Delay(volatile float* pData, void *opaque){
     struct Delay_t *tmp = (struct Delay_t*)opaque;
     volatile float bData[256];
 
-    int32_t relativeBlock = (tmp->blockPtr - (uint32_t)(tmp->delayTime.value / (BLOCK_PREIOD)));
+    int32_t relativeBlock = (tmp->blockPtr - (uint32_t)(tmp->delayTime.value / (BLOCK_PERIOD)));
     if(relativeBlock < 0)
         relativeBlock += 400;
 

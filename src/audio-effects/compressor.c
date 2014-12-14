@@ -10,7 +10,7 @@ void Compressor(volatile float* pData, void *opaque){
     float rate = 1.0f;
     uint8_t status = 0;
     float aData;
-    float attack_block_count = tmp->attack.value / BLOCK_PREIOD;
+    float attack_block_count = tmp->attack.value / BLOCK_PERIOD;
     for (int i = 0; i < SAMPLE_NUM; i++){
         if (pData[i] < 0.0f)
             aData = 0.0f - pData[i];
