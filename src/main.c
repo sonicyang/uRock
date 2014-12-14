@@ -47,7 +47,7 @@
 #include "reverb.h"
 #include "phaser.h"
 #include "compressor.h"
-
+#include "flanger.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -65,6 +65,7 @@ struct Volume_t vol;
 struct Distortion_t distor;
 struct Overdrive_t overdrive;
 struct Reverb_t delay;
+struct Flanger_t flanger;
 struct Phaser_t phaser;
 struct Compressor_t compressor;
 
@@ -148,7 +149,8 @@ static void SignalProcessingUnit(void const *argument){
     //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
-    EffectStages[0] = new_Compressor(&compressor);
+    //EffectStages[0] = new_Compressor(&compressor);
+    EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);

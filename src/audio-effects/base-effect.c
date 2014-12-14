@@ -39,6 +39,16 @@ void Combine(volatile float* pData, volatile float* sData){
     return;
 }
 
+void Copy(volatile float* pData, volatile float* sData){
+    register uint32_t i;
+
+    for(i = 0; i < SAMPLE_NUM; i++){
+        pData[i] = sData[i];
+    }
+
+    return;
+}
+
 void Gain(volatile float* pData, float gain_dB){
     register float multipier = powf(10, (gain_dB * 0.1f));
     register uint32_t i;

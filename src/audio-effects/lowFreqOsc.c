@@ -18,4 +18,11 @@ void new_LFO(struct LFO_t *opaque, float u, float l, uint32_t p){
     opaque->period = p / (BLOCK_PERIOD);
     opaque->upperBound = u;
     opaque->lowerBound = l;
+    return;
+}
+
+void adjust_LFO(struct LFO_t *opaque, uint32_t p){
+    opaque->ptr = ((float)opaque->ptr / opaque->period) * p;
+    opaque->period = p;
+    return;
 }
