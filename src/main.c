@@ -39,6 +39,9 @@
 #include "helper.h"
 #include "setting.h"
 
+#define ARM_MATH_CM4
+#include "arm_math.h"
+
 #include "base-effect.h"
 #include "volume.h"
 #include "delay.h"
@@ -76,7 +79,7 @@ osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
-volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
+q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
 osThreadId UIid;
@@ -145,10 +148,10 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/ 
 
-    //EffectStages[0] = new_Volume(&vol);
+    EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Overdrive(&overdrive);
-    EffectStages[0] = new_Phaser(&phaser);
+    //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[0] = new_Flanger(&flanger);

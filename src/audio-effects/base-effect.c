@@ -29,7 +29,7 @@ void releaseDelayLine(uint32_t address){
     return;
 }
 
-void Combine(volatile float* pData, volatile float* sData){
+void Combine(q31_t* pData, q31_t* sData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
@@ -39,7 +39,7 @@ void Combine(volatile float* pData, volatile float* sData){
     return;
 }
 
-void Copy(volatile float* pData, volatile float* sData){
+void Copy(q31_t* pData, q31_t* sData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
@@ -49,18 +49,21 @@ void Copy(volatile float* pData, volatile float* sData){
     return;
 }
 
-void Gain(volatile float* pData, float gain_dB){
-    register float multipier = powf(10, (gain_dB * 0.1f));
+void Gain(q31_t* pData, float gain_dB){
     register uint32_t i;
 
+    if(gain_dB == 0)
+        return;
+   /* 
     for(i = 0; i < SAMPLE_NUM; i++){
         pData[i] = pData[i] * multipier;
     }
+    */
 
     return;
 }
 
-void HardClipping(volatile float* pData, float threshold){
+void HardClipping(q31_t* pData, float threshold){
     register uint32_t i;
     register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
 
@@ -75,7 +78,7 @@ void HardClipping(volatile float* pData, float threshold){
     return;
 }
 
-void SoftClipping(volatile float* pData, float threshold, float ratio){
+void SoftClipping(q31_t* pData, float threshold, float ratio){
     register uint32_t i;
     register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
     float tmp = 1 / (ratio * gg);
@@ -94,29 +97,20 @@ void SoftClipping(volatile float* pData, float threshold, float ratio){
     return;
 }
 
-void NormalizeData(volatile uint16_t * pData, volatile float* tData){
+void NormalizeData(volatile uint16_t * pData, q31_t* tData){
     register uint32_t i;
 
-    for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
-        *tData = *pData - SAMPLE_MAX;
-    }
+    arm_offset_q15(pData, (-SAMPLE_MAX), pData, SAMPLE_NUM);
+    arm_q15_to_q31(pData, tData, SAMPLE_NUM);
 
     return;
 }
 
-void DenormalizeData(volatile float* tData, volatile uint16_t * pData){
+void DenormalizeData(q31_t* tData, volatile uint16_t * pData){
     register uint32_t i;
 
-    for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
-        
-        if(*tData > SAMPLE_MAX)
-            *tData = SAMPLE_MAX + 0.5f;
-        else if(*tData < -SAMPLE_MAX)
-            *tData = -SAMPLE_MAX - 0.5f;
-       
-
-        *pData = *tData + SAMPLE_MAX;
-    }
+    arm_q31_to_q15(tData, pData, SAMPLE_NUM);
+    arm_offset_q15(pData, (SAMPLE_MAX), pData, SAMPLE_NUM);
 
     return;
 }

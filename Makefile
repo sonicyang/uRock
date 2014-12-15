@@ -46,6 +46,8 @@ SRCDIR = src \
 		 src/audio-effects \
 		 Drivers/STM32F4xx_HAL_Driver/Src \
 		 Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions \
+		 Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions \
+		 Drivers/CMSIS/DSP_Lib/Source/SupportFunctions \
 		 Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions \
 		 Drivers/BSP/STM32F429I-Discovery \
 		 Middlewares/Third_Party/FreeRTOS/Source \

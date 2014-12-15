@@ -17,9 +17,9 @@
 uint32_t allocateDelayLine();
 void releaseDelayLine(uint32_t);
 
-void NormalizeData(volatile uint16_t * pData, volatile float* tData);
+void NormalizeData(volatile uint16_t * pData, q31_t* tData);
 
-void DenormalizeData(volatile float* tData, volatile uint16_t * pData);
+void DenormalizeData(q31_t* tData, volatile uint16_t * pData);
 
 struct parameter_t{
     char name[16];
@@ -28,7 +28,7 @@ struct parameter_t{
     float lowerBound;
 };
 
-typedef void(*EffectFunc)(volatile float*, void*);
+typedef void(*EffectFunc)(q31_t*, void*);
 typedef void(*DeleteFunc)(void*);
 typedef void(*adjustFunc)(void*, uint8_t*);
 
@@ -39,11 +39,11 @@ struct Effect_t{
     adjustFunc adj;
 };
 
-void Combine(volatile float* pData, volatile float* sData);
-void Copy(volatile float* pData, volatile float* sData);
-void Gain(volatile float* pData, float gain_dB);
-void HardClipping(volatile float* pData, float threshold);
-void SoftClipping(volatile float* pData, float threshold, float ratio);
+void Combine(q31_t* pData, q31_t* sData);
+void Copy(q31_t* pData, q31_t* sData);
+void Gain(q31_t* pData, float gain_dB);
+void HardClipping(q31_t* pData, float threshold);
+void SoftClipping(q31_t* pData, float threshold, float ratio);
 
 
 #endif //__AUDIO_EFFECT_H__
