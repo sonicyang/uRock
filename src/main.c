@@ -122,10 +122,15 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
 
+    q7_t a, b;
+    a = 0x38;
+    b = 0x08;
+    arm_mult_q7(&a, &b, &a, 1);
+    arm_shift_q7(&a, 3, &a, 1);
 /*
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
-*/
+
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
@@ -133,7 +138,7 @@ int main(void){
     UIid = osThreadCreate (osThread(UI), NULL);
 
 	osKernelStart (NULL, NULL);
-
+*/
 	while (1);
 }
 

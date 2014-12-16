@@ -39,9 +39,6 @@
 * POSSIBILITY OF SUCH DAMAGE.   
 * ---------------------------------------------------------------------------*/
 
-#include "stm32f4xx_hal.h"
-#define ARM_MATH_CM4
-#include "arm_math.h"
 #include "arm_math.h"
 
 /**    

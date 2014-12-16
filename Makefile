@@ -35,7 +35,7 @@ CFLAGS += -O0 -ffast-math \
 		  --param max-inline-insns-single=1000
 
 # specify STM32F429
-CFLAGS += -DSTM32F429xx
+CFLAGS += -DSTM32F429xx -DARM_MATH_CM4 -D__FPU_PRESENT
 
 # to run from FLASH
 CFLAGS += -DVECT_TAB_FLASH
