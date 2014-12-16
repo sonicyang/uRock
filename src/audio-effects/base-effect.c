@@ -49,35 +49,6 @@ void Copy(q31_t* pData, q31_t* sData){
     return;
 }
 
-void Gain(q31_t* pData, float gain_dB){
-    register uint32_t i;
-
-    if(gain_dB == 0)
-        return;
-   /* 
-    for(i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * multipier;
-    }
-    */
-
-    return;
-}
-
-void HardClipping(q31_t* pData, float threshold){
-    register uint32_t i;
-    register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
-
-    for(i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > gg){
-            pData[i] = gg;
-        }else if (pData[i] < -gg){
-            pData[i] = -gg;
-        }
-    }
-
-    return;
-}
-
 void SoftClipping(q31_t* pData, float threshold, float ratio){
     register uint32_t i;
     register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
@@ -98,19 +69,17 @@ void SoftClipping(q31_t* pData, float threshold, float ratio){
 }
 
 void NormalizeData(volatile uint16_t * pData, q31_t* tData){
-    register uint32_t i;
 
-    arm_offset_q15(pData, (-SAMPLE_MAX), pData, SAMPLE_NUM);
-    arm_q15_to_q31(pData, tData, SAMPLE_NUM);
+    arm_offset_q15((q15_t*)pData, (-SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
+    arm_q15_to_q31((q15_t*)pData, tData, SAMPLE_NUM);
 
     return;
 }
 
 void DenormalizeData(q31_t* tData, volatile uint16_t * pData){
-    register uint32_t i;
 
-    arm_q31_to_q15(tData, pData, SAMPLE_NUM);
-    arm_offset_q15(pData, (SAMPLE_MAX), pData, SAMPLE_NUM);
+    arm_q31_to_q15(tData, (q15_t*)pData, SAMPLE_NUM);
+    arm_offset_q15((q15_t*)pData, (SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
 
     return;
 }

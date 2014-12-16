@@ -7,6 +7,7 @@ struct Distortion_t{
     struct Effect_t parent;
     struct parameter_t gain;
     struct parameter_t volume;
+    q31_t cache[SAMPLE_NUM];
 };
 
 struct Effect_t* new_Distortion(struct Distortion_t* opaque);

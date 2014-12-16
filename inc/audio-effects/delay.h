@@ -7,6 +7,7 @@ struct Delay_t{
     struct Effect_t parent;
     struct parameter_t delayTime;
     struct parameter_t attenuation;
+    q31_t cache[SAMPLE_NUM];
     uint32_t baseAddress;
     uint32_t blockPtr;
 };

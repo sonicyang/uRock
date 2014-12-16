@@ -2,9 +2,7 @@
 #define __LOWFREQOSC__
 
 #include "stm32f4xx_hal.h"
-#define ARM_MATH_CM4
 #include "arm_math.h"
-#include "core_cmInstr.h"
 
 #include "setting.h"
 #include "helper.h"

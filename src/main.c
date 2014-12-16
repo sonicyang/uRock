@@ -39,7 +39,6 @@
 #include "helper.h"
 #include "setting.h"
 
-#define ARM_MATH_CM4
 #include "arm_math.h"
 
 #include "base-effect.h"
@@ -130,7 +129,7 @@ int main(void){
 /*
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
-
+*/
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
@@ -138,7 +137,6 @@ int main(void){
     UIid = osThreadCreate (osThread(UI), NULL);
 
 	osKernelStart (NULL, NULL);
-*/
 	while (1);
 }
 

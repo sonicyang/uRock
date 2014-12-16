@@ -8,7 +8,6 @@
 
 #include "math.h"
 
-#define ARM_MATH_CM4
 #include "arm_math.h"
 #include "core_cmInstr.h"
 
@@ -39,10 +38,6 @@ struct Effect_t{
     adjustFunc adj;
 };
 
-void Combine(q31_t* pData, q31_t* sData);
-void Copy(q31_t* pData, q31_t* sData);
-void Gain(q31_t* pData, float gain_dB);
-void HardClipping(q31_t* pData, float threshold);
 void SoftClipping(q31_t* pData, float threshold, float ratio);
 
 
