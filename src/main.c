@@ -79,7 +79,7 @@ volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 struct Effect_t *EffectList[EFFECT_NUM];
 int8_t StageCurrentEffect[STAGE_NUM];
-uint8_t valueForEachStage[STAGE_NUM][3];
+uint8_t ValueForEachStage[STAGE_NUM][3];
 
 osThreadId UIid;
 static void UserInterface(void const *argument);
@@ -227,47 +227,47 @@ static void present(){
 
 static void StageSetValue0(uint8_t value)
 {
-    valueForEachStage[controllingStage][0] = value;
+    ValueForEachStage[controllingStage][0] = value;
     if (EffectStages[controllingStage]){
         EffectStages[controllingStage]->adj(
             EffectStages[controllingStage],
-            valueForEachStage[controllingStage]);
+            ValueForEachStage[controllingStage]);
     }
 }
 
 static void StageSetValue1(uint8_t value)
 {
-    valueForEachStage[controllingStage][1] = value;
+    ValueForEachStage[controllingStage][1] = value;
     if (EffectStages[controllingStage]){
         EffectStages[controllingStage]->adj(
             EffectStages[controllingStage],
-            valueForEachStage[controllingStage]);
+            ValueForEachStage[controllingStage]);
     }
 }
 
 static void StageSetValue2(uint8_t value)
 {
-    valueForEachStage[controllingStage][2] = value;
+    ValueForEachStage[controllingStage][2] = value;
     if (EffectStages[controllingStage]){
         EffectStages[controllingStage]->adj(
             EffectStages[controllingStage],
-            valueForEachStage[controllingStage]);
+            ValueForEachStage[controllingStage]);
     }
 }
 
 static uint8_t StageGetValue0()
 {
-    return valueForEachStage[controllingStage][0];
+    return ValueForEachStage[controllingStage][0];
 }
 
 static uint8_t StageGetValue1()
 {
-    return valueForEachStage[controllingStage][1];
+    return ValueForEachStage[controllingStage][1];
 }
 
 static uint8_t StageGetValue2()
 {
-    return valueForEachStage[controllingStage][2];
+    return ValueForEachStage[controllingStage][2];
 }
 
 static void SelectNextStage()
@@ -300,12 +300,12 @@ static void Stage0Next()
     EffectStages[0] = EffectList[StageCurrentEffect[0]];
 
     /* Reset value in this stage */
-    valueForEachStage[0][0] = 0;
-    valueForEachStage[0][1] = 0;
-    valueForEachStage[0][2] = 0;
+    ValueForEachStage[0][0] = 0;
+    ValueForEachStage[0][1] = 0;
+    ValueForEachStage[0][2] = 0;
 
     if (EffectStages[0])
-        EffectStages[0]->adj(EffectStages[0], valueForEachStage[0]);
+        EffectStages[0]->adj(EffectStages[0], ValueForEachStage[0]);
 }
 
 static void Stage1Next()
@@ -317,12 +317,12 @@ static void Stage1Next()
     EffectStages[1] = EffectList[StageCurrentEffect[1]];
 
     /* Reset value in this stage */
-    valueForEachStage[1][0] = 0;
-    valueForEachStage[1][1] = 0;
-    valueForEachStage[1][2] = 0;
+    ValueForEachStage[1][0] = 0;
+    ValueForEachStage[1][1] = 0;
+    ValueForEachStage[1][2] = 0;
 
     if (EffectStages[1])
-        EffectStages[1]->adj(EffectStages[1], valueForEachStage[1]);
+        EffectStages[1]->adj(EffectStages[1], ValueForEachStage[1]);
 }
 
 static void Stage2Next()
@@ -334,12 +334,12 @@ static void Stage2Next()
     EffectStages[2] = EffectList[StageCurrentEffect[2]];
 
     /* Reset value in this stage */
-    valueForEachStage[2][0] = 0;
-    valueForEachStage[2][1] = 0;
-    valueForEachStage[2][2] = 0;
+    ValueForEachStage[2][0] = 0;
+    ValueForEachStage[2][1] = 0;
+    ValueForEachStage[2][2] = 0;
 
     if (EffectStages[2])
-        EffectStages[2]->adj(EffectStages[2], valueForEachStage[2]);
+        EffectStages[2]->adj(EffectStages[2], ValueForEachStage[2]);
 }
 
 static void Stage3Next()
@@ -351,12 +351,12 @@ static void Stage3Next()
     EffectStages[3] = EffectList[StageCurrentEffect[3]];
 
     /* Reset value in this stage */
-    valueForEachStage[3][0] = 0;
-    valueForEachStage[3][1] = 0;
-    valueForEachStage[3][2] = 0;
+    ValueForEachStage[3][0] = 0;
+    ValueForEachStage[3][1] = 0;
+    ValueForEachStage[3][2] = 0;
 
     if (EffectStages[3])
-        EffectStages[3]->adj(EffectStages[3], valueForEachStage[3]);
+        EffectStages[3]->adj(EffectStages[3], ValueForEachStage[3]);
 }
 
 static void SelectParamWidget()
