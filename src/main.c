@@ -74,6 +74,8 @@ volatile uint32_t SPU_Hold = 0;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
+struct Effect_t *EffectList[3];
+uint8_t valueForEachStage[STAGE_NUM][3];
 
 osThreadId UIid;
 static void UserInterface(void const *argument);
@@ -82,7 +84,7 @@ osThreadId InputEventId;
 static void InputEvent(void const *argument);
 
 Event event;
-volatile uint32_t controllingStage = 0;
+volatile int8_t controllingStage = 0;
 uint8_t values[3];
 
 enum Widget{
@@ -160,9 +162,13 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/
 
-    EffectStages[0] = new_Volume(&vol);
-    EffectStages[1] = new_Distortion(&distor);
-    EffectStages[2] = new_Reverb(&delay);
+    EffectList[0] = new_Volume(&vol);
+    EffectList[1] = new_Distortion(&distor);
+    EffectList[2] = new_Reverb(&delay);
+
+    EffectStages[0] = EffectList[0];
+    EffectStages[1] = EffectList[1];
+    EffectStages[2] = EffectList[2];
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -208,20 +214,65 @@ static void present(){
     }
 }
 
+static void StageSetValue0(uint8_t value)
+{
+    valueForEachStage[controllingStage][0] = value;
+    if (EffectStages[controllingStage]){
+        EffectStages[controllingStage]->adj(
+            EffectStages[controllingStage],
+            valueForEachStage[controllingStage]);
+    }
+}
+
+static void StageSetValue1(uint8_t value)
+{
+    valueForEachStage[controllingStage][1] = value;
+    if (EffectStages[controllingStage]){
+        EffectStages[controllingStage]->adj(
+            EffectStages[controllingStage],
+            valueForEachStage[controllingStage]);
+    }
+}
+
+static void StageSetValue2(uint8_t value)
+{
+    valueForEachStage[controllingStage][2] = value;
+    if (EffectStages[controllingStage]){
+        EffectStages[controllingStage]->adj(
+            EffectStages[controllingStage],
+            valueForEachStage[controllingStage]);
+    }
+}
+
+static uint8_t StageGetValue0()
+{
+    return valueForEachStage[controllingStage][0];
+}
+
+static uint8_t StageGetValue1()
+{
+    return valueForEachStage[controllingStage][1];
+}
+
+static uint8_t StageGetValue2()
+{
+    return valueForEachStage[controllingStage][2];
+}
+
 static void SelectNextStage()
 {
     controllingStage++;
 
-    if(controllingStage == STAGE_NUM)
+    if(controllingStage >= STAGE_NUM)
         controllingStage = 0;
 }
 
 static void SelectPrevStage()
 {
-    if(controllingStage == 0)
+    controllingStage--;
+
+    if(controllingStage < 0)
         controllingStage = STAGE_NUM - 1;
-    else
-        controllingStage--;
 }
 
 static void SelectStageWidget()
@@ -239,21 +290,22 @@ static void UserInterface(void const *argument){
     BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
     BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
 
-    Button btn_NextStage;
-    gui_ButtonInit(&btn_NextStage);
-    gui_ButtonSetPos(&btn_NextStage, 5, 20);
-    gui_ButtonSetSize(&btn_NextStage, 40, 40);
-    gui_ButtonSetColor(&btn_NextStage, LCD_COLOR_BLUE);
-    gui_ButtonSetRenderType(&btn_NextStage, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_NextStage, SelectNextStage);
-
+    /* Parameter widget */
     Button btn_PrevStage;
     gui_ButtonInit(&btn_PrevStage);
-    gui_ButtonSetPos(&btn_PrevStage, (240 - 40 - 5), 20);
+    gui_ButtonSetPos(&btn_PrevStage, 5, 20);
     gui_ButtonSetSize(&btn_PrevStage, 40, 40);
     gui_ButtonSetColor(&btn_PrevStage, LCD_COLOR_BLUE);
     gui_ButtonSetRenderType(&btn_PrevStage, BUTTON_RENDER_TYPE_LINE);
     gui_ButtonSetCallback(&btn_PrevStage, SelectPrevStage);
+
+    Button btn_NextStage;
+    gui_ButtonInit(&btn_NextStage);
+    gui_ButtonSetPos(&btn_NextStage, (240 - 40 - 5), 20);
+    gui_ButtonSetSize(&btn_NextStage, 40, 40);
+    gui_ButtonSetColor(&btn_NextStage, LCD_COLOR_BLUE);
+    gui_ButtonSetRenderType(&btn_NextStage, BUTTON_RENDER_TYPE_LINE);
+    gui_ButtonSetCallback(&btn_NextStage, SelectNextStage);
 
     Button btn_StageWidget;
     gui_ButtonInit(&btn_StageWidget);
@@ -271,23 +323,25 @@ static void UserInterface(void const *argument){
     gui_ButtonSetRenderType(&btn_ParamWidget, BUTTON_RENDER_TYPE_FILL);
     gui_ButtonSetCallback(&btn_ParamWidget, SelectParamWidget);
 
+    ValueBar vbar_param0;
+    gui_ValueBarInit(&vbar_param0);
+    gui_ValueBarSetPos(&vbar_param0, 5, 100);
+    gui_ValueBarSetSize(&vbar_param0, (240 - 10), 25);
+    gui_ValueBarSetCallbacks(&vbar_param0, StageSetValue0, StageGetValue0);
+
     ValueBar vbar_param1;
     gui_ValueBarInit(&vbar_param1);
-    gui_ValueBarSetPos(&vbar_param1, 5, 100);
+    gui_ValueBarSetPos(&vbar_param1, 5, 160);
     gui_ValueBarSetSize(&vbar_param1, (240 - 10), 25);
+    gui_ValueBarSetCallbacks(&vbar_param1, StageSetValue1, StageGetValue1);
 
     ValueBar vbar_param2;
     gui_ValueBarInit(&vbar_param2);
-    gui_ValueBarSetPos(&vbar_param2, 5, 160);
+    gui_ValueBarSetPos(&vbar_param2, 5, 220);
     gui_ValueBarSetSize(&vbar_param2, (240 - 10), 25);
-
-    ValueBar vbar_param3;
-    gui_ValueBarInit(&vbar_param3);
-    gui_ValueBarSetPos(&vbar_param3, 5, 220);
-    gui_ValueBarSetSize(&vbar_param3, (240 - 10), 25);
+    gui_ValueBarSetCallbacks(&vbar_param2, StageSetValue2, StageGetValue2);
 
     while(1){
-
 
         switch(widget){
         case WIDGET_STAGE:
@@ -295,28 +349,28 @@ static void UserInterface(void const *argument){
             gui_ButtonHandleEvent(&btn_NextStage, &event);
             gui_ButtonHandleEvent(&btn_PrevStage, &event);
 
+            gui_ValueBarHandleEvent(&vbar_param0, &event);
             gui_ValueBarHandleEvent(&vbar_param1, &event);
             gui_ValueBarHandleEvent(&vbar_param2, &event);
-            gui_ValueBarHandleEvent(&vbar_param3, &event);
 
             /* Render part */
             BSP_LCD_Clear(LCD_COLOR_WHITE);
 
             BSP_LCD_DisplayStringAt(5, 0, (uint8_t*) "uROCK", CENTER_MODE);
 
-            if(EffectStages[controllingStage] == NULL){
+            if(!EffectStages[controllingStage]){
                 BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) "< None >", CENTER_MODE);
             }else{
                 BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
-                EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);
+                /*EffectStages[controllingStage]->adj(EffectStages[controllingStage], values);*/
             }
 
             gui_ButtonRender(&btn_NextStage);
             gui_ButtonRender(&btn_PrevStage);
 
+            gui_ValueBarRender(&vbar_param0);
             gui_ValueBarRender(&vbar_param1);
             gui_ValueBarRender(&vbar_param2);
-            gui_ValueBarRender(&vbar_param3);
             break;
         case WIDGET_PARAM:
             BSP_LCD_Clear(LCD_COLOR_YELLOW);

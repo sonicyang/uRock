@@ -86,7 +86,8 @@ void gui_ValueBarInit(ValueBar* bar)
     bar->outColor = LCD_COLOR_BLACK;
     bar->inColor = LCD_COLOR_GREEN;
 
-    bar->cb = NULL;
+    bar->cbSet = NULL;
+    bar->cbGet = NULL;
 }
 
 void gui_ValueBarSetPos(ValueBar* bar, uint16_t x, uint16_t y)
@@ -107,9 +108,11 @@ void gui_ValueBarSetColor(ValueBar* bar, uint32_t inColor, uint32_t outColor)
     bar->outColor = outColor;
 }
 
-void gui_ValueBarSetCallback(ValueBar* bar, ValueBarSetValueCallback cb)
+void gui_ValueBarSetCallbacks(ValueBar* bar, ValueBarSetValueCallback cbSet,
+                              ValueBarGetValueCallback cbGet)
 {
-    bar->cb = cb;
+    bar->cbSet = cbSet;
+    bar->cbGet = cbGet;
 }
 
 void gui_ValueBarRender(ValueBar* bar)
@@ -133,10 +136,16 @@ void gui_ValueBarRender(ValueBar* bar)
 
 void gui_ValueBarHandleEvent(ValueBar* bar, Event* event)
 {
+    if (bar->cbGet)
+        bar->currentValue = bar->cbGet();
+
     if ((event->eventType == TP_PRESSED) &&
         (event->touchX > bar->x) && (event->touchX < bar->x + bar->w) &&
         (event->touchY > bar->y) && (event->touchY < bar->y + bar->h)){
 
         bar->currentValue = map(event->touchX - bar->x, 0, bar->w, 0, 255);
+
+        if (bar->cbSet)
+            bar->cbSet(bar->currentValue);
     }
 }
