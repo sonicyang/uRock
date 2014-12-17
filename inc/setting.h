@@ -7,7 +7,7 @@
 
 #define SAMPLE_MAX 2047
 
-#define SAMPLING_RATE 200 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD 1 / SAMPLE_RATE
 
 #define BLOCK_PERIOD SAMPLE_NUM / SAMPLING_RATE
