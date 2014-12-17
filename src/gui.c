@@ -66,7 +66,8 @@ void gui_ButtonHandleEvent(Button* btn, Event* event)
         if ((event->touchX > btn->x) && (event->touchX < btn->x + btn->w) &&
             (event->touchY > btn->y) && (event->touchY < btn->y + btn->h)){
 
-            btn->cb();
+            if(btn->cb)
+                btn->cb();
         }
         break;
     case TP_RELEASED:
