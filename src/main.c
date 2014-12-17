@@ -363,7 +363,10 @@ static Button btn_stage0;
 static Button btn_stage1;
 static Button btn_stage2;
 static Button btn_stage3;
+
 static void UserInterface(void const *argument){
+    char stageNum[3];
+
     BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
     BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
     BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
@@ -457,12 +460,14 @@ static void UserInterface(void const *argument){
             /* Render part */
             BSP_LCD_Clear(LCD_COLOR_WHITE);
 
-            BSP_LCD_DisplayStringAt(5, 0, (uint8_t*) "uROCK", CENTER_MODE);
+            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
+	    intToStr(controllingStage, stageNum, 2);
+            BSP_LCD_DisplayStringAt(0, 20, (uint8_t*) stageNum, CENTER_MODE);
 
             if(EffectStages[controllingStage])
-                BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
+                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
             else
-                BSP_LCD_DisplayStringAt(0, 30, (uint8_t*) "< None >", CENTER_MODE);
+                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) "< None >", CENTER_MODE);
 
             gui_ButtonRender(&btn_nextStage);
             gui_ButtonRender(&btn_prevStage);
