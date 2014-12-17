@@ -6,6 +6,8 @@ void Overdrive(volatile float* pData, void *opaque){
     Gain(pData, tmp->gain.value);
     SoftClipping(pData, 0, tmp->ratio.value);
     Gain(pData, tmp->volume.value);
+    arm_scale_q31(pData, tmp->gain.value * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
+    arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
     return;
 }
 
@@ -19,6 +21,7 @@ void adjust_Overdrive(void *opaque, uint8_t* values){
     LinkPot(&(tmp->gain), values[0]);
     LinkPot(&(tmp->volume), values[1]);
     LinkPot(&(tmp->ratio), values[2]);
+    tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
     return;
 }

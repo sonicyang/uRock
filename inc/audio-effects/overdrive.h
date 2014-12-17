@@ -8,6 +8,7 @@ struct Overdrive_t{
     struct parameter_t gain;
     struct parameter_t volume;
     struct parameter_t ratio;
+    q31_t cache;
 };
 
 struct Effect_t* new_Overdrive(struct Overdrive_t* opaque);

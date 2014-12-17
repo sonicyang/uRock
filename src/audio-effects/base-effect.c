@@ -69,8 +69,9 @@ void SoftClipping(q31_t* pData, float threshold, float ratio){
 }
 
 void NormalizeData(volatile uint16_t * pData, q31_t* tData){
-
+    
     arm_offset_q15((q15_t*)pData, (-SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
+    arm_shift_q15((q15_t*)pData, 4, (q15_t*)pData, SAMPLE_NUM);
     arm_q15_to_q31((q15_t*)pData, tData, SAMPLE_NUM);
 
     return;
@@ -79,6 +80,7 @@ void NormalizeData(volatile uint16_t * pData, q31_t* tData){
 void DenormalizeData(q31_t* tData, volatile uint16_t * pData){
 
     arm_q31_to_q15(tData, (q15_t*)pData, SAMPLE_NUM);
+    arm_shift_q15((q15_t*)pData, -4, (q15_t*)pData, SAMPLE_NUM);
     arm_offset_q15((q15_t*)pData, (SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
 
     return;
