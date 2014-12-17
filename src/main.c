@@ -120,7 +120,7 @@ int main(void){
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_DAC_Init();
-
+    
 /*
 	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
@@ -146,8 +146,8 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/ 
 
-    //EffectStages[0] = new_Volume(&vol);
-    EffectStages[0] = new_Distortion(&distor);
+    EffectStages[0] = new_Volume(&vol);
+    //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
