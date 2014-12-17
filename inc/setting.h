@@ -10,6 +10,9 @@
 #define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD 1 / SAMPLE_RATE
 
+#define Q_1 131072
+#define Q_MULT_SHIFT 15
+
 #define BLOCK_PERIOD SAMPLE_NUM / SAMPLING_RATE
 
 #define DELAY_BANK(x) DELAY_BANK_##x

@@ -6,7 +6,7 @@ struct Effect_t* new_Reverb(struct Reverb_t* opaque){
 
     strcpy(tmp->parent.name, "Reverb");
 
-    tmp->attenuation.upperBound = -2.0f;
+    tmp->attenuation.upperBound = -5.0f;
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -10.0f;
 

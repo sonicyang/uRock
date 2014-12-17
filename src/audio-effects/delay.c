@@ -11,7 +11,7 @@ void Delay(q31_t* pData, void *opaque){
 
     BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
-    arm_mult_q31(bData, tmp->cache, bData, SAMPLE_NUM);
+    arm_scale_q31(bData, tmp->cache, Q_MULT_SHIFT,  bData, SAMPLE_NUM);
     arm_add_q31(pData, bData, pData, SAMPLE_NUM);
 
     BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
@@ -34,7 +34,7 @@ void adjust_Delay(void *opaque, uint8_t* values){
     
     LinkPot(&(tmp->delayTime), values[0]);  
     LinkPot(&(tmp->attenuation), values[1]);  
-    arm_fill_q31((q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * 2147483648), tmp->cache, SAMPLE_NUM);
+    tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * Q_1);
 
     return;
 }
@@ -45,7 +45,7 @@ struct Effect_t* new_Delay(struct Delay_t* opaque){
     opaque->parent.del = delete_Delay;
     opaque->parent.adj = adjust_Delay;
 
-    opaque->attenuation.upperBound = -1.0f;
+    opaque->attenuation.upperBound = -5.0f;
     opaque->attenuation.lowerBound = -30.0f;
     opaque->attenuation.value = -10.0f;
 

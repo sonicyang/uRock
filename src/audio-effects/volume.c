@@ -7,7 +7,7 @@
 void Volume(q31_t* pData, void *opaque){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
 
-    arm_scale_q31(pData, tmp->cache, 15, pData, SAMPLE_NUM);
+    arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
 
     return;
 }
@@ -20,7 +20,7 @@ void adjust_Volume(void *opaque, uint8_t* values){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
 
     LinkPot(&(tmp->gain), values[0]); 
-    tmp->cache = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * 131072);
+    tmp->cache = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * Q_1);
 
     return;
 }
