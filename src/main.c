@@ -170,16 +170,16 @@ static void SignalProcessingUnit(void const *argument){
     EffectList[2] = new_Reverb(&delay);
     EffectList[3] = NULL;
 
-    EffectStages[0] = EffectList[0];
-    EffectStages[1] = EffectList[1];
-    EffectStages[2] = EffectList[2];
-    EffectStages[3] = EffectList[0];
+    EffectStages[0] = EffectList[3];
+    EffectStages[1] = EffectList[3];
+    EffectStages[2] = EffectList[3];
+    EffectStages[3] = EffectList[3];
 
     /* FIXME */
-    StageCurrentEffect[0] = 0;
-    StageCurrentEffect[1] = 1;
-    StageCurrentEffect[2] = 2;
-    StageCurrentEffect[3] = 0;
+    StageCurrentEffect[0] = 3;
+    StageCurrentEffect[1] = 3;
+    StageCurrentEffect[2] = 3;
+    StageCurrentEffect[3] = 3;
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -303,6 +303,9 @@ static void Stage0Next()
     valueForEachStage[0][0] = 0;
     valueForEachStage[0][1] = 0;
     valueForEachStage[0][2] = 0;
+
+    if (EffectStages[0])
+        EffectStages[0]->adj(EffectStages[0], valueForEachStage[0]);
 }
 
 static void Stage1Next()
@@ -317,6 +320,9 @@ static void Stage1Next()
     valueForEachStage[1][0] = 0;
     valueForEachStage[1][1] = 0;
     valueForEachStage[1][2] = 0;
+
+    if (EffectStages[1])
+        EffectStages[1]->adj(EffectStages[1], valueForEachStage[1]);
 }
 
 static void Stage2Next()
@@ -331,6 +337,9 @@ static void Stage2Next()
     valueForEachStage[2][0] = 0;
     valueForEachStage[2][1] = 0;
     valueForEachStage[2][2] = 0;
+
+    if (EffectStages[2])
+        EffectStages[2]->adj(EffectStages[2], valueForEachStage[2]);
 }
 
 static void Stage3Next()
@@ -345,6 +354,9 @@ static void Stage3Next()
     valueForEachStage[3][0] = 0;
     valueForEachStage[3][1] = 0;
     valueForEachStage[3][2] = 0;
+
+    if (EffectStages[3])
+        EffectStages[3]->adj(EffectStages[3], valueForEachStage[3]);
 }
 
 static void SelectParamWidget()
@@ -461,7 +473,7 @@ static void UserInterface(void const *argument){
             BSP_LCD_Clear(LCD_COLOR_WHITE);
 
             BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-	    intToStr(controllingStage, stageNum, 2);
+            intToStr(controllingStage, stageNum, 2);
             BSP_LCD_DisplayStringAt(0, 20, (uint8_t*) stageNum, CENTER_MODE);
 
             if(EffectStages[controllingStage])
