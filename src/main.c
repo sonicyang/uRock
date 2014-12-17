@@ -73,8 +73,12 @@ static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
 volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
+
+#define EFFECT_NUM 4
+/* XXX Don't use EffectStages anymore */
 struct Effect_t *EffectStages[STAGE_NUM];
-struct Effect_t *EffectList[3];
+struct Effect_t *EffectList[EFFECT_NUM];
+int8_t StageCurrentEffect[STAGE_NUM];
 uint8_t valueForEachStage[STAGE_NUM][3];
 
 osThreadId UIid;
@@ -164,11 +168,18 @@ static void SignalProcessingUnit(void const *argument){
     EffectList[0] = new_Volume(&vol);
     EffectList[1] = new_Distortion(&distor);
     EffectList[2] = new_Reverb(&delay);
+    EffectList[3] = NULL;
 
     EffectStages[0] = EffectList[0];
     EffectStages[1] = EffectList[1];
     EffectStages[2] = EffectList[2];
     EffectStages[3] = EffectList[0];
+
+    /* FIXME */
+    StageCurrentEffect[0] = 0;
+    StageCurrentEffect[1] = 1;
+    StageCurrentEffect[2] = 2;
+    StageCurrentEffect[3] = 0;
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -280,8 +291,60 @@ static void SelectStageWidget()
     widget = WIDGET_STAGE;
 }
 
-static void stage0Next()
+static void Stage0Next()
 {
+    StageCurrentEffect[0]++;
+    if (StageCurrentEffect[0] == EFFECT_NUM)
+        StageCurrentEffect[0] = 0;
+
+    EffectStages[0] = EffectList[StageCurrentEffect[0]];
+
+    /* Reset value in this stage */
+    valueForEachStage[0][0] = 0;
+    valueForEachStage[0][1] = 0;
+    valueForEachStage[0][2] = 0;
+}
+
+static void Stage1Next()
+{
+    StageCurrentEffect[1]++;
+    if (StageCurrentEffect[1] == EFFECT_NUM)
+        StageCurrentEffect[1] = 0;
+
+    EffectStages[1] = EffectList[StageCurrentEffect[1]];
+
+    /* Reset value in this stage */
+    valueForEachStage[1][0] = 0;
+    valueForEachStage[1][1] = 0;
+    valueForEachStage[1][2] = 0;
+}
+
+static void Stage2Next()
+{
+    StageCurrentEffect[2]++;
+    if (StageCurrentEffect[2] == EFFECT_NUM)
+        StageCurrentEffect[2] = 0;
+
+    EffectStages[2] = EffectList[StageCurrentEffect[2]];
+
+    /* Reset value in this stage */
+    valueForEachStage[2][0] = 0;
+    valueForEachStage[2][1] = 0;
+    valueForEachStage[2][2] = 0;
+}
+
+static void Stage3Next()
+{
+    StageCurrentEffect[3]++;
+    if (StageCurrentEffect[3] == EFFECT_NUM)
+        StageCurrentEffect[3] = 0;
+
+    EffectStages[3] = EffectList[StageCurrentEffect[3]];
+
+    /* Reset value in this stage */
+    valueForEachStage[3][0] = 0;
+    valueForEachStage[3][1] = 0;
+    valueForEachStage[3][2] = 0;
 }
 
 static void SelectParamWidget()
@@ -341,28 +404,28 @@ static void UserInterface(void const *argument){
     gui_ButtonSetSize(&btn_stage0, 40, 40);
     gui_ButtonSetColor(&btn_stage0, LCD_COLOR_RED);
     gui_ButtonSetRenderType(&btn_stage0, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage0, SelectPrevStage);
+    gui_ButtonSetCallback(&btn_stage0, Stage0Next);
 
     gui_ButtonInit(&btn_stage1);
     gui_ButtonSetPos(&btn_stage1, 5, 65);
     gui_ButtonSetSize(&btn_stage1, 40, 40);
     gui_ButtonSetColor(&btn_stage1, LCD_COLOR_RED);
     gui_ButtonSetRenderType(&btn_stage1, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage1, SelectPrevStage);
+    gui_ButtonSetCallback(&btn_stage1, Stage1Next);
 
     gui_ButtonInit(&btn_stage2);
     gui_ButtonSetPos(&btn_stage2, 5, 110);
     gui_ButtonSetSize(&btn_stage2, 40, 40);
     gui_ButtonSetColor(&btn_stage2, LCD_COLOR_RED);
     gui_ButtonSetRenderType(&btn_stage2, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage2, SelectPrevStage);
+    gui_ButtonSetCallback(&btn_stage2, Stage2Next);
 
     gui_ButtonInit(&btn_stage3);
     gui_ButtonSetPos(&btn_stage3, 5, 155);
     gui_ButtonSetSize(&btn_stage3, 40, 40);
     gui_ButtonSetColor(&btn_stage3, LCD_COLOR_RED);
     gui_ButtonSetRenderType(&btn_stage3, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage3, SelectPrevStage);
+    gui_ButtonSetCallback(&btn_stage3, Stage3Next);
 
     /* Global */
     gui_ButtonInit(&btn_StageWidget);
