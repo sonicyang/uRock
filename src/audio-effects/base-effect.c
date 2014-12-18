@@ -52,16 +52,16 @@ void Copy(q31_t* pData, q31_t* sData){
 void SoftClipping(q31_t* pData, float threshold, float ratio){
     register uint32_t i;
     register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
-    float tmp = 1 / (ratio * gg);
+    float rg = ratio * gg;
+    float r_rg = 1 / rg;
+    q31_t q31_rg = rg * Q_1;
+    float tmp;
+
     for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > ratio * gg){
-            pData[i] = gg;
-        }
-        else if (pData[i] < -ratio * gg){
-            pData[i] = -gg;
-        }
-        else{
-            pData[i] = arm_sin_f32(PI * pData[i] * 0.5 * tmp) * gg;
+        if (pData[i] < q31_rg && pData[i] > -q31_rg){
+            tmp = pData[i] / Q_1;
+            tmp = arm_sin_f32(PI * tmp * 0.5 * r_rg) * gg;
+            pData[i] = tmp * Q_1;
         }
     }
 
