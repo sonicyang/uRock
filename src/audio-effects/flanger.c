@@ -13,9 +13,12 @@ void Flanger(q31_t* pData, void *opaque){
     BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * SAMPLE_NUM * 4, (uint32_t*)bData, SAMPLE_NUM);
 
     arm_copy_q31(pData, fData, SAMPLE_NUM);
-    arm_scale_q31(bData, tmp->cache, Q_MULT_SHIFT, bData, SAMPLE_NUM);
+
+    arm_scale_q31(pData, (q31_t)(0.5 * Q_1), Q_MULT_SHIFT, pData, SAMPLE_NUM);
+    arm_scale_q31(bData, (q31_t)(0.5 * Q_1), Q_MULT_SHIFT, bData, SAMPLE_NUM);
     arm_add_q31(pData, bData, pData, SAMPLE_NUM);
 
+    arm_scale_q31(bData, tmp->cache, Q_MULT_SHIFT, bData, SAMPLE_NUM);
     arm_add_q31(fData, bData, fData, SAMPLE_NUM);
 
     BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)fData, SAMPLE_NUM);
@@ -40,7 +43,7 @@ void adjust_Flanger(void *opaque, uint8_t* values){
     LinkPot(&(tmp->attenuation), values[1]);  
     LinkPot(&(tmp->depth), values[2]);  
 
-    tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * Q_1);
+    tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * 2 * Q_1); //saving memory
 
     adjust_LFO_speed(&(tmp->lfo), tmp->speed.value / BLOCK_PERIOD);
     tmp->lfo.upperBound = tmp->depth.value / BLOCK_PERIOD;
