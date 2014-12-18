@@ -146,13 +146,13 @@ static void SignalProcessingUnit(void const *argument){
 
     /* Effect Stage Setting*/ 
 
-    EffectStages[0] = new_Volume(&vol);
+    //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
-    //EffectStages[0] = new_Flanger(&flanger);
+    EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);

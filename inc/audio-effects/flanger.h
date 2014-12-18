@@ -12,6 +12,7 @@ struct Flanger_t{
     struct LFO_t lfo;
     uint32_t baseAddress;
     uint32_t blockPtr;
+    q31_t cache;
 };
 
 struct Effect_t* new_Flanger(struct Flanger_t* opaque);
