@@ -3,8 +3,6 @@
 
 void Distortion(q31_t* pData, void *opaque){
     struct Distortion_t *tmp = (struct Distortion_t*)opaque;
-    uint32_t i;
-
     arm_scale_q31(pData, tmp->gain.value * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
     arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
     return;

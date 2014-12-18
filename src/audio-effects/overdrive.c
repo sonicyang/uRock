@@ -1,12 +1,25 @@
 #include "overdrive.h"
 #include "helper.h"
 
-void Overdrive(volatile float* pData, void *opaque){
+void Overdrive(q31_t* pData, void *opaque){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
-    Gain(pData, tmp->gain.value);
-    SoftClipping(pData, 0, tmp->ratio.value);
-    Gain(pData, tmp->volume.value);
+    uint32_t i;
+    float rg = SAMPLE_MAX;
+    float r_rg = 1 / rg;
+    q31_t q31_rg = rg * Q_1;
+    float floating;
+
     arm_scale_q31(pData, tmp->gain.value * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
+
+
+    for (i = 0; i < SAMPLE_NUM; i++){
+        if (pData[i] < q31_rg && pData[i] > -q31_rg){
+            floating = pData[i] / Q_1;
+            floating = arm_sin_f32(PI * floating * 0.5 * r_rg) * SAMPLE_MAX;
+            pData[i] = floating * Q_1;
+        }
+    }
+
     arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
     return;
 }

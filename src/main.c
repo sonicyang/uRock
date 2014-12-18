@@ -71,9 +71,6 @@ struct Flanger_t flanger;
 struct Phaser_t phaser;
 struct Compressor_t compressor;
 
-osThreadId LEDThread1Handle;
-static void LED_Thread1(void const *argument);
-
 osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
@@ -121,10 +118,6 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
     
-/*
-	osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-	LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
-*/
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
     SPUid = osThreadCreate (osThread(SPU), NULL);
 
@@ -148,11 +141,11 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    //EffectStages[0] = new_Overdrive(&overdrive);
+    EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
-    EffectStages[0] = new_Flanger(&flanger);
+    //EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -188,7 +181,7 @@ static void SignalProcessingUnit(void const *argument){
 
 static void UserInterface(void const *argument){
     uint8_t values[3];
-    char buf[16];
+    //char buf[16];
 
 	TS_StateTypeDef tp;
     uint32_t controllingStage = 0;
@@ -228,15 +221,6 @@ static void UserInterface(void const *argument){
 
         osDelay(200);
     }
-}
-
-static void LED_Thread1(void const *argument){
-	(void) argument;
-
-	for(;;){
-		osDelay(300);
-		BSP_LED_Toggle(LED3);
-	}
 }
 
 /* Double Buffer Swapping Callbacks */
@@ -363,14 +347,6 @@ static void SystemClock_Config(void){
 	__HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
 	__HAL_FLASH_DATA_CACHE_ENABLE();
 }
-
-
-/*
-static void Error_Handler(void){
-	BSP_LED_On(LED4);
-	while(1);
-}
-*/
 
 #ifdef  USE_FULL_ASSERT
 /**
