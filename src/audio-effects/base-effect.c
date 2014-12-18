@@ -49,26 +49,6 @@ void Copy(q31_t* pData, q31_t* sData){
     return;
 }
 
-void SoftClipping(q31_t* pData, float threshold, float ratio){
-    register uint32_t i;
-    register float gg = powf(10, (threshold * 0.1f)) * SAMPLE_MAX;
-
-    float rg = ratio * SAMPLE_MAX;
-    float r_rg = 1 / rg;
-    q31_t q31_rg = rg * Q_1;
-    float tmp;
-
-    for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] < q31_rg && pData[i] > -q31_rg){
-            tmp = pData[i] / Q_1;
-            tmp = arm_sin_f32(PI * tmp * 0.5 * r_rg) * SAMPLE_MAX;
-            pData[i] = tmp * Q_1;
-        }
-    }
-
-    return;
-}
-
 void NormalizeData(volatile uint16_t * pData, q31_t* tData){
     
     arm_offset_q15((q15_t*)pData, (-SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);

@@ -38,7 +38,4 @@ struct Effect_t{
     adjustFunc adj;
 };
 
-void SoftClipping(q31_t* pData, float threshold, float ratio);
-
-
 #endif //__AUDIO_EFFECT_H__
