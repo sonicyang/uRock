@@ -1,3 +1,5 @@
+DSPOUTDIR = DSPLib
+
 DSPSRCDIR = Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions \
 			Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions \
 			Drivers/CMSIS/DSP_Lib/Source/SupportFunctions \
@@ -10,13 +12,14 @@ DSPSRC += $(wildcard $(addsuffix /*.c,$(DSPSRCDIR))) \
 
 INCLUDES += $(addprefix -I,$(DSPINCDIR))
 
-DSPOBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(DSPSRC:.c=.o)))
+DSPOBJS += $(addprefix $(OUTDIR)/$(DSPOUTDIR)/,$(patsubst %.s,%.o,$(DSPSRC:.c=.o)))
 
-$(OUTDIR)/%.o: %.c
-	@echo "    CC     "$@	
+$(OUTDIR)/$(DSPOUTDIR)/%.o: %.c
+	@echo "   DSP   |   CC    "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
 .PHONY: clean-dsplib
 clean-dsplib:
-	rm -rf $(DSPOBJS)
+	@rm -rf $(OUTDIR)/$(DSPOUTDIR)
+	@echo "Removing DSP Library Object Files"

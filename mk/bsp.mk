@@ -1,3 +1,5 @@
+BSPOUTDIR = BSPLib
+
 BSPSRCDIR = Drivers/BSP/STM32F429I-Discovery \
 			Utilities/Fonts
 
@@ -13,13 +15,14 @@ BSPSRC += Drivers/BSP/Components/stmpe811/stmpe811.c
 
 INCLUDES += $(addprefix -I,$(BSPINCDIR))
 
-BSPOBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(BSPSRC:.c=.o)))
+BSPOBJS += $(addprefix $(OUTDIR)/$(BSPOUTDIR)/,$(patsubst %.s,%.o,$(BSPSRC:.c=.o)))
 
-$(OUTDIR)/%.o: %.c
-	@echo "    CC     "$@	
+$(OUTDIR)/$(BSPOUTDIR)/%.o: %.c
+	@echo "   BSP   |   CC    "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
 .PHONY: clean-bsp
 clean-bsp:
-	rm -rf $(BSPOBJS)
+	@rm -rf $(OUTDIR)/$(BSPOUTDIR)
+	@echo "Removing BSP Library Object Files"

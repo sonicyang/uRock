@@ -68,22 +68,22 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@$(OBJCOPY) -O binary $^ $@
 	@$(OBJCOPY) -O ihex $^ $(HEX_IMAGE)
 	@$(OBJDUMP) -h -S -D $^ > $(LIST_FILE)
-	@echo "  OBJCOPY  "$@	
-	@echo "  OBJCOPY  "$(HEX_IMAGEX)	
-	@echo "  OBJDUMP  "$(LIST_FILE)
+	@echo "   ALL   |  OBJCOPY   "$@	
+	@echo "   ALL   |  OBJCOPY   "$(HEX_IMAGEX)	
+	@echo "   ALL   |  OBJDUMP   "$(LIST_FILE)
 	@$(SIZE) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS)
-	@echo "    LD     "$@	
+	@echo "   ALL   |   LD    "$@	
 	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
-	@echo "    CC     "$@	
+	@echo "   MAIN  |   CC    "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
 $(OUTDIR)/%.o: %.s
-	@echo "    CC     "$@	
+	@echo "   MAIN  |   AS    "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
@@ -102,14 +102,16 @@ openocd_flash: $(EXECUTABLE)
 
 .PHONY: clean
 clean:
-	rm -rf $(BIN_IMAGE)
-	rm -rf $(HEX_IMAGE)
-	rm -rf $(LIST_FILE)
-	rm -rf $(OUTDIR)/src/*
+	@rm -rf $(BIN_IMAGE)
+	@rm -rf $(HEX_IMAGE)
+	@rm -rf $(LIST_FILE)
+	@rm -rf $(OUTDIR)/src/*
+	@echo "Removing Project Object Files"
 
 .PHONY: clean-all
 clean-all:
-	rm -rf $(OUTDIR)/*
+	@rm -rf $(OUTDIR)/*
+	@echo "Removing All Object Files"
 
 dbg: $(EXECUTABLE)
 	openocd -f board/stm32f429discovery.cfg >/dev/null & \
