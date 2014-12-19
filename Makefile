@@ -44,46 +44,25 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 #files
 SRCDIR = src \
 		 src/audio-effects \
-		 Drivers/STM32F4xx_HAL_Driver/Src \
-		 Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions \
-		 Drivers/CMSIS/DSP_Lib/Source/BasicMathFunctions \
-		 Drivers/CMSIS/DSP_Lib/Source/SupportFunctions \
-		 Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions \
-		 Drivers/BSP/STM32F429I-Discovery \
-		 Middlewares/Third_Party/FreeRTOS/Source \
-		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-		 Utilities/Fonts \
-		 Utilities/CPU
 
 INCDIR = inc \
 		 inc/audio-effects \
-		 Drivers/CMSIS/Device/ST/STM32F4xx/Include \
-		 Drivers/CMSIS/Include \
-		 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-		 Drivers/STM32F4xx_HAL_Driver/Inc \
-		 Drivers/BSP/STM32F429I-Discovery \
-		 Middlewares/Third_Party/FreeRTOS/Source/include \
-		 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
-		 Utilities/Fonts \
-		 Utilities/CPU
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))
-
-SRC += Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.c
-
-SRC += Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
-
-SRC += Drivers/BSP/Components/ili9341/ili9341.c
-
-SRC += Drivers/BSP/Components/stmpe811/stmpe811.c
 
 OBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(SRC:.c=.o)))
 
 INCLUDES = $(addprefix -I,$(INCDIR))
 
+DEP = $(OBJ:.o=.o.d)
+
+MAKDIR = mk
+MAK = $(wildcard $(MAKDIR)/*.mk)
+
 all: $(BIN_IMAGE)
+
+include $(MAK)
 
 $(BIN_IMAGE): $(EXECUTABLE)
 	@$(OBJCOPY) -O binary $^ $@
@@ -94,24 +73,24 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@echo "  OBJDUMP  "$(LIST_FILE)
 	@$(SIZE) $(EXECUTABLE)
 	
-$(EXECUTABLE): $(OBJS)
+$(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS)
 	@echo "    LD     "$@	
 	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
 	@echo "    CC     "$@	
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
 $(OUTDIR)/%.o: %.s
 	@echo "    CC     "$@	
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 
-flash:
+flash: $(EXECUTABLE)
 	st-flash write $(BIN_IMAGE) 0x8000000
 
-openocd_flash:
+openocd_flash: $(EXECUTABLE)
 	openocd \
 	-f board/stm32f429discovery.cfg \
 	-c "init" \
@@ -123,6 +102,13 @@ openocd_flash:
 
 .PHONY: clean
 clean:
+	rm -rf $(BIN_IMAGE)
+	rm -rf $(HEX_IMAGE)
+	rm -rf $(LIST_FILE)
+	rm -rf $(OUTDIR)/src/*
+
+.PHONY: clean-all
+clean-all:
 	rm -rf $(OUTDIR)/*
 
 dbg: $(EXECUTABLE)
@@ -131,3 +117,5 @@ dbg: $(EXECUTABLE)
     $(CROSS_COMPILE)gdb -x $(TOOLDIR)/gdbscript && \
     cat $(OUTDIR)/openocd_pid |`xargs kill 2>/dev/null || test true` && \
     rm -f $(OUTDIR)/openocd_pid
+
+-include $(DEP)
