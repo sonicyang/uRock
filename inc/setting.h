@@ -7,8 +7,8 @@
 
 #define SAMPLE_MAX 2047
 
-#define SAMPLING_RATE 100 /* In Kilo Hz, Make Sure it can divide 45000*/
-#define SAMPLE_PERIOD (1 / SAMPLE_RATE)
+#define SAMPLING_RATE 45 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLE_PERIOD (1.0f / SAMPLING_RATE)
 
 #define Q_1 1048576
 #define Q_MULT_SHIFT 11
