@@ -4,7 +4,7 @@
 void Overdrive(q31_t* pData, void *opaque){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
     uint32_t i;
-    float rg = SAMPLE_MAX;
+    float rg = tmp->ratio.value * SAMPLE_MAX;
     float r_rg = 1 / rg;
     q31_t q31_rg = rg * Q_1;
     float floating;
@@ -13,7 +13,13 @@ void Overdrive(q31_t* pData, void *opaque){
 
 
     for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] < q31_rg && pData[i] > -q31_rg){
+        if (pData[i] > q31_rg){
+            pData[i] = q31_rg;
+        }
+        else if(pData[i] < -q31_rg){
+            pData[i] = -q31_rg;
+        }
+        else{
             floating = pData[i] / Q_1;
             floating = arm_sin_f32(PI * floating * 0.5 * r_rg) * SAMPLE_MAX;
             pData[i] = floating * Q_1;
