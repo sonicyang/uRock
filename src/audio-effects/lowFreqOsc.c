@@ -5,7 +5,7 @@ float lfoNext(struct LFO_t *opaque){
     ret = arm_sin_f32((2 * PI / (float)opaque->period) * opaque->ptr);
 
     opaque->ptr++;
-    if(opaque->ptr >= opaque->period)
+    if(opaque->ptr > opaque->period)
         opaque->ptr = 0;
 
     return map(ret, 1, -1, opaque->upperBound, opaque->lowerBound);
