@@ -120,10 +120,10 @@ int main(void){
     
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
     SPUid = osThreadCreate (osThread(SPU), NULL);
-/*
+
 	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
     UIid = osThreadCreate (osThread(UI), NULL);
-*/
+
 	osKernelStart (NULL, NULL);
 	while (1);
 }
@@ -141,11 +141,11 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    //EffectStages[0] = new_Overdrive(&overdrive);
+    EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
-    EffectStages[0] = new_Flanger(&flanger);
+    //EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
