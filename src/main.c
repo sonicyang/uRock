@@ -55,13 +55,11 @@
 static void SystemClock_Config(void);
 
 /* Private variables ---------------------------------------------------------*/
-DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_adc2;
-DMA_HandleTypeDef hdma_dac2;
-ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
-DAC_HandleTypeDef hdac;
-TIM_HandleTypeDef htim2;
+SAI_HandleTypeDef hsai_BlockA1;
+SAI_HandleTypeDef hsai_BlockB1;
+DMA_HandleTypeDef hdma_sai1_a;
 
 struct Volume_t vol;
 struct Distortion_t distor;
@@ -74,7 +72,8 @@ struct Compressor_t compressor;
 osThreadId SPUid;
 static void SignalProcessingUnit(void const *argument);
 volatile uint32_t SPU_Hold = 0;
-volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
+uint32_t pipeindex = 0;
+volatile uint32_t SignalBuffer[2][SAMPLE_NUM * 2]; 
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
@@ -104,7 +103,7 @@ int main(void){
 	BSP_LCD_Clear(LCD_COLOR_RED);
 	BSP_LCD_FillCircle(150, 150, 40);
 
-	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+	//BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
 	BSP_SDRAM_Init();
 
@@ -113,10 +112,8 @@ int main(void){
 
     MX_GPIO_Init();
     MX_DMA_Init();
-    MX_TIM2_Init();
-    MX_ADC1_Init();
     MX_ADC2_Init();
-    MX_DAC_Init();
+    MX_SAI1_Init();
     
 	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
     SPUid = osThreadCreate (osThread(SPU), NULL);
@@ -130,7 +127,6 @@ int main(void){
 
 static void SignalProcessingUnit(void const *argument){
     uint32_t index = 0;
-    uint32_t pipeindex = 0;
     uint32_t i;
     
     for(i = 0; i < STAGE_NUM; i++){
@@ -148,16 +144,16 @@ static void SignalProcessingUnit(void const *argument){
     //EffectStages[0] = new_Flanger(&flanger);
 
     /* Init */
-    HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
+    //HAL_TIM_Base_Start(&htim2);
+    //HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
+    //HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
+    HAL_SAI_Receive_DMA(&hsai_BlockA1, (uint32_t*) SignalBuffer[0], SAMPLE_NUM);
   
     /* Process */
     while(1){
         if(SPU_Hold){
             SPU_Hold--;
 
-            NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
             for(i = 0; i < STAGE_NUM; i++){
                 if(EffectStages[i] != NULL){
@@ -165,14 +161,11 @@ static void SignalProcessingUnit(void const *argument){
                 }
             }
 
-            DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
+            //DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
 
             index+=1;
             if(index >= BUFFER_NUM)
                 index = 0;
-            pipeindex+=1;
-            if(pipeindex >= STAGE_NUM)
-                pipeindex = 0;
         }
     }
 
@@ -224,45 +217,35 @@ static void UserInterface(void const *argument){
 }
 
 /* Double Buffer Swapping Callbacks */
-void DMA2_Stream0_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_adc1);
+void DMA2_Stream1_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_sai1_a);
     return;
 }
 
-void DMA1_Stream6_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_dac2);
+void DMA2_Stream4_IRQHandler(void){
+    //HAL_DMA_IRQHandler(&hdma_dac2);
     return;
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 0;
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 0;
-
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
+void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
+    if(hsai->Instance == SAI1_Block_A){
+        NormalizeData(SignalBuffer[0], SignalPipe[pipeindex]);
 
         SPU_Hold++;
     }
     return;  
 }
 
-void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 1;
+void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
+    if(hsai->Instance == SAI1_Block_A){
+        NormalizeData(SignalBuffer[0] + SAMPLE_NUM, SignalPipe[pipeindex]);
 
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 1;
-
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
-        
         SPU_Hold++;
     }
     return;  
 }
 
+/*
 void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
     static uint32_t index = 1;
 
@@ -286,6 +269,7 @@ void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
 
     return;  
 }
+*/
 
 /**
  * @brief  System Clock Configuration
@@ -341,11 +325,6 @@ static void SystemClock_Config(void){
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;  
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
 	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
-
-	__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
-
-	__HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
-	__HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
 #ifdef  USE_FULL_ASSERT
