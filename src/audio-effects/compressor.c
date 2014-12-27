@@ -6,12 +6,16 @@ void Compressor(q31_t* pData, void *opaque){
     register int i;
     float sum = 0.0f;
     float temp = 0.0f;
+    float att, rel;
     float r_q = 1.0f / Q_1;
     float rms = 0, theta;
-    float att = (tmp->attack.value == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * tmp->attack.value));
-    float rel = expf(-1.0f / (SAMPLING_RATE * 1000));
     static float env = 0.0f;
     static float gain = 1.0f;
+    att = tmp->attack.value * 1e-3;
+    rel = 0.0003;
+    att = (att == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * att));
+    rel = expf(-1.0f / (SAMPLING_RATE * rel));
+
     for (i=0; i<SAMPLE_NUM; i++){
         //arm_scale_q31(pData + i, pData[i], Q_MULT_SHIFT, pData + i, 1);
         temp = pData[i] * r_q;
@@ -53,9 +57,9 @@ struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     opaque->threshold.lowerBound = 100.0f;
     opaque->threshold.value = 100.0f;
 
-    opaque->attack.upperBound = 200.0f;
-    opaque->attack.lowerBound = 1.0f;
-    opaque->attack.value = 1.0f;
+    opaque->attack.upperBound = 0.2f;
+    opaque->attack.lowerBound = 0.05f;
+    opaque->attack.value = 0.05f;
     
     opaque->ratio.upperBound = 2.0f;
     opaque->ratio.lowerBound = 1.0f;
