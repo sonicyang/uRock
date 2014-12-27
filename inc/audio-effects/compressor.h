@@ -8,8 +8,8 @@ struct Compressor_t{
     struct parameter_t attack;
     struct parameter_t threshold;
     struct parameter_t ratio;
-    uint8_t pre_status;
-    uint32_t count;
+    float env;
+    float gain;
     float pre_r;
 };
 

@@ -1,47 +1,31 @@
 #include "compressor.h"
 #include "helper.h"
 
-void Compressor(volatile float* pData, void *opaque){
+void Compressor(q31_t* pData, void *opaque){
     struct Compressor_t *tmp = (struct Compressor_t*)opaque;
-    float rRatio = 1.0f / tmp->ratio.value;
-    float volume = 0.0f;
-    float dbvolume = -30.0f;
-    float gg = powf(10, (tmp->threshold.value * 0.1f)) * SAMPLE_MAX;
-    float rate = 1.0f;
-    uint8_t status = 0;
-    float aData;
-    float attack_block_count = tmp->attack.value / BLOCK_PERIOD;
-    for (int i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] < 0.0f)
-            aData = 0.0f - pData[i];
-        if (aData > volume){
-            volume = aData;
-            if (aData > gg)
-                status = 1;
-        }
+    register int i;
+    float sum = 0.0f;
+    float temp = 0.0f;
+    float r_q = 1.0f / Q_1;
+    float rms = 0, theta;
+    float att = (tmp->attack.value == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * tmp->attack.value));
+    float rel = expf(-1.0f / (SAMPLING_RATE * 1000));
+    static float env = 0.0f;
+    static float gain = 1.0f;
+    for (i=0; i<SAMPLE_NUM; i++){
+        //arm_scale_q31(pData + i, pData[i], Q_MULT_SHIFT, pData + i, 1);
+        temp = pData[i] * r_q;
+        temp = temp * temp;
+        sum = sum + temp;
     }
-    if (volume != 0)
-        dbvolume = 10.0f * logf(volume / SAMPLE_MAX);
-    if (tmp->pre_status != status){
-        tmp->count = 0;
-        tmp->pre_status = status;
+    rms = sqrtf(sum / SAMPLE_NUM);
+    theta = rms > env ? att : rel;
+    env = (1.0 - theta) * rms + theta * env; 
+    if (env > tmp->threshold.value){
+        gain = gain - (env - tmp->threshold.value) * tmp->ratio.value / SAMPLE_MAX;
     }
-    if (tmp->count <= attack_block_count){
-        rate = tmp->count / attack_block_count;
-    }
-    float temp;
-    if (status == 1){
-        tmp->pre_r = dbvolume - tmp->threshold.value;
-        temp = powf(10, -tmp->pre_r * rRatio * rate);
-    }else{
-        temp = powf(10, -tmp->pre_r * rRatio + tmp->pre_r * rRatio * rate);
-    }
-    for (int i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * temp;
-    }
-    tmp->count ++;
     
-    
+    arm_scale_q31(pData, gain * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
     return;
 }
 
@@ -65,20 +49,20 @@ struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     opaque->parent.del = delete_Compressor;
     opaque->parent.adj = adjust_Compressor;
 
-    opaque->threshold.upperBound = 0.0f;
-    opaque->threshold.lowerBound = -30.0f;
-    opaque->threshold.value = 0.0f;
+    opaque->threshold.upperBound = 500.0f;
+    opaque->threshold.lowerBound = 100.0f;
+    opaque->threshold.value = 100.0f;
 
-    opaque->attack.upperBound = 50.0f;
+    opaque->attack.upperBound = 200.0f;
     opaque->attack.lowerBound = 1.0f;
     opaque->attack.value = 1.0f;
     
-    opaque->ratio.upperBound = 5.0f;
+    opaque->ratio.upperBound = 2.0f;
     opaque->ratio.lowerBound = 1.0f;
     opaque->ratio.value = 1.0f;
     
-    opaque->pre_status = 0;
-    opaque->count = 0;
+    opaque->env = 0.0f;
+    opaque->gain = 1.0f;
 
     return (struct Effect_t*)opaque;
 }
