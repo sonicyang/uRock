@@ -9,8 +9,6 @@ struct Compressor_t{
     struct parameter_t threshold;
     struct parameter_t ratio;
     float env;
-    float gain;
-    float pre_r;
 };
 
 struct Effect_t* new_Compressor(struct Compressor_t* opaque);

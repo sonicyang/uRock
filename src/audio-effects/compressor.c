@@ -9,8 +9,7 @@ void Compressor(q31_t* pData, void *opaque){
     float att, rel;
     float r_q = 1.0f / Q_1;
     float rms = 0, theta;
-    static float env = 0.0f;
-    static float gain = 1.0f;
+    float gain = 1.0f;
     att = tmp->attack.value * 1e-3;
     rel = 0.0003;
     att = (att == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * att));
@@ -23,10 +22,10 @@ void Compressor(q31_t* pData, void *opaque){
         sum = sum + temp;
     }
     rms = sqrtf(sum / SAMPLE_NUM);
-    theta = rms > env ? att : rel;
-    env = (1.0 - theta) * rms + theta * env; 
-    if (env > tmp->threshold.value){
-        gain = gain - (env - tmp->threshold.value) * tmp->ratio.value / SAMPLE_MAX;
+    theta = rms > tmp->env ? att : rel;
+    tmp->env = (1.0 - theta) * rms + theta * tmp->env; 
+    if (tmp->env > tmp->threshold.value){
+        gain = gain - (tmp->env - tmp->threshold.value) * tmp->ratio.value / SAMPLE_MAX;
     }
     
     arm_scale_q31(pData, gain * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
@@ -66,7 +65,6 @@ struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     opaque->ratio.value = 1.0f;
     
     opaque->env = 0.0f;
-    opaque->gain = 1.0f;
 
     return (struct Effect_t*)opaque;
 }
