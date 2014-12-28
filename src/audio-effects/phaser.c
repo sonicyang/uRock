@@ -4,10 +4,13 @@
 float iir_coeff_b[3] = {0.25, 0.5, 0.25};
 float iir_coeff_a[2] = {1.2940575444, -0.5520629632};
 
-q31_t coeffTable[5] = {744051710, -1164315096, 481197437, 702532174, -272930673};
+//float iir_coeff[10] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+float iir_coeff[10] = {1.35741138584944e-06, 2.71482285494618e-06, 1.35741140509988e-06, 1.87433370644654, -0.878910638328047, 1.99999993867203, 0.999999985818274, 1.94325363119022, 0};
+
+q31_t coeffTable[10];
 
 arm_biquad_casd_df1_inst_q31 S;
-q31_t biquadState[4];
+q31_t biquadState[8];
 
 void Phaser(q31_t* pData, void *opaque){
     struct Phaser_t *tmp = (struct Phaser_t*)opaque;
@@ -47,17 +50,10 @@ struct Effect_t* new_Phaser(struct Phaser_t* opaque){
 
     new_LFO(&(opaque->lfo), 4, 0, 1000);
 
-    coeffTable[0] = iir_coeff_b[0] * Q_1;
-    coeffTable[1] = iir_coeff_b[1] * Q_1;
-    coeffTable[2] = iir_coeff_b[2] * Q_1;
-    coeffTable[3] = iir_coeff_a[0] * Q_1;
-    coeffTable[4] = iir_coeff_a[1] * Q_1;
-
-    arm_biquad_cascade_df1_init_q31(&S, 1, coeffTable, biquadState, Q_MULT_SHIFT);
-    biquadState[0] = 0;
-    biquadState[1] = 0;
-    biquadState[2] = 0;
-    biquadState[3] = 0;
+    for (i = 0; i < 10; i++) {
+        coeffTable[i] = iir_coeff[i] * 536870912;
+    }
+    arm_biquad_cascade_df1_init_q31(&S, 2, coeffTable, biquadState, 2);
 
     return (struct Effect_t*)opaque;
 }

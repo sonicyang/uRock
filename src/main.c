@@ -50,6 +50,7 @@
 #include "phaser.h"
 #include "compressor.h"
 #include "flanger.h"
+#include "equalizer.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -69,6 +70,7 @@ struct Overdrive_t overdrive;
 struct Reverb_t delay;
 struct Flanger_t flanger;
 struct Phaser_t phaser;
+struct Equalizer_t equalizer;
 struct Compressor_t compressor;
 
 osThreadId SPUid;
@@ -141,8 +143,9 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    EffectStages[0] = new_Overdrive(&overdrive);
+    //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
+    EffectStages[0] = new_Equalizer(&equalizer);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[0] = new_Flanger(&flanger);
@@ -219,7 +222,7 @@ static void UserInterface(void const *argument){
         BSP_LCD_DisplayStringAt(0, 5 * 16, (uint8_t*) buf, CENTER_MODE);
         */
 
-        osDelay(200);
+        osDelay(1000);
     }
 }
 
