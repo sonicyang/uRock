@@ -4,35 +4,35 @@
 void Overdrive(q31_t* pData, void *opaque){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
     register uint32_t i;
-    register float gg = SAMPLE_MAX;
-    q31_t q31_ratio = tmp->ratio.value * Q_1;
-    q31_t q31_r_ratio = Q_1 / tmp->ratio.value;
-    q31_t q31_gg = gg * Q_1;
-    q31_t q31_r_gg = 2147483648 / gg; //this is fking Q1.31
-    q31_t q31_rg;
-    q31_t q31_r_rg;
 
-    arm_scale_q31(&q31_gg, q31_ratio, Q_MULT_SHIFT, &q31_rg, 1);
+    q31_t q31_ratio = tmp->ratio.value * 2147483648; //this is fking Q1.31
+    q31_t q31_r_ratio = Q_1 / tmp->ratio.value;
+
+    q31_t q31_gg = SAMPLE_MAX * tmp->gain.value * Q_1;
+    q31_t q31_r_gg = 2147483648 / (SAMPLE_MAX * tmp->gain.value); //this is fking Q1.31
+
+    q31_t q31_rg;
+    q31_t q31_r_rg; //this is fking Q1.31
+
+    q31_t cacl_tmp;
+
+    arm_mult_q31(&q31_gg, &q31_ratio, &q31_rg, 1);
     arm_scale_q31(&q31_r_gg, q31_r_ratio, Q_MULT_SHIFT, &q31_r_rg, 1);
 
     for (i = 0; i < SAMPLE_NUM; i++){
-
         if (pData[i] > q31_rg){
             pData[i] = q31_gg;
         }else if(pData[i] < -q31_rg){
             pData[i] = -q31_gg;
         }else{
-
-            q31_t tmp;
-            arm_scale_q31(pData + i, q31_r_rg, 0, &tmp, 1);
-            arm_scale_q31(&tmp, 0.25 * Q_1, Q_MULT_SHIFT * 2, &tmp, 1);
-            tmp = arm_sin_q31(tmp);
-            arm_shift_q31(&tmp, -Q_MULT_SHIFT, &tmp, 1);
-            arm_scale_q31(&tmp, q31_gg, Q_MULT_SHIFT, &pData[i], 1);
-            //pData[i] = arm_sin_f32(PI * pData[i] * 0.5 * q31_r_rg) * q31_gg;
-            //pData[i] = sin(pData[i] * 0.25 * q31_r_rg) * q_31_gg ;
+            arm_mult_q31(pData + i, &q31_r_rg, &cacl_tmp, 1);
+            arm_scale_q31(&cacl_tmp, 0x20000000, Q_MULT_SHIFT, &cacl_tmp, 1);
+            cacl_tmp = arm_sin_q31(cacl_tmp);
+            arm_mult_q31(&q31_gg, &cacl_tmp, &pData[i], 1);
         }
     }
+
+    arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
 
     return;
 }
@@ -58,17 +58,17 @@ struct Effect_t* new_Overdrive(struct Overdrive_t* opaque){
     opaque->parent.del = delete_Overdrive;
     opaque->parent.adj = adjust_Overdrive;
 
-    opaque->gain.upperBound = 15.0f;
-    opaque->gain.lowerBound = 0.0f;
-    opaque->gain.value = 0.0f;
+    opaque->gain.upperBound = 0.0f;
+    opaque->gain.lowerBound = 1.0f;
+    opaque->gain.value = 1.0f;
 
     opaque->volume.upperBound = 0.0f;
     opaque->volume.lowerBound = -30.0f;
     opaque->volume.value = 0.0f;
 
-    opaque->ratio.upperBound = 1.0f;
+    opaque->ratio.upperBound = 0.99f;
     opaque->ratio.lowerBound = 0.5f;
-    opaque->ratio.value = 1.0f;
+    opaque->ratio.value = 0.99f;
 
     return (struct Effect_t*)opaque;
 }
