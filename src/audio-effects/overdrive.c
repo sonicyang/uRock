@@ -8,7 +8,7 @@ void Overdrive(q31_t* pData, void *opaque){
     q31_t q31_ratio = tmp->ratio.value * Q_1;
     q31_t q31_r_ratio = Q_1 / tmp->ratio.value;
     q31_t q31_gg = gg * Q_1;
-    q31_t q31_r_gg = Q_1 / gg;
+    q31_t q31_r_gg = 2147483648 / gg; //this is fking Q1.31
     q31_t q31_rg;
     q31_t q31_r_rg;
 
@@ -16,15 +16,18 @@ void Overdrive(q31_t* pData, void *opaque){
     arm_scale_q31(&q31_r_gg, q31_r_ratio, Q_MULT_SHIFT, &q31_r_rg, 1);
 
     for (i = 0; i < SAMPLE_NUM; i++){
+
         if (pData[i] > q31_rg){
-            pData[i] = q31_rg;
+            pData[i] = q31_gg;
         }else if(pData[i] < -q31_rg){
-            pData[i] = -q31_rg;
+            pData[i] = -q31_gg;
         }else{
+
             q31_t tmp;
-            arm_scale_q31(pData + i, q31_r_rg, Q_MULT_SHIFT, &tmp, 1);
-            arm_scale_q31(&tmp, 0.25 * Q_1, Q_MULT_SHIFT, &tmp, 1);
+            arm_scale_q31(pData + i, q31_r_rg, 0, &tmp, 1);
+            arm_scale_q31(&tmp, 0.25 * Q_1, Q_MULT_SHIFT * 2, &tmp, 1);
             tmp = arm_sin_q31(tmp);
+            arm_shift_q31(&tmp, -Q_MULT_SHIFT, &tmp, 1);
             arm_scale_q31(&tmp, q31_gg, Q_MULT_SHIFT, &pData[i], 1);
             //pData[i] = arm_sin_f32(PI * pData[i] * 0.5 * q31_r_rg) * q31_gg;
             //pData[i] = sin(pData[i] * 0.25 * q31_r_rg) * q_31_gg ;

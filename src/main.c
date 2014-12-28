@@ -143,9 +143,9 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    //EffectStages[0] = new_Overdrive(&overdrive);
+    EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
-    EffectStages[0] = new_Equalizer(&equalizer);
+    //EffectStages[0] = new_Equalizer(&equalizer);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[0] = new_Flanger(&flanger);
@@ -222,7 +222,7 @@ static void UserInterface(void const *argument){
         BSP_LCD_DisplayStringAt(0, 5 * 16, (uint8_t*) buf, CENTER_MODE);
         */
 
-        osDelay(1000);
+        osDelay(200);
     }
 }
 
