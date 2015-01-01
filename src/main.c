@@ -82,7 +82,7 @@ volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
-static void UserInterface(void const *argument);
+static void UserInterface(void *argument);
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -125,8 +125,9 @@ int main(void){
 	            (signed char*)"SPU",
 	            2048, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	//osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    //UIid = osThreadCreate (osThread(UI), NULL);
+	xTaskCreate(UserInterface,
+	            (signed char*)"UI",
+	            256, NULL, tskIDLE_PRIORITY + 1, NULL);
 
 	vTaskStartScheduler();
 
@@ -148,7 +149,7 @@ static void SignalProcessingUnit(void *pvParameters){
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
-    //EffectStages[0] = new_Equalizer(&equalizer);
+    EffectStages[0] = new_Equalizer(&equalizer);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[0] = new_Flanger(&flanger);
@@ -163,7 +164,6 @@ static void SignalProcessingUnit(void *pvParameters){
     /* Process */
     while(1){
         if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){
-            SPU_Hold--;
 
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
@@ -187,7 +187,7 @@ static void SignalProcessingUnit(void *pvParameters){
     while(1);
 }
 
-static void UserInterface(void const *argument){
+static void UserInterface(void *argument){
     uint8_t values[3];
     //char buf[16];
 
@@ -233,7 +233,11 @@ static void UserInterface(void const *argument){
 
 /* Double Buffer Swapping Callbacks */
 void DMA2_Stream0_IRQHandler(void){
+
+
+
     HAL_DMA_IRQHandler(&hdma_adc1);
+
     return;
 }
 
@@ -246,16 +250,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
     static signed portBASE_TYPE xHigherPriorityTaskWoken;
 
-
     if(hadc->Instance == ADC1){
         index += 2;
         if(index >= BUFFER_NUM)
             index = 0;
 
+        xHigherPriorityTaskWoken = pdFALSE;
+
         HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
 
         xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        if(xHigherPriorityTaskWoken != pdFALSE)
+            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
     return;  
@@ -269,11 +275,14 @@ void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
         index += 2;
         if(index >= BUFFER_NUM)
             index = 1;
+        
+        xHigherPriorityTaskWoken = pdFALSE;
 
         HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
 
         xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        if(xHigherPriorityTaskWoken != pdFALSE)
+            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
     return;  
 }
