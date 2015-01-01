@@ -33,7 +33,10 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
 
-#include "cmsis_os.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
 #include "MspInit.h"
 #include "helper.h"
@@ -73,14 +76,12 @@ struct Phaser_t phaser;
 struct Equalizer_t equalizer;
 struct Compressor_t compressor;
 
-osThreadId SPUid;
-static void SignalProcessingUnit(void const *argument);
-volatile uint32_t SPU_Hold = 0;
+static void SignalProcessingUnit(void *pvParameters);
+xSemaphoreHandle SPU_Hold;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
-osThreadId UIid;
 static void UserInterface(void const *argument);
 
 int main(void){
@@ -120,17 +121,19 @@ int main(void){
     MX_ADC2_Init();
     MX_DAC_Init();
     
-	osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 2048);
-    SPUid = osThreadCreate (osThread(SPU), NULL);
+	xTaskCreate(SignalProcessingUnit,
+	            (signed char*)"SPU",
+	            2048, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    UIid = osThreadCreate (osThread(UI), NULL);
+	//osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+    //UIid = osThreadCreate (osThread(UI), NULL);
 
-	osKernelStart (NULL, NULL);
+	vTaskStartScheduler();
+
 	while (1);
 }
 
-static void SignalProcessingUnit(void const *argument){
+static void SignalProcessingUnit(void *pvParameters){
     uint32_t index = 0;
     uint32_t pipeindex = 0;
     uint32_t i;
@@ -143,12 +146,14 @@ static void SignalProcessingUnit(void const *argument){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    EffectStages[0] = new_Overdrive(&overdrive);
+    //EffectStages[0] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[0] = new_Equalizer(&equalizer);
     //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[0] = new_Flanger(&flanger);
+    //
+    SPU_Hold = xSemaphoreCreateBinary();
 
     /* Init */
     HAL_TIM_Base_Start(&htim2);
@@ -157,7 +162,7 @@ static void SignalProcessingUnit(void const *argument){
   
     /* Process */
     while(1){
-        if(SPU_Hold){
+        if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){
             SPU_Hold--;
 
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
@@ -193,7 +198,7 @@ static void UserInterface(void const *argument){
     BSP_LCD_Clear(LCD_COLOR_WHITE);
     BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
     
-    osDelay(10);
+    vTaskDelay(10);
 	while (1) {
 		BSP_TS_GetState(&tp);
 		if (tp.TouchDetected == 1) {
@@ -222,7 +227,7 @@ static void UserInterface(void const *argument){
         BSP_LCD_DisplayStringAt(0, 5 * 16, (uint8_t*) buf, CENTER_MODE);
         */
 
-        osDelay(200);
+        vTaskDelay(200);
     }
 }
 
@@ -239,6 +244,9 @@ void DMA1_Stream6_IRQHandler(void){
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 0;
+    static signed portBASE_TYPE xHigherPriorityTaskWoken;
+
+
     if(hadc->Instance == ADC1){
         index += 2;
         if(index >= BUFFER_NUM)
@@ -246,13 +254,16 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 
         HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
 
-        SPU_Hold++;
+        xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
+
     return;  
 }
 
 void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
     static uint32_t index = 1;
+    static signed portBASE_TYPE xHigherPriorityTaskWoken;
 
     if(hadc->Instance == ADC1){
         index += 2;
@@ -260,8 +271,9 @@ void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
             index = 1;
 
         HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
-        
-        SPU_Hold++;
+
+        xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
     return;  
 }
