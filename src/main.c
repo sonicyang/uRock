@@ -147,11 +147,11 @@ static void SignalProcessingUnit(void *pvParameters){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    //EffectStages[0] = new_Overdrive(&overdrive);
-    //EffectStages[0] = new_Phaser(&phaser);
-    EffectStages[0] = new_Equalizer(&equalizer);
-    //EffectStages[0] = new_Reverb(&delay);
     //EffectStages[0] = new_Compressor(&compressor);
+    EffectStages[1] = new_Overdrive(&overdrive);
+    //EffectStages[0] = new_Phaser(&phaser);
+    //EffectStages[2] = new_Equalizer(&equalizer);
+    //EffectStages[3] = new_Reverb(&delay);
     //EffectStages[0] = new_Flanger(&flanger);
     //
     SPU_Hold = xSemaphoreCreateBinary();
@@ -160,7 +160,7 @@ static void SignalProcessingUnit(void *pvParameters){
     HAL_TIM_Base_Start(&htim2);
     HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
     HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
-  
+
     /* Process */
     while(1){
         if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){

@@ -12,7 +12,7 @@ void Compressor(q31_t* pData, void *opaque){
     float gain = 1.0f;
     att = tmp->attack.value * 1e-3;
     rel = 0.0003;
-    att = (att == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * att));
+    att = (att == 0.0f) ? (0.0f) : expf(-1.0f / (SAMPLING_RATE * 1000 * att));
     rel = expf(-1.0f / (SAMPLING_RATE * rel));
 
     for (i=0; i<SAMPLE_NUM; i++){
