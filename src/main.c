@@ -33,6 +33,10 @@
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
 
+#include "ff.h"
+#include "ff_gen_drv.h"
+#include "sd_diskio.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -66,6 +70,10 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DAC_HandleTypeDef hdac;
 TIM_HandleTypeDef htim2;
+SD_HandleTypeDef hsd;
+HAL_SD_CardInfoTypedef SDCardInfo;
+DMA_HandleTypeDef hdma_sdiorx;
+DMA_HandleTypeDef hdma_sdiotx;
 
 struct Volume_t vol;
 struct Distortion_t distor;
@@ -83,6 +91,11 @@ q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
 static void UserInterface(void *argument);
+
+uint8_t SD_DriverNum;      /* FatFS SD part */
+char SD_Path[4];           /* SD card logical drive path */
+FATFS FatFs;
+FIL fil;
 
 int main(void){
 	/* STM32F4xx HAL library initialization:
@@ -115,11 +128,18 @@ int main(void){
 	BSP_LED_Init(LED4);
 
     MX_GPIO_Init();
+    MX_SDIO_SD_Init();
     MX_DMA_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_DAC_Init();
+
+    HAL_NVIC_SetPriority(SDIO_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(SDIO_IRQn);
+
+    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+
     
 	xTaskCreate(SignalProcessingUnit,
 	            (signed char*)"SPU",
@@ -139,6 +159,23 @@ static void SignalProcessingUnit(void *pvParameters){
     uint32_t pipeindex = 0;
     uint32_t i;
     
+    if (f_mount(&FatFs, SD_Path, 1) == FR_OK) {
+        //Try to open file
+        if (f_open(&fil, "0:/1stfile.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE) == FR_OK) {
+            //If we put more than 0 characters (everything OK)
+            if (f_puts("First string in my file\n", &fil) > 0) {
+                
+            }
+            
+            //Close file, don't forget this!
+            f_close(&fil);
+        }
+        
+        //Unmount drive, don't forget this!
+        f_mount(0, SD_Path, 1);
+    }
+
+
     for(i = 0; i < STAGE_NUM; i++){
         EffectStages[i] = NULL;
     }
@@ -231,11 +268,26 @@ static void UserInterface(void *argument){
     }
 }
 
+void SDIO_IRQHandler(void){
+    HAL_SD_IRQHandler(&hsd);
+
+    return;
+}
+
+void DMA2_Stream3_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_sdiorx);
+
+    return;
+}
+
+void DMA2_Stream6_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_sdiotx);
+
+    return;
+}
+
 /* Double Buffer Swapping Callbacks */
 void DMA2_Stream0_IRQHandler(void){
-
-
-
     HAL_DMA_IRQHandler(&hdma_adc1);
 
     return;

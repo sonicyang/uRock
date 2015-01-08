@@ -1,14 +1,12 @@
 /**
   ******************************************************************************
-  * @file    sram_diskio.h 
-  * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    22-April-2014
-  * @brief   Header for sram_diskio.c module
+  * File Name          : fatfs_handles.h
+  * Date               : 08/01/2015 21:29:23
+  * Description        : This file provides code for the IP handles used by FATFS
+  * Version			   : v0.1.0
   ******************************************************************************
-  * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+  * COPYRIGHT 2015 STMicroelectronics
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -24,18 +22,34 @@
   *
   ******************************************************************************
   */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __SRAM_DISKIO_H
-#define __SRAM_DISKIO_H
+#ifndef __FATFS_HANDLES__H__
+#define __FATFS_HANDLES__H__
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-extern Diskio_drvTypeDef  SRAMDISK_Driver;
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-#endif /* __SRAM_DISKIO_H */
+/*----------   -----------*/
+#define _HNAND      valueNotSetted 
+ 
+/*----------   -----------*/
+#define _HSDRAM      valueNotSetted 
+ 
+/*----------   -----------*/
+#define _HSD      hsd 
+ 
+/*----------   -----------*/
+#define _HUSBH      valueNotSetted 
+ 
+
+#ifdef __cplusplus
+}
+#endif
+#endif /*__ FATFS_HANDLES__H_H */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
