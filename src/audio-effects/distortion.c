@@ -29,8 +29,8 @@ struct Effect_t* new_Distortion(struct Distortion_t* opaque){
     opaque->parent.adj = adjust_Distortion;
 
     opaque->gain.upperBound = 200.0f;
-    opaque->gain.lowerBound = 1.0f;
-    opaque->gain.value = 1.0f;
+    opaque->gain.lowerBound = 10.0f;
+    opaque->gain.value = 10.0f;
 
     opaque->volume.upperBound = 0.0f;
     opaque->volume.lowerBound = -30.0f;

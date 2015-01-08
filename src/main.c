@@ -147,7 +147,7 @@ static void SignalProcessingUnit(void *pvParameters){
 
     //EffectStages[0] = new_Volume(&vol);
     //EffectStages[0] = new_Distortion(&distor);
-    //EffectStages[0] = new_Compressor(&compressor);
+    EffectStages[0] = new_Compressor(&compressor);
     EffectStages[1] = new_Overdrive(&overdrive);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[2] = new_Equalizer(&equalizer);
