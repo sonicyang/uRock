@@ -59,10 +59,21 @@ void NormalizeData(volatile uint16_t * pData, q31_t* tData){
 }
 
 void DenormalizeData(q31_t* tData, volatile uint16_t * pData){
+    uint32_t i;
 
     arm_q31_to_q15(tData, (q15_t*)pData, SAMPLE_NUM);
     arm_shift_q15((q15_t*)pData, -4, (q15_t*)pData, SAMPLE_NUM);
+   
+
+    //DITHERING 
+    for(i = 0; i < 256; i += 2){
+        pData[i] += DITHERING_AMP;
+        pData[i + 1] -= DITHERING_AMP;
+    }
+
     arm_offset_q15((q15_t*)pData, (SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
+
+
 
     return;
 }
