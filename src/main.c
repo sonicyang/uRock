@@ -32,6 +32,7 @@
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
+#include "stm32f4xx_it.h"
 
 #include "ff.h"
 #include "ff_gen_drv.h"
@@ -45,8 +46,6 @@
 #include "MspInit.h"
 #include "helper.h"
 #include "setting.h"
-
-#include "arm_math.h"
 
 #include "base-effect.h"
 #include "volume.h"
@@ -134,9 +133,8 @@ int main(void){
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_DAC_Init();
+    NVIC_Init();
 
-    HAL_NVIC_SetPriority(SDIO_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(SDIO_IRQn);
 
     SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
 
@@ -266,36 +264,6 @@ static void UserInterface(void *argument){
 
         vTaskDelay(200);
     }
-}
-
-void SDIO_IRQHandler(void){
-    HAL_SD_IRQHandler(&hsd);
-
-    return;
-}
-
-void DMA2_Stream3_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_sdiorx);
-
-    return;
-}
-
-void DMA2_Stream6_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_sdiotx);
-
-    return;
-}
-
-/* Double Buffer Swapping Callbacks */
-void DMA2_Stream0_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_adc1);
-
-    return;
-}
-
-void DMA1_Stream6_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_dac2);
-    return;
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){

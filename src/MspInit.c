@@ -244,15 +244,6 @@ void MX_DMA_Init(void) {
   /* DMA controller clock enable */
   __DMA2_CLK_ENABLE();
   __DMA1_CLK_ENABLE();
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-
-  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 6, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
-  HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 7, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 }
  
 /** Configure pins as

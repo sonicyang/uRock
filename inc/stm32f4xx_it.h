@@ -41,6 +41,8 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+void NVIC_Init(void);
+
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void MemManage_Handler(void);
@@ -50,6 +52,12 @@ void SVC_Handler(void);
 void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
+
+void SDIO_IRQHandler(void);
+void DMA2_Stream3_IRQHandler(void);
+void DMA2_Stream6_IRQHandler(void);
+void DMA2_Stream0_IRQHandler(void);
+void DMA1_Stream6_IRQHandler(void);
 
 #ifdef __cplusplus
 }
