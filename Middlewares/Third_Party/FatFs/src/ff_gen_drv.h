@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    ff_gen_drv.h 
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    22-April-2014
+  * @version V1.0.0
+  * @date    18-February-2014
   * @brief   Header for ff_gen_drv.c module.
   ******************************************************************************
   * @attention
@@ -60,8 +60,7 @@ typedef struct
   * @brief  Global Disk IO Drivers structure definition  
   */ 
 typedef struct
-{ 
-  uint8_t                 is_initialized[_VOLUMES];
+{
   Diskio_drvTypeDef       *drv[_VOLUMES];
   __IO uint8_t            nbr;
 

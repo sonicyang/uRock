@@ -13,8 +13,6 @@ arm_biquad_casd_df1_inst_q31 S;
 q31_t biquadState[8];
 
 void Phaser(q31_t* pData, void *opaque){
-    struct Phaser_t *tmp = (struct Phaser_t*)opaque;
-    uint32_t i;
     q31_t fData[256];
 
     arm_biquad_cascade_df1_q31(&S, pData, fData, SAMPLE_NUM);
