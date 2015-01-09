@@ -21,7 +21,7 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
   hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLED;
-  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_FULL;
   hsai_BlockA1.FrameInit.FrameLength = 128;
   hsai_BlockA1.FrameInit.ActiveFrameLength = 64;
   hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
@@ -30,7 +30,7 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.SlotInit.FirstBitOffset = 0;
   hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
   hsai_BlockA1.SlotInit.SlotNumber = 1;
-  hsai_BlockA1.SlotInit.SlotActive = 0x00000000;
+  hsai_BlockA1.SlotInit.SlotActive = SAI_SLOTACTIVE_ALL;
   HAL_SAI_Init(&hsai_BlockA1);
 
   hsai_BlockB1.Instance = SAI1_Block_B;
