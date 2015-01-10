@@ -8,7 +8,8 @@ UGFXSRCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/gevent \
 			 Middlewares/ugfx/src/gtimer \
 			 Middlewares/ugfx/src/gwin \
-			 Middlewares/ugfx/src/gdriver
+			 Middlewares/ugfx/src/gdriver \
+			 Middlewares/ugfx/src/gqueue
 
 UGFXINCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/gdisp \

@@ -42,6 +42,9 @@
 #define GFX_USE_GEVENT			TRUE
 #define GFX_USE_GTIMER			TRUE
 #define GFX_USE_GINPUT			TRUE
+#define GFX_USE_GWIN			TRUE
+#define GFX_USE_GWIGEIT			TRUE
+#define GFX_USE_GQUEUE          TRUE
 
 /* Features for the GDISP sub-system. */
 #define GDISP_NEED_VALIDATION	TRUE
@@ -49,6 +52,11 @@
 #define GDISP_NEED_TEXT			TRUE
 #define GDISP_NEED_CIRCLE		TRUE
 #define GDISP_NEED_MULTITHREAD	TRUE
+#define GWIN_NEED_WIDGET        TRUE
+#define GWIN_NEED_WINDOWMANAGER TRUE
+#define GQUEUE_NEED_ASYNC       TRUE
+#define GWIN_NEED_BUTTON        TRUE
+
 
 /* Builtin Fonts */
 #define GDISP_INCLUDE_FONT_DEJAVUSANS12_AA		TRUE
