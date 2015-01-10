@@ -34,6 +34,13 @@ void adjust_Phaser(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Phaser(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Phaser_t *tmp = (struct Phaser_t*)opaque;
+    *paramNum = 1;
+    param[0].value = tmp->speed.value;
+    return;
+}
+
 struct Effect_t* new_Phaser(struct Phaser_t* opaque){
     uint32_t i;
 
@@ -41,6 +48,7 @@ struct Effect_t* new_Phaser(struct Phaser_t* opaque){
     opaque->parent.func = Phaser;
     opaque->parent.del = delete_Phaser;
     opaque->parent.adj = adjust_Phaser;
+    opaque->parent.getParam = getParam_Phaser;
 
     opaque->speed.upperBound = 500.0f;
     opaque->speed.lowerBound = 5000.0;

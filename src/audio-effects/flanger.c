@@ -56,12 +56,22 @@ void adjust_Flanger(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Flanger(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Flanger_t *tmp = (struct Flanger_t*)opaque;
+    *paramNum = 3;
+    param[0].value = tmp->attenuation.value;
+    param[1].value = tmp->speed.value;
+    param[2].value = tmp->depth.value;
+    return;
+}
+
 
 struct Effect_t* new_Flanger(struct Flanger_t* opaque){
     strcpy(opaque->parent.name, "Flanger");
     opaque->parent.func = Flanger;
     opaque->parent.del = delete_Flanger;
     opaque->parent.adj = adjust_Flanger;
+    opaque->parent.getParam = getParam_Flanger;
 
     opaque->attenuation.upperBound = -2.0f;
     opaque->attenuation.lowerBound = -30.0f;

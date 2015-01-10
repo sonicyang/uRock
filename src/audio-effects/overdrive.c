@@ -52,11 +52,21 @@ void adjust_Overdrive(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Overdrive(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
+    *paramNum = 3;
+    param[0].value = tmp->gain.value;
+    param[1].value = tmp->volume.value;
+    param[2].value = tmp->ratio.value;
+    return;
+}
+
 struct Effect_t* new_Overdrive(struct Overdrive_t* opaque){
     strcpy(opaque->parent.name, "Overdrive");
     opaque->parent.func = Overdrive;
     opaque->parent.del = delete_Overdrive;
     opaque->parent.adj = adjust_Overdrive;
+    opaque->parent.getParam = getParam_Overdrive;
 
     opaque->gain.upperBound = 0.0f;
     opaque->gain.lowerBound = 1.0f;

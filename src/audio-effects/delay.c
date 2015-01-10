@@ -39,11 +39,20 @@ void adjust_Delay(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Delay(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Delay_t *tmp = (struct Compressor_t*)opaque;
+    *paramNum = 2;
+    param[0].value = tmp->attenuation.value;
+    param[1].value = tmp->delayTime.value;
+    return;
+}
+
 struct Effect_t* new_Delay(struct Delay_t* opaque){
     strcpy(opaque->parent.name, "Delay");
     opaque->parent.func = Delay;
     opaque->parent.del = delete_Delay;
     opaque->parent.adj = adjust_Delay;
+    opaque->parent.getParam = getParam_Delay;
 
     opaque->attenuation.upperBound = -5.0f;
     opaque->attenuation.lowerBound = -30.0f;

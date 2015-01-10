@@ -60,6 +60,15 @@ void adjust_Equalizer(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Equalizer(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Equalizer_t *tmp = (struct Equalizer_t*)opaque;
+    *paramNum = 3;
+    param[0].value = tmp->low.value;
+    param[1].value = tmp->mid.value;
+    param[2].value = tmp->high.value;
+    return;
+}
+
 struct Effect_t* new_Equalizer(struct Equalizer_t* opaque){
     uint32_t i;
 
@@ -67,6 +76,7 @@ struct Effect_t* new_Equalizer(struct Equalizer_t* opaque){
     opaque->parent.func = Equalizer;
     opaque->parent.del = delete_Equalizer;
     opaque->parent.adj = adjust_Equalizer;
+    opaque->parent.getParam = getParam_Equalizer;
 
     opaque->low.upperBound = 0.0f;
     opaque->low.lowerBound = -20.0;

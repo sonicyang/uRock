@@ -30,12 +30,14 @@ struct parameter_t{
 typedef void(*EffectFunc)(q31_t*, void*);
 typedef void(*DeleteFunc)(void*);
 typedef void(*adjustFunc)(void*, uint8_t*);
+typedef void(*getParamFunc)(void*,struct parameter_t*, uint8_t*);
 
 struct Effect_t{
     char name[16];
     EffectFunc func;
     DeleteFunc del;
     adjustFunc adj;
+    getParamFunc getParam;
 };
 
 #endif //__AUDIO_EFFECT_H__
