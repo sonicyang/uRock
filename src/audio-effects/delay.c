@@ -40,7 +40,7 @@ void adjust_Delay(void *opaque, uint8_t* values){
 }
 
 void getParam_Delay(void *opaque, struct parameter_t param[], uint8_t* paramNum){
-    struct Delay_t *tmp = (struct Compressor_t*)opaque;
+    struct Delay_t *tmp = (struct Delay_t*)opaque;
     *paramNum = 2;
     param[0].value = tmp->attenuation.value;
     param[1].value = tmp->delayTime.value;
