@@ -67,7 +67,7 @@ static inline void init_board(GDisplay *g) {
 static inline void set_backlight(GDisplay *g, uint8_t percent) {
 	(void) g;
 	uint16_t i = (percent * 0xFF) / 100;
-	//BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, (uint8_t)i);
+	BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, (uint8_t)i);
 }
 
 /*===========================================================================*/
