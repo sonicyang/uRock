@@ -47,8 +47,6 @@
 #include "ui.h"
 #include "spu.h"
 
-#include "sys_defs.h"
-
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 
@@ -63,119 +61,54 @@ char SD_Path[4];           /* SD card logical drive path */
 FATFS FatFs;
 FIL fil;
 
-#define COLOR_SIZE	20
-#define PEN_SIZE	20
-#define POFFSET		3
+int main(void){
+	/* STM32F4xx HAL library initialization:
+	   - Configure the Flash prefetch, instruction and Data caches
+	   - Configure the Systick to generate an interrupt each 1 msec
+	   - Set NVIC Group Priority to 4
+	   - Global MSP (MCU Support Package) initialization
+	   */
 
-#define COLOR_BOX(a)		(ev.x >= a && ev.x <= a + COLOR_SIZE)
-#define PEN_BOX(a)			(ev.y >= a && ev.y <= a + COLOR_SIZE)
-#define GET_COLOR(a)		(COLOR_BOX(a * COLOR_SIZE + POFFSET))
-#define GET_PEN(a)			(PEN_BOX(a * 2 * PEN_SIZE + POFFSET))
-#define DRAW_COLOR(a)		(a * COLOR_SIZE + POFFSET)
-#define DRAW_PEN(a)			(a * 2 * PEN_SIZE + POFFSET)
-#define DRAW_AREA(x, y)		(x >= PEN_SIZE + POFFSET + 3 && x <= gdispGetWidth() && \
-							 y >= COLOR_SIZE + POFFSET + 3 && y <= gdispGetHeight())
-
-/* Task priorities. */
-#define mainFLASH_TASK_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainLCD_TASK_PRIORITY				( tskIDLE_PRIORITY + 2 )
-
-void drawScreen(void)
-{
-	char *msg = "uGFX";
-	font_t		font1, font2;
-
-	font1 = gdispOpenFont("DejaVuSans24*");
-	font2 = gdispOpenFont("DejaVuSans12*");
-
-	gdispClear(White);
-	gdispDrawString(gdispGetWidth()-gdispGetStringWidth(msg, font1)-3, 3, msg, font1, Black);
-
-	/* colors */
-	gdispFillArea(0 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Black);	/* Black */
-	gdispFillArea(1 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uRed);		/* uRed */
-	gdispFillArea(2 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Yellow);	/* Yellow */
-	gdispFillArea(3 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uGreen);	/* uGreen */
-	gdispFillArea(4 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uBlue);		/* uBlue */
-	gdispDrawBox (5 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Black);	/* White */
-
-	/* pens */
-	gdispFillStringBox(POFFSET * 2, DRAW_PEN(1), PEN_SIZE, PEN_SIZE, "1", font2, White, Black, justifyCenter);
-	gdispFillStringBox(POFFSET * 2, DRAW_PEN(2), PEN_SIZE, PEN_SIZE, "2", font2, White, Black, justifyCenter);
-	gdispFillStringBox(POFFSET * 2, DRAW_PEN(3), PEN_SIZE, PEN_SIZE, "3", font2, White, Black, justifyCenter);
-	gdispFillStringBox(POFFSET * 2, DRAW_PEN(4), PEN_SIZE, PEN_SIZE, "4", font2, White, Black, justifyCenter);
-	gdispFillStringBox(POFFSET * 2, DRAW_PEN(5), PEN_SIZE, PEN_SIZE, "5", font2, White, Black, justifyCenter);
-
-	gdispCloseFont(font1);
-	gdispCloseFont(font2);
-}
-
-GEventMouse		ev;
-
-/* GFX notepad demo */
-static void prvLCDTask(void *pvParameters)
-{
-	color_t color = Black;
-	uint16_t pen = 0;
-
-	( void ) pvParameters;
-
-	gfxInit();
-	ginputGetMouse(0);
-
-	drawScreen();
-
-	while (TRUE) {
-		ginputGetMouseStatus(0, &ev);
-		if (!(ev.current_buttons & GINPUT_MOUSE_BTN_LEFT))
-			continue;
-
-		/* inside color box ? */
-		if(ev.y >= POFFSET && ev.y <= COLOR_SIZE) {
-			     if(GET_COLOR(0)) 	color = Black;
-			else if(GET_COLOR(1))	color = uRed;
-			else if(GET_COLOR(2))	color = Yellow;
-			else if(GET_COLOR(3))	color = uGreen;
-			else if(GET_COLOR(4))	color = uBlue;
-			else if(GET_COLOR(5))	color = White;
-
-		/* inside pen box ? */
-		} else if(ev.x >= POFFSET && ev.x <= PEN_SIZE) {
-			     if(GET_PEN(1))		pen = 0;
-			else if(GET_PEN(2))		pen = 1;
-			else if(GET_PEN(3))		pen = 2;
-			else if(GET_PEN(4))		pen = 3;
-			else if(GET_PEN(5))		pen = 4;
-
-		/* inside drawing area ? */
-		} else if(DRAW_AREA(ev.x, ev.y)) {
-			if(pen == 0)
-				gdispDrawPixel(ev.x, ev.y, color);
-			else
-				gdispFillCircle(ev.x, ev.y, pen, color);
-		}
-	}
-}
-
-int main(void)
-{
-	/* Configure the hardware ready to run the test. */
+	/* Configure the system clock to 180 Mhz */
 	SystemClock_Config();
 
 	HAL_Init();
 
-	/* Start the LCD task */
-	xTaskCreate( prvLCDTask, "LCD", 256, NULL, mainLCD_TASK_PRIORITY, NULL );
+	BSP_SDRAM_Init();
 
-	/* Start the scheduler. */
+	BSP_LCD_Init();
+	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+	BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER + BUFFER_OFFSET);
+	BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+
+	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+
+	BSP_LED_Init(LED3);
+	BSP_LED_Init(LED4);
+
+    MX_GPIO_Init();
+    MX_SDIO_SD_Init();
+    MX_TIM2_Init();
+    MX_ADC1_Init();
+    MX_DAC_Init();
+    MX_ADC2_Init();
+    MX_DMA_Init();
+    NVIC_Init();
+
+    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+    
+	xTaskCreate(SignalProcessingUnit,
+	            (signed char*)"SPU",
+	            2048, NULL, tskIDLE_PRIORITY + 2, NULL);
+
+	xTaskCreate(UserInterface,
+	            (signed char*)"UI",
+	            256, NULL, tskIDLE_PRIORITY + 1, NULL);
+
 	vTaskStartScheduler();
+
+	while (1);
 }
-
-
-void vApplicationTickHook(void)
-{
-}
-
 
 /**
  * @brief  System Clock Configuration
