@@ -25,10 +25,10 @@ void adjust_Volume(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Volume(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Volume(void *opaque, struct parameter_t* param[], uint8_t* paramNum){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
     *paramNum = 1;
-    param[0].value = tmp->gain.value;
+    param[0] = &tmp->gain;
     return;
 }
 
@@ -42,6 +42,7 @@ struct Effect_t* new_Volume(struct Volume_t* opaque){
     opaque->gain.upperBound = 0.0f;
     opaque->gain.lowerBound = -30.0f;
     opaque->gain.value = 0.0f;
+    opaque->gain.name = "gain";
 
     return (struct Effect_t*)opaque;
 }

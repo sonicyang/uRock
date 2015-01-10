@@ -21,7 +21,7 @@ void NormalizeData(volatile uint16_t * pData, q31_t* tData);
 void DenormalizeData(q31_t* tData, volatile uint16_t * pData);
 
 struct parameter_t{
-    char name[16];
+    char* name;
     float value;
     float upperBound;
     float lowerBound;
@@ -30,7 +30,7 @@ struct parameter_t{
 typedef void(*EffectFunc)(q31_t*, void*);
 typedef void(*DeleteFunc)(void*);
 typedef void(*adjustFunc)(void*, uint8_t*);
-typedef void(*getParamFunc)(void*,struct parameter_t*, uint8_t*);
+typedef void(*getParamFunc)(void*,struct parameter_t**, uint8_t*);
 
 struct Effect_t{
     char name[16];

@@ -46,12 +46,12 @@ void adjust_Compressor(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Compressor(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Compressor(void *opaque, struct parameter_t* param[], uint8_t* paramNum){
     struct Compressor_t *tmp = (struct Compressor_t*)opaque;
     *paramNum = 3;
-    param[0].value = tmp->threshold.value;
-    param[1].value = tmp->attack.value;
-    param[2].value = tmp->ratio.value;
+    param[0] = &tmp->threshold;
+    param[1] = &tmp->attack;
+    param[2] = &tmp->ratio;
     return;
 }
 
@@ -65,15 +65,18 @@ struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     opaque->threshold.upperBound = 500.0f;
     opaque->threshold.lowerBound = 100.0f;
     opaque->threshold.value = 100.0f;
+    opaque->threshold.name = "threshold";
 
     opaque->attack.upperBound = 0.2f;
     opaque->attack.lowerBound = 0.05f;
     opaque->attack.value = 0.05f;
-    
+    opaque->attack.name ="attack";
+
     opaque->ratio.upperBound = 2.0f;
     opaque->ratio.lowerBound = 1.0f;
     opaque->ratio.value = 1.0f;
-    
+    opaque->ratio.name = "ratio";
+
     opaque->env = 0.0f;
 
     return (struct Effect_t*)opaque;

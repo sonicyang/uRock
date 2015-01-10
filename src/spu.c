@@ -57,7 +57,7 @@ void SignalProcessingUnit(void *pvParameters){
         EffectList[i] = NULL;
     }
 
-    /* Effect Stage Setting*/ 
+    /* Effect Stage Setting*/
 
     //EffectList[0] = new_Volume(&vol);
     //EffectList[0] = new_Distortion(&distor);

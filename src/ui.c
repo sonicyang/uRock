@@ -23,11 +23,19 @@ extern struct Effect_t *EffectList[EFFECT_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][3];
 extern int8_t controllingStage;
 
+static struct parameter_t* paramList[5];
+static uint8_t paramNum;
+
 enum Widget{
     WIDGET_STAGE = 0x00000000,
     WIDGET_PARAM
 };
 enum Widget widget = WIDGET_STAGE;
+
+static Event event;
+static TS_StateTypeDef tp;
+static uint8_t lastTouchState = 0;
+static char stageNum[3];
 
 static void present(){
     static uint32_t currentDrawLayer = LCD_BACKGROUND_LAYER;
@@ -187,11 +195,6 @@ static Button btn_stage2;
 static Button btn_stage3;
 
 void UserInterface(void const *argument){
-    Event event;
-    TS_StateTypeDef tp;
-    uint8_t lastTouchState = 0;
-
-    char stageNum[3];
 
     /*HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);*/
 
@@ -321,6 +324,12 @@ void UserInterface(void const *argument){
             gui_ValueBarRender(&vbar_param0);
             gui_ValueBarRender(&vbar_param1);
             gui_ValueBarRender(&vbar_param2);
+
+            if (EffectList[EffectStages[controllingStage]]) {
+                    EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[controllingStage]], paramList, &paramNum);
+                    for (int i = 0; i < paramNum; ++i)
+                            BSP_LCD_DisplayStringAt(0, 80 + 60 * i, (uint8_t*) paramList[i]->name, CENTER_MODE);
+            }
             break;
         case WIDGET_PARAM:
             gui_ButtonHandleEvent(&btn_stage0, &event);
@@ -349,6 +358,7 @@ void UserInterface(void const *argument){
 
         gui_ButtonRender(&btn_StageWidget);
         gui_ButtonRender(&btn_ParamWidget);
+
 
         present();
     }

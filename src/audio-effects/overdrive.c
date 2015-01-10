@@ -43,7 +43,7 @@ void delete_Overdrive(void *opaque){
 
 void adjust_Overdrive(void *opaque, uint8_t* values){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
-    
+
     LinkPot(&(tmp->gain), values[0]);
     LinkPot(&(tmp->volume), values[1]);
     LinkPot(&(tmp->ratio), values[2]);
@@ -52,12 +52,12 @@ void adjust_Overdrive(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Overdrive(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Overdrive(void *opaque, struct parameter_t* param[], uint8_t* paramNum){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
     *paramNum = 3;
-    param[0].value = tmp->gain.value;
-    param[1].value = tmp->volume.value;
-    param[2].value = tmp->ratio.value;
+    param[0] = &tmp->gain;
+    param[1] = &tmp->volume;
+    param[2] = &tmp->ratio;
     return;
 }
 
@@ -71,14 +71,17 @@ struct Effect_t* new_Overdrive(struct Overdrive_t* opaque){
     opaque->gain.upperBound = 0.0f;
     opaque->gain.lowerBound = 1.0f;
     opaque->gain.value = 1.0f;
+    opaque->gain.name = "gain";
 
     opaque->volume.upperBound = 0.0f;
     opaque->volume.lowerBound = -30.0f;
     opaque->volume.value = 0.0f;
+    opaque->volume.name = "volume";
 
     opaque->ratio.upperBound = 0.99f;
     opaque->ratio.lowerBound = 0.5f;
     opaque->ratio.value = 0.99f;
+    opaque->ratio.name = "ratio";
 
     return (struct Effect_t*)opaque;
 }
