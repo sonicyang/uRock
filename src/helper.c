@@ -42,6 +42,9 @@ void itoa(int n, char s[])
 int intToStr(int x, char str[], int d)
 {
     int i = 0;
+    if (x < 0.0f){
+        x = -x;
+    }
     while (x)
     {
         str[i++] = (x%10) + '0';
@@ -60,6 +63,13 @@ int intToStr(int x, char str[], int d)
 
 void ftoa(float n, char *res, int afterpoint)
 {
+    if (n < 0){
+        n = -n;
+        res[0] = '-';
+    }else{
+        res[0] = ' ';
+    }
+
     // Extract integer part
     int ipart = (int)n;
  
@@ -67,8 +77,8 @@ void ftoa(float n, char *res, int afterpoint)
     float fpart = n - (float)ipart;
  
     // convert integer part to string
-    int i = intToStr(ipart, res, 0);
- 
+    int i = intToStr(ipart, res + 1, 1);
+    i = i + 1;
     // check for display option after point
     if (afterpoint != 0)
     {
