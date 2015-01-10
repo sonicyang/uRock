@@ -1,4 +1,7 @@
+.DS_Store
+
 # Object files
+*.d
 *.o
 *.ko
 *.obj

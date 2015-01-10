@@ -1,9 +1,14 @@
 #include "volume.h"
 #include "helper.h"
+#include "math.h"
 
-void Volume(volatile float* pData, void *opaque){
+#include "arm_math.h"
+
+void Volume(q31_t* pData, void *opaque){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
-    Gain(pData, tmp->gain.value);
+
+    arm_scale_q31(pData, tmp->cache, Q_MULT_SHIFT, pData, SAMPLE_NUM);
+
     return;
 }
 
@@ -14,7 +19,8 @@ void delete_Volume(void *opaque){
 void adjust_Volume(void *opaque, uint8_t* values){
     struct Volume_t *tmp = (struct Volume_t*)opaque;
 
-    LinkPot(&(tmp->gain), values[0]);
+    LinkPot(&(tmp->gain), values[0]); 
+    tmp->cache = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * Q_1);
 
     return;
 }

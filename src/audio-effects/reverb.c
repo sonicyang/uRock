@@ -11,7 +11,7 @@ struct Effect_t* new_Reverb(struct Reverb_t* opaque){
     tmp->attenuation.value = -10.0f;
 
     tmp->delayTime.upperBound = 50.0f;
-    tmp->delayTime.lowerBound = 35.0f;
+    tmp->delayTime.lowerBound = 10.0f;
     tmp->delayTime.value = 35.0f;
 
     return (struct Effect_t*)tmp;

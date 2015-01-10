@@ -32,69 +32,34 @@
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
+#include "stm32f4xx_it.h"
 
-#include "cmsis_os.h"
+#include "ff.h"
+#include "ff_gen_drv.h"
+#include "sd_diskio.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
 #include "MspInit.h"
-#include "helper.h"
-#include "setting.h"
-
-#include "gui.h"
-#include "event.h"
-
-#include "base-effect.h"
-#include "volume.h"
-#include "delay.h"
-#include "distortion.h"
-#include "reverb.h"
-
+#include "ui.h"
+#include "spu.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 
 /* Private variables ---------------------------------------------------------*/
-DMA_HandleTypeDef hdma_adc1;
-DMA_HandleTypeDef hdma_adc2;
-DMA_HandleTypeDef hdma_dac2;
-ADC_HandleTypeDef hadc1;
-ADC_HandleTypeDef hadc2;
-DAC_HandleTypeDef hdac;
-TIM_HandleTypeDef htim2;
+SD_HandleTypeDef hsd;
+HAL_SD_CardInfoTypedef SDCardInfo;
+DMA_HandleTypeDef hdma_sdiorx;
+DMA_HandleTypeDef hdma_sdiotx;
 
-struct Volume_t vol;
-struct Distortion_t distor;
-struct Reverb_t delay;
-
-osThreadId LEDThread1Handle;
-static void LED_Thread1(void const *argument);
-
-osThreadId SPUid;
-static void SignalProcessingUnit(void const *argument);
-volatile uint32_t SPU_Hold = 0;
-volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
-volatile float SignalPipe[STAGE_NUM][SAMPLE_NUM];
-
-#define EFFECT_NUM 4
-/* XXX Don't use EffectStages anymore */
-struct Effect_t *EffectStages[STAGE_NUM];
-struct Effect_t *EffectList[EFFECT_NUM];
-int8_t StageCurrentEffect[STAGE_NUM];
-uint8_t ValueForEachStage[STAGE_NUM][3];
-
-osThreadId UIid;
-static void UserInterface(void const *argument);
-
-osThreadId InputEventId;
-static void InputEvent(void const *argument);
-
-Event event;
-volatile int8_t controllingStage = 0;
-
-enum Widget{
-    WIDGET_STAGE = 0x00000000,
-    WIDGET_PARAM
-};
-enum Widget widget = WIDGET_STAGE;
+uint8_t SD_DriverNum;      /* FatFS SD part */
+char SD_Path[4];           /* SD card logical drive path */
+FATFS FatFs;
+FIL fil;
 
 int main(void){
     /* STM32F4xx HAL library initialization:
@@ -125,502 +90,28 @@ int main(void){
 
     BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
-    BSP_SDRAM_Init();
-
-    BSP_LED_Init(LED3);
-    BSP_LED_Init(LED4);
-
     MX_GPIO_Init();
-    MX_DMA_Init();
+    MX_SDIO_SD_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
-    MX_ADC2_Init();
     MX_DAC_Init();
+    MX_ADC2_Init();
+    MX_DMA_Init();
+    NVIC_Init();
 
-    osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    LEDThread1Handle = osThreadCreate (osThread(LED3), NULL);
+    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
 
-    osThreadDef(SPU, SignalProcessingUnit, osPriorityNormal, 0, 1024);
-    SPUid = osThreadCreate (osThread(SPU), NULL);
+    xTaskCreate(SignalProcessingUnit,
+        (signed char*)"SPU",
+        2048, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-    osThreadDef(UI, UserInterface, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    UIid = osThreadCreate (osThread(UI), NULL);
+    xTaskCreate(UserInterface,
+        (signed char*)"UI",
+        256, NULL, tskIDLE_PRIORITY + 1, NULL);
 
-    osThreadDef(IE, InputEvent, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    InputEventId = osThreadCreate (osThread(IE), NULL);
-
-    osKernelStart (NULL, NULL);
+    vTaskStartScheduler();
 
     while (1);
-}
-
-static void SignalProcessingUnit(void const *argument){
-    uint32_t index = 0;
-    uint32_t pipeindex = 0;
-    uint32_t i;
-
-    for(i = 0; i < STAGE_NUM; i++){
-        EffectStages[i] = NULL;
-    }
-
-    /* Effect Stage Setting*/
-
-    EffectList[0] = new_Volume(&vol);
-    EffectList[1] = new_Distortion(&distor);
-    EffectList[2] = new_Reverb(&delay);
-    EffectList[3] = NULL;
-
-    EffectStages[0] = EffectList[3];
-    EffectStages[1] = EffectList[3];
-    EffectStages[2] = EffectList[3];
-    EffectStages[3] = EffectList[3];
-
-    /* FIXME */
-    StageCurrentEffect[0] = 3;
-    StageCurrentEffect[1] = 3;
-    StageCurrentEffect[2] = 3;
-    StageCurrentEffect[3] = 3;
-
-    /* Init */
-    HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
-
-    /* Process */
-    while(1){
-        if(SPU_Hold){
-            SPU_Hold--;
-
-            for(i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i]){
-                    EffectStages[i]->func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectStages[i]);
-                }
-            }
-
-            DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
-
-            index+=1;
-            if(index >= BUFFER_NUM)
-                index = 0;
-            pipeindex+=1;
-            if(pipeindex >= STAGE_NUM)
-                pipeindex = 0;
-        }
-    }
-
-    while(1);
-}
-
-static void present(){
-    static uint32_t currentDrawLayer = LCD_BACKGROUND_LAYER;
-
-    if(currentDrawLayer == LCD_BACKGROUND_LAYER){
-        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
-        BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-        currentDrawLayer = LCD_FOREGROUND_LAYER;
-    }else{
-        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 255);
-        BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-        currentDrawLayer = LCD_BACKGROUND_LAYER;
-    }
-}
-
-static void StageSetValue0(uint8_t value)
-{
-    ValueForEachStage[controllingStage][0] = value;
-    if (EffectStages[controllingStage]){
-        EffectStages[controllingStage]->adj(
-            EffectStages[controllingStage],
-            ValueForEachStage[controllingStage]);
-    }
-}
-
-static void StageSetValue1(uint8_t value)
-{
-    ValueForEachStage[controllingStage][1] = value;
-    if (EffectStages[controllingStage]){
-        EffectStages[controllingStage]->adj(
-            EffectStages[controllingStage],
-            ValueForEachStage[controllingStage]);
-    }
-}
-
-static void StageSetValue2(uint8_t value)
-{
-    ValueForEachStage[controllingStage][2] = value;
-    if (EffectStages[controllingStage]){
-        EffectStages[controllingStage]->adj(
-            EffectStages[controllingStage],
-            ValueForEachStage[controllingStage]);
-    }
-}
-
-static uint8_t StageGetValue0()
-{
-    return ValueForEachStage[controllingStage][0];
-}
-
-static uint8_t StageGetValue1()
-{
-    return ValueForEachStage[controllingStage][1];
-}
-
-static uint8_t StageGetValue2()
-{
-    return ValueForEachStage[controllingStage][2];
-}
-
-static void SelectNextStage()
-{
-    controllingStage++;
-
-    if(controllingStage == STAGE_NUM)
-        controllingStage = 0;
-}
-
-static void SelectPrevStage()
-{
-    controllingStage--;
-
-    if(controllingStage < 0)
-        controllingStage = STAGE_NUM - 1;
-}
-
-static void SelectStageWidget()
-{
-    widget = WIDGET_STAGE;
-}
-
-static void Stage0Next()
-{
-    StageCurrentEffect[0]++;
-    if (StageCurrentEffect[0] == EFFECT_NUM)
-        StageCurrentEffect[0] = 0;
-
-    EffectStages[0] = EffectList[StageCurrentEffect[0]];
-
-    /* Reset value in this stage */
-    ValueForEachStage[0][0] = 0;
-    ValueForEachStage[0][1] = 0;
-    ValueForEachStage[0][2] = 0;
-
-    if (EffectStages[0])
-        EffectStages[0]->adj(EffectStages[0], ValueForEachStage[0]);
-}
-
-static void Stage1Next()
-{
-    StageCurrentEffect[1]++;
-    if (StageCurrentEffect[1] == EFFECT_NUM)
-        StageCurrentEffect[1] = 0;
-
-    EffectStages[1] = EffectList[StageCurrentEffect[1]];
-
-    /* Reset value in this stage */
-    ValueForEachStage[1][0] = 0;
-    ValueForEachStage[1][1] = 0;
-    ValueForEachStage[1][2] = 0;
-
-    if (EffectStages[1])
-        EffectStages[1]->adj(EffectStages[1], ValueForEachStage[1]);
-}
-
-static void Stage2Next()
-{
-    StageCurrentEffect[2]++;
-    if (StageCurrentEffect[2] == EFFECT_NUM)
-        StageCurrentEffect[2] = 0;
-
-    EffectStages[2] = EffectList[StageCurrentEffect[2]];
-
-    /* Reset value in this stage */
-    ValueForEachStage[2][0] = 0;
-    ValueForEachStage[2][1] = 0;
-    ValueForEachStage[2][2] = 0;
-
-    if (EffectStages[2])
-        EffectStages[2]->adj(EffectStages[2], ValueForEachStage[2]);
-}
-
-static void Stage3Next()
-{
-    StageCurrentEffect[3]++;
-    if (StageCurrentEffect[3] == EFFECT_NUM)
-        StageCurrentEffect[3] = 0;
-
-    EffectStages[3] = EffectList[StageCurrentEffect[3]];
-
-    /* Reset value in this stage */
-    ValueForEachStage[3][0] = 0;
-    ValueForEachStage[3][1] = 0;
-    ValueForEachStage[3][2] = 0;
-
-    if (EffectStages[3])
-        EffectStages[3]->adj(EffectStages[3], ValueForEachStage[3]);
-}
-
-static void SelectParamWidget()
-{
-    widget = WIDGET_PARAM;
-}
-
-static Button btn_prevStage;
-static Button btn_nextStage;
-static ValueBar vbar_param0;
-static ValueBar vbar_param1;
-static ValueBar vbar_param2;
-static Button btn_StageWidget;
-static Button btn_ParamWidget;
-static Button btn_stage0;
-static Button btn_stage1;
-static Button btn_stage2;
-static Button btn_stage3;
-
-static void UserInterface(void const *argument){
-    char stageNum[3];
-
-    BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
-    BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
-    BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-
-    /* Parameter widget */
-    gui_ButtonInit(&btn_prevStage);
-    gui_ButtonSetPos(&btn_prevStage, 5, 20);
-    gui_ButtonSetSize(&btn_prevStage, 40, 40);
-    gui_ButtonSetColor(&btn_prevStage, LCD_COLOR_BLUE);
-    gui_ButtonSetRenderType(&btn_prevStage, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_prevStage, SelectPrevStage);
-
-    gui_ButtonInit(&btn_nextStage);
-    gui_ButtonSetPos(&btn_nextStage, (240 - 40 - 5), 20);
-    gui_ButtonSetSize(&btn_nextStage, 40, 40);
-    gui_ButtonSetColor(&btn_nextStage, LCD_COLOR_BLUE);
-    gui_ButtonSetRenderType(&btn_nextStage, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_nextStage, SelectNextStage);
-
-    gui_ValueBarInit(&vbar_param0);
-    gui_ValueBarSetPos(&vbar_param0, 5, 100);
-    gui_ValueBarSetSize(&vbar_param0, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param0, StageSetValue0, StageGetValue0);
-
-    gui_ValueBarInit(&vbar_param1);
-    gui_ValueBarSetPos(&vbar_param1, 5, 160);
-    gui_ValueBarSetSize(&vbar_param1, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param1, StageSetValue1, StageGetValue1);
-
-    gui_ValueBarInit(&vbar_param2);
-    gui_ValueBarSetPos(&vbar_param2, 5, 220);
-    gui_ValueBarSetSize(&vbar_param2, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param2, StageSetValue2, StageGetValue2);
-
-    /* Stage widget */
-    gui_ButtonInit(&btn_stage0);
-    gui_ButtonSetPos(&btn_stage0, 5, 20);
-    gui_ButtonSetSize(&btn_stage0, 40, 40);
-    gui_ButtonSetColor(&btn_stage0, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage0, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage0, Stage0Next);
-
-    gui_ButtonInit(&btn_stage1);
-    gui_ButtonSetPos(&btn_stage1, 5, 65);
-    gui_ButtonSetSize(&btn_stage1, 40, 40);
-    gui_ButtonSetColor(&btn_stage1, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage1, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage1, Stage1Next);
-
-    gui_ButtonInit(&btn_stage2);
-    gui_ButtonSetPos(&btn_stage2, 5, 110);
-    gui_ButtonSetSize(&btn_stage2, 40, 40);
-    gui_ButtonSetColor(&btn_stage2, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage2, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage2, Stage2Next);
-
-    gui_ButtonInit(&btn_stage3);
-    gui_ButtonSetPos(&btn_stage3, 5, 155);
-    gui_ButtonSetSize(&btn_stage3, 40, 40);
-    gui_ButtonSetColor(&btn_stage3, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage3, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage3, Stage3Next);
-
-    /* Global */
-    gui_ButtonInit(&btn_StageWidget);
-    gui_ButtonSetPos(&btn_StageWidget,  5, (320 - 10 - 5));
-    gui_ButtonSetSize(&btn_StageWidget, ((240 - 5 * 3) / 2), 10);
-    gui_ButtonSetColor(&btn_StageWidget, LCD_COLOR_BLACK);
-    gui_ButtonSetRenderType(&btn_StageWidget, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_StageWidget, SelectStageWidget);
-
-    gui_ButtonInit(&btn_ParamWidget);
-    gui_ButtonSetPos(&btn_ParamWidget, (240 - 5 - ((240 - 5 * 3) / 2)), (320 - 10 - 5));
-    gui_ButtonSetSize(&btn_ParamWidget, ((240 - 5 * 3) / 2), 10);
-    gui_ButtonSetColor(&btn_ParamWidget, LCD_COLOR_BLACK);
-    gui_ButtonSetRenderType(&btn_ParamWidget, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_ParamWidget, SelectParamWidget);
-
-    while(1){
-
-        switch(widget){
-        case WIDGET_STAGE:
-            /* Event handle & update part */
-            gui_ButtonHandleEvent(&btn_nextStage, &event);
-            gui_ButtonHandleEvent(&btn_prevStage, &event);
-
-            gui_ValueBarHandleEvent(&vbar_param0, &event);
-            gui_ValueBarHandleEvent(&vbar_param1, &event);
-            gui_ValueBarHandleEvent(&vbar_param2, &event);
-
-            /* Render part */
-            BSP_LCD_Clear(LCD_COLOR_WHITE);
-
-            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-            intToStr(controllingStage, stageNum, 2);
-            BSP_LCD_DisplayStringAt(0, 20, (uint8_t*) stageNum, CENTER_MODE);
-
-            if(EffectStages[controllingStage])
-                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) EffectStages[controllingStage]->name, CENTER_MODE);
-            else
-                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) "< None >", CENTER_MODE);
-
-            gui_ButtonRender(&btn_nextStage);
-            gui_ButtonRender(&btn_prevStage);
-
-            gui_ValueBarRender(&vbar_param0);
-            gui_ValueBarRender(&vbar_param1);
-            gui_ValueBarRender(&vbar_param2);
-            break;
-        case WIDGET_PARAM:
-            gui_ButtonHandleEvent(&btn_stage0, &event);
-            gui_ButtonHandleEvent(&btn_stage1, &event);
-            gui_ButtonHandleEvent(&btn_stage2, &event);
-            gui_ButtonHandleEvent(&btn_stage3, &event);
-
-            BSP_LCD_Clear(LCD_COLOR_YELLOW);
-
-            for(int8_t i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i])
-                    BSP_LCD_DisplayStringAt(0, 30 + 45 * i,(uint8_t*) EffectStages[i]->name, CENTER_MODE);
-                else
-                    BSP_LCD_DisplayStringAt(0, 30 + 45 * i, (uint8_t*) "< NONE >", CENTER_MODE);
-            }
-
-            gui_ButtonRender(&btn_stage0);
-            gui_ButtonRender(&btn_stage1);
-            gui_ButtonRender(&btn_stage2);
-            gui_ButtonRender(&btn_stage3);
-            break;
-        }
-
-        gui_ButtonHandleEvent(&btn_StageWidget, &event);
-        gui_ButtonHandleEvent(&btn_ParamWidget, &event);
-
-        gui_ButtonRender(&btn_StageWidget);
-        gui_ButtonRender(&btn_ParamWidget);
-
-        present();
-
-        osThreadResume(InputEventId);
-        osThreadSuspend(UIid);
-    }
-}
-
-static void InputEvent(void const *argument){
-    TS_StateTypeDef tp;
-    uint8_t lastTouchState = 0;
-
-    while(1){
-        BSP_TS_GetState(&tp);
-        if(tp.TouchDetected != lastTouchState){
-            if(tp.TouchDetected == 1){
-                lastTouchState = 1;
-                event.eventType = TP_PRESSED;
-                event.touchX = tp.X;
-                event.touchY = tp.Y;
-            }else if(tp.TouchDetected == 0){
-                lastTouchState = 0;
-                event.eventType = TP_RELEASED;
-                event.touchX = tp.X;
-                event.touchY = tp.Y;
-            }
-
-            osThreadResume(UIid);
-            osThreadSuspend(InputEventId);
-        }
-
-        osDelay(50);
-    }
-}
-
-static void LED_Thread1(void const *argument){
-    (void) argument;
-
-    for(;;){
-        osDelay(300);
-        BSP_LED_Toggle(LED3);
-    }
-}
-
-/* Double Buffer Swapping Callbacks */
-void DMA2_Stream0_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_adc1);
-    return;
-}
-
-void DMA1_Stream6_IRQHandler(void){
-    HAL_DMA_IRQHandler(&hdma_dac2);
-    return;
-}
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 0;
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 0;
-
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
-
-        SPU_Hold++;
-    }
-    return;
-}
-
-void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 1;
-
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 1;
-
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
-
-        SPU_Hold++;
-    }
-    return;
-}
-
-void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
-    static uint32_t index = 1;
-
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 1;
-
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY0);
-
-    return;
-}
-
-void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
-    static uint32_t index = 2;
-
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 0;
-
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY1);
-
-    return;
 }
 
 /**
@@ -683,31 +174,4 @@ static void SystemClock_Config(void){
     __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
     __HAL_FLASH_DATA_CACHE_ENABLE();
 }
-
-
-/*
-static void Error_Handler(void){
-    BSP_LED_On(LED4);
-    while(1);
-}
-*/
-
-#ifdef  USE_FULL_ASSERT
-/**
- * @brief  Reports the name of the source file and the source line number
- *   where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
-void assert_failed(uint8_t* file, uint32_t line){
-    /* User can add his own implementation to report the file name and line number,
-ex: printf("Wrong parameters SignalPipe: file %s on line %d\r\n", file, line) */
-
-    /* Infinite loop */
-    while (1);
-}
-#endif
-
-
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

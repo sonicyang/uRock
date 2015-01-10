@@ -29,7 +29,7 @@ void releaseDelayLine(uint32_t address){
     return;
 }
 
-void Combine(volatile float* pData, volatile float* sData){
+void Combine(q31_t* pData, q31_t* sData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
@@ -39,116 +39,41 @@ void Combine(volatile float* pData, volatile float* sData){
     return;
 }
 
-void Gain(volatile float* pData, float gain_dB){
-    register float multipier = powf(10, (gain_dB / 10.0f));
+void Copy(q31_t* pData, q31_t* sData){
     register uint32_t i;
 
     for(i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * multipier;
+        pData[i] = sData[i];
     }
 
     return;
 }
 
-void HardClipping(volatile float* pData, float threshold){
-    register uint32_t i;
-    register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
-
-    for(i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > gg){
-            pData[i] = gg;
-        }else if (pData[i] < -gg){
-            pData[i] = -gg;
-        }
-    }
+void NormalizeData(volatile uint16_t * pData, q31_t* tData){
+    
+    arm_offset_q15((q15_t*)pData, (-SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
+    arm_shift_q15((q15_t*)pData, 4, (q15_t*)pData, SAMPLE_NUM);
+    arm_q15_to_q31((q15_t*)pData, tData, SAMPLE_NUM);
 
     return;
 }
 
-void SoftClipping(volatile float* pData, float threshold){
-    register uint32_t i;
-    register float gg = powf(10, (threshold / 10.0f)) * SAMPLE_MAX;
-    float ff;
+void DenormalizeData(q31_t* tData, volatile uint16_t * pData){
+    uint32_t i;
 
-    for (i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] > gg){
-            arm_sqrt_f32((pData[i] - gg), &ff);
-            pData[i] = gg + ff;
-        }else if (pData[i] < -gg){
-            arm_sqrt_f32((-pData[i] - gg), &ff);
-            pData[i] = -gg + ff;
-        }
+    arm_q31_to_q15(tData, (q15_t*)pData, SAMPLE_NUM);
+    arm_shift_q15((q15_t*)pData, -4, (q15_t*)pData, SAMPLE_NUM);
+   
+
+    //DITHERING 
+    for(i = 0; i < 256; i += 2){
+        pData[i] += DITHERING_AMP;
+        pData[i + 1] -= DITHERING_AMP;
     }
-    return;
-}
 
-void NormalizeData(volatile uint16_t * pData, volatile float* tData){
-    register uint32_t i;
+    arm_offset_q15((q15_t*)pData, (SAMPLE_MAX), (q15_t*)pData, SAMPLE_NUM);
 
-    for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
-        *tData = *pData - SAMPLE_MAX;
-    }
+
 
     return;
-}
-
-void DenormalizeData(volatile float* tData, volatile uint16_t * pData){
-    register uint32_t i;
-
-    for(i = 0; i < SAMPLE_NUM; i++, pData++, tData++){
-        
-        if(*tData > SAMPLE_MAX)
-            *tData = SAMPLE_MAX + 0.5f;
-        else if(*tData < -SAMPLE_MAX)
-            *tData = -SAMPLE_MAX - 0.5f;
-       
-
-        *pData = *tData + SAMPLE_MAX;
-    }
-
-    return;
-}
-
-void Compressor(volatile float* pData, struct parameter_t* p){
-    static uint8_t pre_status = 0;
-    static uint32_t count = 0;
-    static float pre_r;
-    float rRatio = 1.0f / p[1].value;
-    float volume = 0.0f;
-    float dbvolume;
-    float dbthreshold;
-    float rate = 1.0f;
-    uint8_t status = 0;
-    float aData;
-    float attack_block_count = p[1].value / BLOCK_PREIOD;
-
-    for (int i = 0; i < SAMPLE_NUM; i++){
-        if (pData[i] < 0.0f)
-            aData = 0.0f - pData[i];
-        if (aData > volume){
-            volume = aData;
-            if (aData > p[0].value)
-                status = 1;
-        }
-    }
-    dbvolume = logf(volume / 127.0f);
-    dbthreshold = logf(p[0].value / 127.0f);
-    if (pre_status != status){
-        count = 0;
-        pre_status = status;
-    }
-    if (count <= attack_block_count){
-        rate = count / attack_block_count;
-    }
-    float tmp;
-    if (status == 1){
-        pre_r = dbvolume - dbthreshold;
-        tmp = powf(10, -pre_r * rRatio * rate);
-    }else{
-        tmp = powf(10, -pre_r * rRatio + pre_r * rRatio * rate);
-    }
-    for (int i = 0; i < SAMPLE_NUM; i++){
-        pData[i] = pData[i] * tmp;
-    }
-    count ++;
 }

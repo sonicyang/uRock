@@ -277,7 +277,7 @@
 #include "core_cm0plus.h"
 #define ARM_MATH_CM0_FAMILY
 #else
-#include "ARMCM4.h"
+#include "core_cm4.h"
 #warning "Define either ARM_MATH_CM4 OR ARM_MATH_CM3...By Default building on ARM_MATH_CM4....."
 #endif
 

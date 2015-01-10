@@ -10,6 +10,7 @@ void MX_DAC_Init(void);
 void MX_TIM2_Init(void);
 void MX_DMA_Init(void);
 void MX_GPIO_Init(void);
+void MX_SDIO_SD_Init(void);
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc);
 

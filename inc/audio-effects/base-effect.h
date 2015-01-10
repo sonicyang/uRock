@@ -8,7 +8,6 @@
 
 #include "math.h"
 
-#define ARM_MATH_CM4
 #include "arm_math.h"
 #include "core_cmInstr.h"
 
@@ -17,9 +16,9 @@
 uint32_t allocateDelayLine();
 void releaseDelayLine(uint32_t);
 
-void NormalizeData(volatile uint16_t * pData, volatile float* tData);
+void NormalizeData(volatile uint16_t * pData, q31_t* tData);
 
-void DenormalizeData(volatile float* tData, volatile uint16_t * pData);
+void DenormalizeData(q31_t* tData, volatile uint16_t * pData);
 
 struct parameter_t{
     char name[16];
@@ -28,7 +27,7 @@ struct parameter_t{
     float lowerBound;
 };
 
-typedef void(*EffectFunc)(volatile float*, void*);
+typedef void(*EffectFunc)(q31_t*, void*);
 typedef void(*DeleteFunc)(void*);
 typedef void(*adjustFunc)(void*, uint8_t*);
 
@@ -38,12 +37,5 @@ struct Effect_t{
     DeleteFunc del;
     adjustFunc adj;
 };
-
-void Combine(volatile float* pData, volatile float* sData);
-void Gain(volatile float* pData, float gain_dB);
-void HardClipping(volatile float* pData, float threshold);
-void SoftClipping(volatile float* pData, float threshold);
-
-void Compressor(volatile float* pData, struct parameter_t* p);
 
 #endif //__AUDIO_EFFECT_H__
