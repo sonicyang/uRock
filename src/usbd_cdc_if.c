@@ -325,6 +325,8 @@ int VCP_write(const void *pBuffer, int size)
         return 0;
 
     while(pCDC->TxState) { } //Wait until transfer is done
+    //TODO: Implement Time Out
+
     return size;
 }
 /**
