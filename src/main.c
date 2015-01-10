@@ -88,11 +88,11 @@ int main(void){
 
     MX_GPIO_Init();
     MX_SDIO_SD_Init();
+    MX_DMA_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
-    MX_DAC_Init();
     MX_ADC2_Init();
-    MX_DMA_Init();
+    MX_DAC_Init();
     NVIC_Init();
 
     SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
