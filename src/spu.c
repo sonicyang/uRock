@@ -6,6 +6,8 @@
 #include "setting.h"
 #include "base-effect.h"
 
+#include "spu.h"
+
 #include "volume.h"
 #include "compressor.h"
 
@@ -32,8 +34,6 @@ xSemaphoreHandle SPU_Hold;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 
-#define EFFECT_NUM 3
-#define STAGE_NUM 4
 int8_t EffectStages[STAGE_NUM];
 struct Effect_t *EffectList[EFFECT_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][3];
@@ -59,11 +59,11 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Effect Stage Setting*/
 
-    //EffectList[0] = new_Volume(&vol);
     //EffectList[0] = new_Distortion(&distor);
     EffectList[0] = NULL;
-    EffectList[1] = new_Compressor(&compressor);
-    EffectList[2] = new_Overdrive(&overdrive);
+    EffectList[1] = new_Volume(&vol);
+    EffectList[2] = new_Compressor(&compressor);
+    EffectList[3] = new_Overdrive(&overdrive);
     //EffectList[0] = new_Phaser(&phaser);
     //EffectList[2] = new_Equalizer(&equalizer);
     //EffectList[3] = new_Reverb(&delay);

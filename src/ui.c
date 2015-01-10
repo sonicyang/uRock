@@ -13,8 +13,6 @@
 #include "event.h"
 #include "gui.h"
 
-#define EFFECT_NUM 3
-#define STAGE_NUM 4
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
 
@@ -54,31 +52,31 @@ static void present(){
 static void StageSetValue0(uint8_t value)
 {
     ValueForEachStage[controllingStage][0] = value;
-    /*if (EffectStages[controllingStage]){*/
-        /*EffectStages[controllingStage]->adj(*/
-            /*EffectStages[controllingStage],*/
-            /*ValueForEachStage[controllingStage]);*/
-    /*}*/
+    if (EffectList[EffectStages[controllingStage]]){
+        EffectList[EffectStages[controllingStage]]->adj(
+            EffectList[EffectStages[controllingStage]],
+            ValueForEachStage[controllingStage]);
+    }
 }
 
 static void StageSetValue1(uint8_t value)
 {
     ValueForEachStage[controllingStage][1] = value;
-    /*if (EffectStages[controllingStage]){*/
-        /*EffectStages[controllingStage]->adj(*/
-            /*EffectStages[controllingStage],*/
-            /*ValueForEachStage[controllingStage]);*/
-    /*}*/
+    if (EffectList[EffectStages[controllingStage]]){
+        EffectList[EffectStages[controllingStage]]->adj(
+            EffectList[EffectStages[controllingStage]],
+            ValueForEachStage[controllingStage]);
+    }
 }
 
 static void StageSetValue2(uint8_t value)
 {
     ValueForEachStage[controllingStage][2] = value;
-    /*if (EffectStages[controllingStage]){*/
-        /*EffectStages[controllingStage]->adj(*/
-            /*EffectStages[controllingStage],*/
-            /*ValueForEachStage[controllingStage]);*/
-    /*}*/
+    if (EffectList[EffectStages[controllingStage]]){
+        EffectList[EffectStages[controllingStage]]->adj(
+            EffectList[EffectStages[controllingStage]],
+            ValueForEachStage[controllingStage]);
+    }
 }
 
 static uint8_t StageGetValue0()
