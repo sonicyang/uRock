@@ -7,6 +7,7 @@ UGFXSRCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/ginput \
 			 Middlewares/ugfx/src/gevent \
 			 Middlewares/ugfx/src/gtimer \
+			 Middlewares/ugfx/src/gwin \
 			 Middlewares/ugfx/src/gdriver
 
 UGFXINCDIR = Middlewares/ugfx \
@@ -15,7 +16,9 @@ UGFXINCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/ginput \
 			 Middlewares/ugfx/src/gevent \
 			 Middlewares/ugfx/src/gtimer \
-			 Middlewares/ugfx/src/gdriver
+			 Middlewares/ugfx/src/gdriver \
+			 Middlewares/ugfx/src/gwin \
+			 Middlewares/ugfx/drivers/ginput/toggle/Pal
 
 UGFXSRC += $(wildcard $(addsuffix /*.c,$(UGFXSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(UGFXSRCDIR)))

@@ -47,6 +47,7 @@ SRCDIR = src \
 
 INCDIR = inc \
 		 inc/audio-effects \
+		 ./
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))
