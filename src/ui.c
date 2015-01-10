@@ -92,7 +92,7 @@ static void SelectNextStage()
 {
     controllingStage++;
 
-    if(controllingStage == STAGE_NUM)
+    if(controllingStage >= STAGE_NUM)
         controllingStage = 0;
 }
 
@@ -310,7 +310,7 @@ void UserInterface(void const *argument){
             intToStr(controllingStage, stageNum, 2);
             BSP_LCD_DisplayStringAt(0, 20, (uint8_t*) stageNum, CENTER_MODE);
 
-            if(EffectStages[controllingStage])
+            if(EffectList[EffectStages[controllingStage]] != NULL)
                 BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) EffectList[EffectStages[controllingStage]]->name, CENTER_MODE);
             else
                 BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) "< None >", CENTER_MODE);

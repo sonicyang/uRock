@@ -33,10 +33,11 @@ volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 
 #define EFFECT_NUM 3
+#define STAGE_NUM 4
 int8_t EffectStages[STAGE_NUM];
 struct Effect_t *EffectList[EFFECT_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][3];
-int8_t controllingStage;
+int8_t controllingStage = 0;
 
 struct Volume_t vol;
 struct Distortion_t distor;
@@ -60,16 +61,16 @@ void SignalProcessingUnit(void *pvParameters){
 
     //EffectList[0] = new_Volume(&vol);
     //EffectList[0] = new_Distortion(&distor);
-    EffectList[0] = new_Compressor(&compressor);
-    EffectList[1] = new_Overdrive(&overdrive);
-    EffectList[2] = NULL;
+    EffectList[0] = NULL;
+    EffectList[1] = new_Compressor(&compressor);
+    EffectList[2] = new_Overdrive(&overdrive);
     //EffectList[0] = new_Phaser(&phaser);
     //EffectList[2] = new_Equalizer(&equalizer);
     //EffectList[3] = new_Reverb(&delay);
     //EffectList[0] = new_Flanger(&flanger);
 
     for(i = 0; i < STAGE_NUM; i++){
-        EffectStages[i] = 2;
+         EffectStages[i] = 0;
     }
 
     SPU_Hold = xSemaphoreCreateBinary();
@@ -84,7 +85,7 @@ void SignalProcessingUnit(void *pvParameters){
         if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){
 
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
-            
+
             for(i = 0; i < STAGE_NUM; i++){
                 if(EffectList[EffectStages[i]] != NULL){
                     EffectList[EffectStages[i]]->func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectList[EffectStages[i]]);
