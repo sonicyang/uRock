@@ -68,18 +68,16 @@ void SignalProcessingUnit(void *pvParameters){
     uint32_t index = 0;
     uint32_t pipeindex = 0;
     uint32_t i;
+    int16_t wavData[512];
+    uint8_t wavNotEmpty = 1;
+    uint16_t wavDataLeft = 0;
+    uint16_t wavDataIndex = 0;
 
-   if (f_mount(&FatFs, SD_Path, 1) == FR_OK) {
-         //Try to open file
-         if (f_open(&fil, "0:/tst.wav", FA_OPEN_ALWAYS | FA_READ) == FR_OK) {
-             f_read(&fil, &wavHeader, sizeof(wavHeader), &i);
+    vTaskDelay(1000);
 
-             f_close(&fil);
-         }
-
-         //Unmount drive, don't forget this!
-         f_mount(0, SD_Path, 1);
-     } 
+    if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
+    if (f_open(&fil, "0:/tst.wav", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+    f_read(&fil, &wavHeader, sizeof(wavHeader), &i);
 
     for(i = 0; i < STAGE_NUM; i++){
         EffectStages[i] = NULL;
@@ -105,7 +103,25 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Process */
     while(1){
+        if((wavDataLeft == 0) && wavNotEmpty){
+           f_read(&fil, &wavData, 504 * 2, &wavDataLeft);
+            wavDataLeft >>= 2;
+            wavDataIndex = 0;
+            if(wavDataLeft == 0)
+                wavNotEmpty = 0;
+        }
         if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){
+            
+            if(wavDataLeft != 0){
+                for(i = 0; i < 252; i += 6){
+                    for(int j = 0 ; j < 6; j++)
+                        SignalBuffer[index][i + j] += wavData[wavDataIndex];
+                    wavDataLeft -= 1; 
+                    wavDataIndex += 1;
+                }
+                SignalBuffer[index][253] = wavData[wavDataIndex];
+                SignalBuffer[index][254] = wavData[wavDataIndex];
+            }
 
             NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
             
