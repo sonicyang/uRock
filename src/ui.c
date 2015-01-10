@@ -10,6 +10,9 @@
 #include "setting.h"
 #include "base-effect.h"
 
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
+
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
 
@@ -18,6 +21,8 @@ extern struct Effect_t *EffectStages[STAGE_NUM];
 void UserInterface(void *argument){
     uint8_t values[3];
     //char buf[16];
+    //
+    MX_USB_DEVICE_Init();
 
 	TS_StateTypeDef tp;
     uint32_t controllingStage = 0;
@@ -26,8 +31,11 @@ void UserInterface(void *argument){
     BSP_LCD_Clear(LCD_COLOR_WHITE);
     BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
     
-    vTaskDelay(10);
+    vTaskDelay(1000);
 	while (1) {
+    
+        VCP_write("X", 1);
+
 		BSP_TS_GetState(&tp);
 		if (tp.TouchDetected == 1) {
             controllingStage++;

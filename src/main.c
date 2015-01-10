@@ -83,9 +83,6 @@ int main(void){
 
 	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
 
-	BSP_LED_Init(LED3);
-	BSP_LED_Init(LED4);
-
     MX_GPIO_Init();
     MX_SDIO_SD_Init();
     MX_DMA_Init();
