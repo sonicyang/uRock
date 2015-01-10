@@ -177,6 +177,8 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
+#include "FreeRTOS.h"
+#include "task.h"
 #include "stm32f4xx_hal.h"
 
 /** @addtogroup STM32F4xx_HAL_Driver
@@ -1107,6 +1109,7 @@ HAL_SD_ErrorTypedef HAL_SD_CheckReadOperation(SD_HandleTypeDef *hsd, uint32_t Ti
     tmp1 = hsd->DmaTransferCplt; 
     tmp2 = hsd->SdTransferCplt;
     tmp3 = (HAL_SD_ErrorTypedef)hsd->SdTransferErr;    
+    vTaskDelay(10 / portTICK_RATE_MS);
     timeout--;
   }
   
@@ -1115,6 +1118,7 @@ HAL_SD_ErrorTypedef HAL_SD_CheckReadOperation(SD_HandleTypeDef *hsd, uint32_t Ti
   /* Wait until the Rx transfer is no longer active */
   while((__HAL_SD_SDIO_GET_FLAG(hsd, SDIO_FLAG_RXACT)) && (timeout > 0))
   {
+    vTaskDelay(10 / portTICK_RATE_MS);
     timeout--;  
   }
   

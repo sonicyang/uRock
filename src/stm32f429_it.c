@@ -17,16 +17,16 @@ extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 
 void NVIC_Init(void){
 
-    /* SDIO IRQ */
+    /* USB IRQ */
     HAL_NVIC_SetPriority(OTG_HS_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
 
-    /* SDIO IRQ */
+    /* USB IRQ */
     HAL_NVIC_SetPriority(OTG_HS_WKUP_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(OTG_HS_WKUP_IRQn);
 
     /* SDIO IRQ */
-    HAL_NVIC_SetPriority(SDIO_IRQn, 6, 0);
+    HAL_NVIC_SetPriority(SDIO_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(SDIO_IRQn);
 
     /* ADC1 DMA IRQ */
@@ -38,11 +38,11 @@ void NVIC_Init(void){
     HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
     /* SDIO RX DMA IRQ */
-    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 7, 0);
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
 
     /* SDIO TX DMA IRQ */
-    HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 8, 0);
+    HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 }
 

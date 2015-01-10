@@ -33,9 +33,6 @@ void UserInterface(void *argument){
     
     vTaskDelay(1000);
 	while (1) {
-    
-        VCP_write("X", 1);
-
 		BSP_TS_GetState(&tp);
 		if (tp.TouchDetected == 1) {
             controllingStage++;

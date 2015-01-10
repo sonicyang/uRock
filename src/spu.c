@@ -20,6 +20,12 @@
 #include "phaser.h"
 #include "flanger.h"
 
+#include "ff.h"
+
+extern char SD_Path[4];
+extern FATFS FatFs;
+extern FIL fil;
+
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
@@ -42,10 +48,38 @@ struct Phaser_t phaser;
 struct Equalizer_t equalizer;
 struct Compressor_t compressor;
 
+struct wavHeader_t{
+    char        filID[4];
+    uint32_t    filSize;
+    char        waveID[4];
+    char        fmtID[4];
+    uint32_t    fmtSize;
+    uint16_t    wFormatTag;
+    uint16_t    nChannels;
+    uint32_t    nSamplesPerSec;
+    uint32_t    nAvgBytesPerSec;
+    uint16_t    nBlockAlign;
+    uint16_t    wBitsPerSample;
+    char        dataID[4];
+    uint32_t    dataSize;
+} __attribute__((packed)) wavHeader;
+
 void SignalProcessingUnit(void *pvParameters){
     uint32_t index = 0;
     uint32_t pipeindex = 0;
     uint32_t i;
+
+   if (f_mount(&FatFs, SD_Path, 1) == FR_OK) {
+         //Try to open file
+         if (f_open(&fil, "0:/tst.wav", FA_OPEN_ALWAYS | FA_READ) == FR_OK) {
+             f_read(&fil, &wavHeader, sizeof(wavHeader), &i);
+
+             f_close(&fil);
+         }
+
+         //Unmount drive, don't forget this!
+         f_mount(0, SD_Path, 1);
+     } 
 
     for(i = 0; i < STAGE_NUM; i++){
         EffectStages[i] = NULL;
