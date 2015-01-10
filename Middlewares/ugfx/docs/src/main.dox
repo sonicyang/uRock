@@ -1,0 +1,23 @@
+/*
+ * This file is subject to the terms of the GFX License. If a copy of
+ * the license was not distributed with this file, you can obtain one at:
+ *
+ *              http://ugfx.com/license.html
+ */
+
+/**
+ * @mainpage uGFX
+ * @author Joel Bodenmann (joel@unormal.org).
+ *
+ * <h2>uGFX</h2>
+ * µGFX is a library to interface different displays and touchscreen
+ * to your embedded application. Extreme low system requirements are our
+ * goal. A complete GUI toolkit is provided.
+ *
+ * <h2>Documentation</h2>
+ * - http://ugfx.org
+ *
+ * <h2>License</h2>
+ * - http://ugfx.org/license.html
+ */
+
