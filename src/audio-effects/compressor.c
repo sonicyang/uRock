@@ -46,11 +46,21 @@ void adjust_Compressor(void *opaque, uint8_t* values){
     return;
 }
 
+void getParam_Compressor(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+    struct Compressor_t *tmp = (struct Compressor_t*)opaque;
+    *paramNum = 3;
+    param[0].value = tmp->threshold.value;
+    param[1].value = tmp->attack.value;
+    param[2].value = tmp->ratio.value;
+    return;
+}
+
 struct Effect_t* new_Compressor(struct Compressor_t* opaque){
     strcpy(opaque->parent.name, "Compressor");
     opaque->parent.func = Compressor;
     opaque->parent.del = delete_Compressor;
     opaque->parent.adj = adjust_Compressor;
+    opaque->parent.getParam = getParam_Compressor;
 
     opaque->threshold.upperBound = 500.0f;
     opaque->threshold.lowerBound = 100.0f;
