@@ -73,7 +73,7 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@echo "   ALL   |  OBJDUMP   "$(LIST_FILE)
 	@$(SIZE) $(EXECUTABLE)
 	
-$(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS) $(FATOBJS)
+$(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS) $(FATOBJS) $(USBOBJS)
 	@echo "   ALL   |   LD    "$@	
 	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
