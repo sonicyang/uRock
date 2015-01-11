@@ -1,7 +1,7 @@
 #ifndef __SETTING_H__
 #define __SETTING_H__
 
-#define DITHERING_AMP 256;
+#define DITHERING_AMP 0;
 
 #define BUFFER_NUM 4
 #define STAGE_NUM 4
