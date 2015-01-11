@@ -16,6 +16,6 @@ struct Equalizer_t{
     q31_t biquadState[3][16];
 };
 
-struct Effect_t* new_Equalizer(struct Equalizer_t* opaque);
+struct Effect_t* new_Equalizer();
 
 #endif //__EQUALIZER_H__

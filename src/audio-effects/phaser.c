@@ -1,5 +1,6 @@
 #include "phaser.h"
 #include "helper.h"
+#include "FreeRTOS.h"
 
 float iir_coeff_b[3] = {0.25, 0.5, 0.25};
 float iir_coeff_a[2] = {1.2940575444, -0.5520629632};
@@ -22,6 +23,8 @@ void Phaser(q31_t* pData, void *opaque){
 }
 
 void delete_Phaser(void *opaque){
+    struct Phaser_t *tmp = (struct Phaser_t*)opaque;
+    vPortFree(tmp); 
     return;
 }
 
@@ -41,26 +44,27 @@ void getParam_Phaser(void *opaque, struct parameter_t param[], uint8_t* paramNum
     return;
 }
 
-struct Effect_t* new_Phaser(struct Phaser_t* opaque){
+struct Effect_t* new_Phaser(){
+    struct Phaser_t* tmp = pvPortMalloc(sizeof(struct Phaser_t));
     uint32_t i;
 
-    strcpy(opaque->parent.name, "Phaser");
-    opaque->parent.func = Phaser;
-    opaque->parent.del = delete_Phaser;
-    opaque->parent.adj = adjust_Phaser;
-    opaque->parent.getParam = getParam_Phaser;
+    strcpy(tmp->parent.name, "Phaser");
+    tmp->parent.func = Phaser;
+    tmp->parent.del = delete_Phaser;
+    tmp->parent.adj = adjust_Phaser;
+    tmp->parent.getParam = getParam_Phaser;
 
-    opaque->speed.upperBound = 500.0f;
-    opaque->speed.lowerBound = 5000.0;
-    opaque->speed.value = 2000.0f;
+    tmp->speed.upperBound = 500.0f;
+    tmp->speed.lowerBound = 5000.0;
+    tmp->speed.value = 2000.0f;
 
-    new_LFO(&(opaque->lfo), 4, 0, 1000);
+    new_LFO(&(tmp->lfo), 4, 0, 1000);
 
     for (i = 0; i < 10; i++) {
         coeffTable[i] = iir_coeff[i] * 536870912;
     }
     arm_biquad_cascade_df1_init_q31(&S, 2, coeffTable, biquadState, 2);
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 

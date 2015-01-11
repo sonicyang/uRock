@@ -10,6 +10,6 @@ struct Distortion_t{
     q31_t cache;
 };
 
-struct Effect_t* new_Distortion(struct Distortion_t* opaque);
+struct Effect_t* new_Distortion();
 
 #endif //__DISTORTION_H__

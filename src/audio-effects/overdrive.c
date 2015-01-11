@@ -1,6 +1,6 @@
 #include "overdrive.h"
 #include "helper.h"
-
+#include "FreeRTOS.h"
 void Overdrive(q31_t* pData, void *opaque){
     struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
     register uint32_t i;
@@ -38,6 +38,8 @@ void Overdrive(q31_t* pData, void *opaque){
 }
 
 void delete_Overdrive(void *opaque){
+    struct Overdrive_t *tmp = (struct Overdrive_t*)opaque;
+    vPortFree(tmp); 
     return;
 }
 
@@ -61,25 +63,26 @@ void getParam_Overdrive(void *opaque, struct parameter_t param[], uint8_t* param
     return;
 }
 
-struct Effect_t* new_Overdrive(struct Overdrive_t* opaque){
-    strcpy(opaque->parent.name, "Overdrive");
-    opaque->parent.func = Overdrive;
-    opaque->parent.del = delete_Overdrive;
-    opaque->parent.adj = adjust_Overdrive;
-    opaque->parent.getParam = getParam_Overdrive;
+struct Effect_t* new_Overdrive(){
+    struct Overdrive_t* tmp = pvPortMalloc(sizeof(struct Overdrive_t));
+    strcpy(tmp->parent.name, "Overdrive");
+    tmp->parent.func = Overdrive;
+    tmp->parent.del = delete_Overdrive;
+    tmp->parent.adj = adjust_Overdrive;
+    tmp->parent.getParam = getParam_Overdrive;
 
-    opaque->gain.upperBound = 0.0f;
-    opaque->gain.lowerBound = 1.0f;
-    opaque->gain.value = 1.0f;
+    tmp->gain.upperBound = 0.0f;
+    tmp->gain.lowerBound = 1.0f;
+    tmp->gain.value = 1.0f;
 
-    opaque->volume.upperBound = 0.0f;
-    opaque->volume.lowerBound = -30.0f;
-    opaque->volume.value = 0.0f;
+    tmp->volume.upperBound = 0.0f;
+    tmp->volume.lowerBound = -30.0f;
+    tmp->volume.value = 0.0f;
 
-    opaque->ratio.upperBound = 0.99f;
-    opaque->ratio.lowerBound = 0.5f;
-    opaque->ratio.value = 0.99f;
+    tmp->ratio.upperBound = 0.99f;
+    tmp->ratio.lowerBound = 0.5f;
+    tmp->ratio.value = 0.99f;
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 

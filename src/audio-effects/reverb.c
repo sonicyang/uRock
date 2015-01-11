@@ -1,8 +1,8 @@
 #include "reverb.h"
 #include "helper.h"
 
-struct Effect_t* new_Reverb(struct Reverb_t* opaque){
-    struct Delay_t *tmp = (struct Delay_t*)new_Delay((struct Delay_t*)opaque);
+struct Effect_t* new_Reverb(){
+    struct Delay_t *tmp = (struct Delay_t*)new_Delay();
 
     strcpy(tmp->parent.name, "Reverb");
 

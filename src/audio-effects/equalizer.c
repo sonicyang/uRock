@@ -1,5 +1,6 @@
 #include "equalizer.h"
 #include "helper.h"
+#include "FreeRTOS.h"
 
 float low_iir_coeff[20] = { 3.99551947083410e-10,   7.99348161821938e-10,   3.99671234609408e-10,   1.74266431038426,   -0.759790473239173, \
                             1,                      2.02501937393162,       1.02534004997240,       1.77512221511265,   -0.792567352260218, \
@@ -43,6 +44,8 @@ void Equalizer(q31_t* pData, void *opaque){
 }
 
 void delete_Equalizer(void *opaque){
+    struct Equalizer_t *tmp = (struct Equalizer_t*)opaque;
+    vPortFree(tmp); 
     return;
 }
 
@@ -69,46 +72,47 @@ void getParam_Equalizer(void *opaque, struct parameter_t param[], uint8_t* param
     return;
 }
 
-struct Effect_t* new_Equalizer(struct Equalizer_t* opaque){
+struct Effect_t* new_Equalizer(){
     uint32_t i;
+    struct Equalizer_t* tmp = pvPortMalloc(sizeof(struct Equalizer_t));
 
-    strcpy(opaque->parent.name, "Equalizer");
-    opaque->parent.func = Equalizer;
-    opaque->parent.del = delete_Equalizer;
-    opaque->parent.adj = adjust_Equalizer;
-    opaque->parent.getParam = getParam_Equalizer;
+    strcpy(tmp->parent.name, "Equalizer");
+    tmp->parent.func = Equalizer;
+    tmp->parent.del = delete_Equalizer;
+    tmp->parent.adj = adjust_Equalizer;
+    tmp->parent.getParam = getParam_Equalizer;
 
-    opaque->low.upperBound = 0.0f;
-    opaque->low.lowerBound = -20.0;
-    opaque->low.value = 0.0f;
+    tmp->low.upperBound = 0.0f;
+    tmp->low.lowerBound = -20.0;
+    tmp->low.value = 0.0f;
 
-    opaque->mid.upperBound = 0.0f;
-    opaque->mid.lowerBound = -20.0;
-    opaque->mid.value = 0.0f;
+    tmp->mid.upperBound = 0.0f;
+    tmp->mid.lowerBound = -20.0;
+    tmp->mid.value = 0.0f;
 
-    opaque->high.upperBound = 0.0f;
-    opaque->high.lowerBound = -20.0;
-    opaque->high.value = 0.0f;
-    opaque->cache[0] = (q31_t)(powf(10, (opaque->low.value * 0.1f)) * Q_1);
-    opaque->cache[1] = (q31_t)(powf(10, (opaque->mid.value * 0.1f)) * Q_1);
-    opaque->cache[2] = (q31_t)(powf(10, (opaque->high.value * 0.1f)) * Q_1);
+    tmp->high.upperBound = 0.0f;
+    tmp->high.lowerBound = -20.0;
+    tmp->high.value = 0.0f;
+    tmp->cache[0] = (q31_t)(powf(10, (tmp->low.value * 0.1f)) * Q_1);
+    tmp->cache[1] = (q31_t)(powf(10, (tmp->mid.value * 0.1f)) * Q_1);
+    tmp->cache[2] = (q31_t)(powf(10, (tmp->high.value * 0.1f)) * Q_1);
 
     //TODO: Clear this 
     for (i = 0; i < 20; i++) {
-        opaque->coeffTable[0][i] = low_iir_coeff[i] * 536870912;
+        tmp->coeffTable[0][i] = low_iir_coeff[i] * 536870912;
     }
 
     for (i = 0; i < 20; i++) {
-        opaque->coeffTable[1][i] = mid_iir_coeff[i] * 536870912;
+        tmp->coeffTable[1][i] = mid_iir_coeff[i] * 536870912;
     }
 
     for (i = 0; i < 20; i++) {
-        opaque->coeffTable[2][i] = high_iir_coeff[i] * 536870912;
+        tmp->coeffTable[2][i] = high_iir_coeff[i] * 536870912;
     }
-    arm_biquad_cascade_df1_init_q31(&opaque->S[0], 4, opaque->coeffTable[0], opaque->biquadState[0], 2);
-    arm_biquad_cascade_df1_init_q31(&opaque->S[1], 4, opaque->coeffTable[1], opaque->biquadState[1], 2);
-    arm_biquad_cascade_df1_init_q31(&opaque->S[2], 4, opaque->coeffTable[2], opaque->biquadState[2], 2);
+    arm_biquad_cascade_df1_init_q31(&tmp->S[0], 4, tmp->coeffTable[0], tmp->biquadState[0], 2);
+    arm_biquad_cascade_df1_init_q31(&tmp->S[1], 4, tmp->coeffTable[1], tmp->biquadState[1], 2);
+    arm_biquad_cascade_df1_init_q31(&tmp->S[2], 4, tmp->coeffTable[2], tmp->biquadState[2], 2);
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 

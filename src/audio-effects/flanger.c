@@ -1,5 +1,6 @@
 #include "flanger.h"
 #include "helper.h"
+#include "FreeRTOS.h"
 
 void Flanger(q31_t* pData, void *opaque){
     struct Flanger_t *tmp = (struct Flanger_t*)opaque;
@@ -38,6 +39,7 @@ void Flanger(q31_t* pData, void *opaque){
 void delete_Flanger(void *opaque){
     struct Flanger_t *tmp = (struct Flanger_t*)opaque;
     releaseDelayLine(tmp->baseAddress);
+    vPortFree(tmp); 
     return;
 }
 
@@ -66,34 +68,35 @@ void getParam_Flanger(void *opaque, struct parameter_t param[], uint8_t* paramNu
 }
 
 
-struct Effect_t* new_Flanger(struct Flanger_t* opaque){
-    strcpy(opaque->parent.name, "Flanger");
-    opaque->parent.func = Flanger;
-    opaque->parent.del = delete_Flanger;
-    opaque->parent.adj = adjust_Flanger;
-    opaque->parent.getParam = getParam_Flanger;
+struct Effect_t* new_Flanger(){
+    struct Flanger_t* tmp = pvPortMalloc(sizeof(struct Flanger_t));
+    strcpy(tmp->parent.name, "Flanger");
+    tmp->parent.func = Flanger;
+    tmp->parent.del = delete_Flanger;
+    tmp->parent.adj = adjust_Flanger;
+    tmp->parent.getParam = getParam_Flanger;
 
-    opaque->attenuation.upperBound = -2.0f;
-    opaque->attenuation.lowerBound = -30.0f;
-    opaque->attenuation.value = -30.0f;
+    tmp->attenuation.upperBound = -2.0f;
+    tmp->attenuation.lowerBound = -30.0f;
+    tmp->attenuation.value = -30.0f;
 
-    opaque->speed.upperBound = 500.0f;
-    opaque->speed.lowerBound = 5000.0;
-    opaque->speed.value = 2000.0f;
+    tmp->speed.upperBound = 500.0f;
+    tmp->speed.lowerBound = 5000.0;
+    tmp->speed.value = 2000.0f;
 
-    opaque->depth.upperBound = 200.0f;
-    opaque->depth.lowerBound = 10.0;
-    opaque->depth.value = 25.0f;
+    tmp->depth.upperBound = 200.0f;
+    tmp->depth.lowerBound = 10.0;
+    tmp->depth.value = 25.0f;
 
-    new_LFO(&(opaque->lfo), 25 / SAMPLE_PERIOD, 10 / SAMPLE_PERIOD, 1000 / SAMPLE_PERIOD);
+    new_LFO(&(tmp->lfo), 25 / SAMPLE_PERIOD, 10 / SAMPLE_PERIOD, 1000 / SAMPLE_PERIOD);
 
-    opaque->blockPtr = 0;
-    opaque->baseAddress = allocateDelayLine();
+    tmp->blockPtr = 0;
+    tmp->baseAddress = allocateDelayLine();
 
-    if(opaque->baseAddress < 0)
+    if(tmp->baseAddress < 0)
         return NULL;
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 
 

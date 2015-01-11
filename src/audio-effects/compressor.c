@@ -1,5 +1,6 @@
 #include "compressor.h"
 #include "helper.h"
+#include "FreeRTOS.h"
 
 void Compressor(q31_t* pData, void *opaque){
     struct Compressor_t *tmp = (struct Compressor_t*)opaque;
@@ -33,6 +34,8 @@ void Compressor(q31_t* pData, void *opaque){
 }
 
 void delete_Compressor(void *opaque){
+    struct Compressor_t *tmp = (struct Compressor_t*)opaque;
+    vPortFree(tmp); 
     return;
 }
 
@@ -55,26 +58,27 @@ void getParam_Compressor(void *opaque, struct parameter_t param[], uint8_t* para
     return;
 }
 
-struct Effect_t* new_Compressor(struct Compressor_t* opaque){
-    strcpy(opaque->parent.name, "Compressor");
-    opaque->parent.func = Compressor;
-    opaque->parent.del = delete_Compressor;
-    opaque->parent.adj = adjust_Compressor;
-    opaque->parent.getParam = getParam_Compressor;
+struct Effect_t* new_Compressor(){
+    struct Compressor_t* tmp = pvPortMalloc(sizeof(struct Compressor_t));
+    strcpy(tmp->parent.name, "Compressor");
+    tmp->parent.func = Compressor;
+    tmp->parent.del = delete_Compressor;
+    tmp->parent.adj = adjust_Compressor;
+    tmp->parent.getParam = getParam_Compressor;
 
-    opaque->threshold.upperBound = 500.0f;
-    opaque->threshold.lowerBound = 100.0f;
-    opaque->threshold.value = 100.0f;
+    tmp->threshold.upperBound = 500.0f;
+    tmp->threshold.lowerBound = 100.0f;
+    tmp->threshold.value = 100.0f;
 
-    opaque->attack.upperBound = 0.2f;
-    opaque->attack.lowerBound = 0.05f;
-    opaque->attack.value = 0.05f;
+    tmp->attack.upperBound = 0.2f;
+    tmp->attack.lowerBound = 0.05f;
+    tmp->attack.value = 0.05f;
     
-    opaque->ratio.upperBound = 2.0f;
-    opaque->ratio.lowerBound = 1.0f;
-    opaque->ratio.value = 1.0f;
+    tmp->ratio.upperBound = 2.0f;
+    tmp->ratio.lowerBound = 1.0f;
+    tmp->ratio.value = 1.0f;
     
-    opaque->env = 0.0f;
+    tmp->env = 0.0f;
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }

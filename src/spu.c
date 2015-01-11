@@ -53,10 +53,11 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Effect Stage Setting*/ 
 
-    //EffectStages[0] = new_Volume(&vol);
+    EffectStages[0] = new_Equalizer();
+    //EffectStages[2] = new_Equalizer();
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Compressor(&compressor);
-    //EffectStages[1] = new_Overdrive(&overdrive);
+    //EffectStages[0] = new_Overdrive(NULL);
     //EffectStages[0] = new_Phaser(&phaser);
     //EffectStages[2] = new_Equalizer(&equalizer);
     //EffectStages[3] = new_Reverb(&delay);

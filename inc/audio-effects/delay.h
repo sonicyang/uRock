@@ -12,6 +12,6 @@ struct Delay_t{
     uint32_t blockPtr;
 };
 
-struct Effect_t* new_Delay(struct Delay_t* opaque);
+struct Effect_t* new_Delay();
 
 #endif //__DELAY_H__
