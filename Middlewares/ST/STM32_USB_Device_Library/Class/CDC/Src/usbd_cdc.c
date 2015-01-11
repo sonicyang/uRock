@@ -56,10 +56,12 @@
   * limitations under the License.
   *
   ******************************************************************************
-  */ 
+  */
+
+#include "FreeRTOS.h" 
 
 /* Includes ------------------------------------------------------------------*/
-#include "USBD_CDC.h"
+#include "usbd_cdc.h"
 #include "usbd_desc.h"
 #include "usbd_ctlreq.h"
 
@@ -837,6 +839,8 @@ uint8_t  USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
   {
     if(hcdc->TxState == 0)
     {
+      /* Tx Transfer in progress */
+      hcdc->TxState = 1;
       
       /* Transmit next packet */
       USBD_LL_Transmit(pdev,
@@ -844,8 +848,6 @@ uint8_t  USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
                        hcdc->TxBuffer,
                        hcdc->TxLength);
       
-      /* Tx Transfer in progress */
-      hcdc->TxState = 1;
       return USBD_OK;
     }
     else

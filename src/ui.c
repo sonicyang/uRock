@@ -10,8 +10,16 @@
 #include "spu.h"
 #include "setting.h"
 #include "base-effect.h"
-#include "event.h"
-#include "gui.h"
+#include "helper.h"
+
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
+
+#include "gfxconf.h"
+#include "gfx.h"
+#include "src/gwin/sys_defs.h"
+
+#define TAB_GROUP_1 0
 
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
@@ -24,74 +32,177 @@ extern int8_t controllingStage;
 static struct parameter_t* paramList[5];
 static uint8_t paramNum;
 
-enum Widget{
-    WIDGET_STAGE = 0x00000000,
-    WIDGET_PARAM
-};
-enum Widget widget = WIDGET_STAGE;
+static GHandle label_uRock;
+static GHandle btn_prevStage;
+static GHandle btn_nextStage;
+static GHandle vbar_param0;
+static GHandle vbar_param1;
+static GHandle vbar_param2;
+static GHandle btn_StageWidget;
+static GHandle btn_ParamWidget;
+static GHandle btn_stage0;
+static GHandle btn_stage1;
+static GHandle btn_stage2;
+static GHandle btn_stage3;
 
-static Event event;
-static TS_StateTypeDef tp;
-static uint8_t lastTouchState = 0;
+uint8_t values[3];
+
 static char stageNum[3];
 
-static void present(){
-    static uint32_t currentDrawLayer = LCD_BACKGROUND_LAYER;
+static GListener gl;
 
-    if(currentDrawLayer == LCD_BACKGROUND_LAYER){
-        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
-        BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-        currentDrawLayer = LCD_FOREGROUND_LAYER;
-    }else{
-        BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 255);
-        BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-        currentDrawLayer = LCD_BACKGROUND_LAYER;
-    }
+static void createWidgets(void) {
+	GWidgetInit wi;
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 0;
+	wi.g.y = 0;
+	wi.g.width = 100;
+	wi.g.height = 20;
+	wi.text = "uRock";
+	label_uRock = gwinLabelCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 20;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Prev";
+	btn_prevStage = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = (240 - 40 - 5);
+	wi.g.y = 20;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_nextStage = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = (240 - 40 - 5);
+	wi.g.y = 20;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_nextStage = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 100;
+	wi.g.width = (240 - 10);
+	wi.g.height = 25;
+	wi.text = "S0";
+	vbar_param0 = gwinSliderCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 160;
+	wi.g.width = (240 - 10);
+	wi.g.height = 25;
+	wi.text = "S1";
+	vbar_param1 = gwinSliderCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 220;
+	wi.g.width = (240 - 10);
+	wi.g.height = 25;
+	wi.text = "S2";
+	vbar_param2 = gwinSliderCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 20;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_stage0 = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 65;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_stage1 = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 110;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_stage2 = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 5;
+	wi.g.y = 155;
+	wi.g.width = 40;
+	wi.g.height = 40;
+	wi.text = "Next";
+	btn_stage3 = gwinButtonCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.customDraw = gwinRadioDraw_Tab;
+	wi.g.width = gdispGetWidth() / 2;
+	wi.g.height = 50;
+	wi.g.y = gdispGetHeight() - 15;
+	wi.g.x = 0 * wi.g.width;
+	wi.text = "Tab 1";
+	btn_StageWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
+
+	wi.g.x = 1 * wi.g.width;
+	wi.text = "Tab 2";
+	btn_ParamWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
 }
 
-static void StageSetValue0(uint8_t value)
+void SwitchTab(GHandle tab){
+	gwinSetVisible(label_uRock, FALSE);
+	gwinSetVisible(btn_prevStage, FALSE);
+	gwinSetVisible(btn_nextStage, FALSE);
+	gwinSetVisible(vbar_param0, FALSE);
+	gwinSetVisible(vbar_param1, FALSE);
+	gwinSetVisible(vbar_param2, FALSE);
+	gwinSetVisible(btn_stage0, FALSE);
+	gwinSetVisible(btn_stage1, FALSE);
+	gwinSetVisible(btn_stage2, FALSE);
+	gwinSetVisible(btn_stage3, FALSE);
+
+	if (tab == btn_StageWidget) {
+		gwinSetVisible(label_uRock, TRUE);
+		gwinSetVisible(btn_prevStage, TRUE);
+		gwinSetVisible(btn_nextStage, TRUE);
+		gwinSetVisible(vbar_param0, TRUE);
+		gwinSetVisible(vbar_param1, TRUE);
+		gwinSetVisible(vbar_param2, TRUE);
+	} else if (tab == btn_ParamWidget) {
+		gwinSetVisible(btn_stage0, TRUE);
+		gwinSetVisible(btn_stage1, TRUE);
+		gwinSetVisible(btn_stage2, TRUE);
+		gwinSetVisible(btn_stage3, TRUE);
+	}
+}
+
+static void StageSetValue(uint8_t whichParam, uint8_t value)
 {
-    ValueForEachStage[controllingStage][0] = value;
+    ValueForEachStage[controllingStage][whichParam] = value;
     if (EffectList[EffectStages[controllingStage]]){
         EffectList[EffectStages[controllingStage]]->adj(
             EffectList[EffectStages[controllingStage]],
             ValueForEachStage[controllingStage]);
     }
-}
-
-static void StageSetValue1(uint8_t value)
-{
-    ValueForEachStage[controllingStage][1] = value;
-    if (EffectList[EffectStages[controllingStage]]){
-        EffectList[EffectStages[controllingStage]]->adj(
-            EffectList[EffectStages[controllingStage]],
-            ValueForEachStage[controllingStage]);
-    }
-}
-
-static void StageSetValue2(uint8_t value)
-{
-    ValueForEachStage[controllingStage][2] = value;
-    if (EffectList[EffectStages[controllingStage]]){
-        EffectList[EffectStages[controllingStage]]->adj(
-            EffectList[EffectStages[controllingStage]],
-            ValueForEachStage[controllingStage]);
-    }
-}
-
-static uint8_t StageGetValue0()
-{
-    return ValueForEachStage[controllingStage][0];
-}
-
-static uint8_t StageGetValue1()
-{
-    return ValueForEachStage[controllingStage][1];
-}
-
-static uint8_t StageGetValue2()
-{
-    return ValueForEachStage[controllingStage][2];
 }
 
 static void SelectNextStage()
@@ -110,254 +221,83 @@ static void SelectPrevStage()
         controllingStage = STAGE_NUM - 1;
 }
 
-static void SelectStageWidget()
+static void StageEffectNext(uint8_t whichStage)
 {
-    widget = WIDGET_STAGE;
-}
-
-static void Stage0Next()
-{
-    EffectStages[0]++;
-    if (EffectStages[0] == EFFECT_NUM)
-        EffectStages[0] = 0;
+    EffectStages[whichStage]++;
+    if (EffectStages[whichStage] == EFFECT_NUM)
+        EffectStages[whichStage] = 0;
 
     /* Reset value in this stage */
-    ValueForEachStage[0][0] = 0;
-    ValueForEachStage[0][1] = 0;
-    ValueForEachStage[0][2] = 0;
+    ValueForEachStage[whichStage][0] = 0;
+    ValueForEachStage[whichStage][1] = 0;
+    ValueForEachStage[whichStage][2] = 0;
 
-    if (EffectList[EffectStages[0]])
-        EffectList[EffectStages[0]]->adj(EffectList[EffectStages[0]], ValueForEachStage[0]);
+    if (EffectList[EffectStages[whichStage]])
+        EffectList[EffectStages[whichStage]]->adj(EffectList[EffectStages[0]], ValueForEachStage[0]);
 }
 
-static void Stage1Next()
-{
-    EffectStages[1]++;
-    if (EffectStages[1] == EFFECT_NUM)
-        EffectStages[1] = 0;
+void UserInterface(void *argument){
+	GEvent* event;
+	char digits[4];
 
-    /* Reset value in this stage */
-    ValueForEachStage[1][0] = 0;
-    ValueForEachStage[1][1] = 0;
-    ValueForEachStage[1][2] = 0;
+	gfxInit();
 
-    if (EffectList[EffectStages[1]])
-        EffectList[EffectStages[1]]->adj(EffectList[EffectStages[1]], ValueForEachStage[1]);
-}
+	gdispClear(White);
 
-static void Stage2Next()
-{
-    EffectStages[2]++;
-    if (EffectStages[2] == EFFECT_NUM)
-        EffectStages[2] = 0;
+	gwinSetDefaultFont(gdispOpenFont("fixed_7x14"));
+	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
 
-    /* Reset value in this stage */
-    ValueForEachStage[2][0] = 0;
-    ValueForEachStage[2][1] = 0;
-    ValueForEachStage[2][2] = 0;
+	// Attach the mouse input
+	gwinAttachMouse(0);
 
-    if (EffectList[EffectStages[2]])
-        EffectList[EffectStages[2]]->adj(EffectList[EffectStages[2]], ValueForEachStage[2]);
-}
+	// create the widget
+	createWidgets();
 
-static void Stage3Next()
-{
-    EffectStages[3]++;
-    if (EffectStages[3] == EFFECT_NUM)
-        EffectStages[3] = 0;
+	// We want to listen for widget events
+	geventListenerInit(&gl);
+	gwinAttachListener(&gl);
 
-    /* Reset value in this stage */
-    ValueForEachStage[3][0] = 0;
-    ValueForEachStage[3][1] = 0;
-    ValueForEachStage[3][2] = 0;
+	while(1) {
+		// Get an Event
+		event = geventEventWait(&gl, TIME_INFINITE);
 
-    if (EffectList[EffectStages[3]])
-        EffectList[EffectStages[3]]->adj(EffectList[EffectStages[3]], ValueForEachStage[3]);
-}
+		switch(event->type) {
+		case GEVENT_GWIN_RADIO:
+			switch(((GEventGWinRadio *)event)->group) {
+			case TAB_GROUP_1:
+				SwitchTab(((GEventGWinRadio *)event)->radio);
+				break;
+			default:
+				break;
+			}
+			break;
 
-static void SelectParamWidget()
-{
-    widget = WIDGET_PARAM;
-}
+		case GEVENT_GWIN_BUTTON:
+			if (((GEventGWinButton*)event)->button == btn_prevStage)
+				SelectNextStage();
+			else if (((GEventGWinButton*)event)->button == btn_nextStage)
+				SelectPrevStage();
+			else if (((GEventGWinButton*)event)->button == btn_stage0)
+				StageEffectNext(0);
+			else if (((GEventGWinButton*)event)->button == btn_stage1)
+				StageEffectNext(1);
+			else if (((GEventGWinButton*)event)->button == btn_stage2)
+				StageEffectNext(2);
+			else if (((GEventGWinButton*)event)->button == btn_stage3)
+				StageEffectNext(3);
+			break;
 
-static Button btn_prevStage;
-static Button btn_nextStage;
-static ValueBar vbar_param0;
-static ValueBar vbar_param1;
-static ValueBar vbar_param2;
-static Button btn_StageWidget;
-static Button btn_ParamWidget;
-static Button btn_stage0;
-static Button btn_stage1;
-static Button btn_stage2;
-static Button btn_stage3;
+		case GEVENT_GWIN_SLIDER:
+			itoa(((GEventGWinSlider *)event)->position, digits);
+			gdispDrawString(0, 50, digits, gdispOpenFont("UI2"), HTML2COLOR(0xFF0000));
 
-void UserInterface(void const *argument){
-
-    /*HAL_ADC_Start_DMA(&hadc2, (uint32_t*)values, 3);*/
-
-    BSP_LCD_SetTransparency(LCD_FOREGROUND_LAYER, 0);
-    BSP_LCD_SetTransparency(LCD_BACKGROUND_LAYER, 255);
-    BSP_LCD_SelectLayer(LCD_BACKGROUND_LAYER);
-
-    /* Parameter widget */
-    gui_ButtonInit(&btn_prevStage);
-    gui_ButtonSetPos(&btn_prevStage, 5, 20);
-    gui_ButtonSetSize(&btn_prevStage, 40, 40);
-    gui_ButtonSetColor(&btn_prevStage, LCD_COLOR_BLUE);
-    gui_ButtonSetRenderType(&btn_prevStage, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_prevStage, SelectPrevStage);
-
-    gui_ButtonInit(&btn_nextStage);
-    gui_ButtonSetPos(&btn_nextStage, (240 - 40 - 5), 20);
-    gui_ButtonSetSize(&btn_nextStage, 40, 40);
-    gui_ButtonSetColor(&btn_nextStage, LCD_COLOR_BLUE);
-    gui_ButtonSetRenderType(&btn_nextStage, BUTTON_RENDER_TYPE_LINE);
-    gui_ButtonSetCallback(&btn_nextStage, SelectNextStage);
-
-    gui_ValueBarInit(&vbar_param0);
-    gui_ValueBarSetPos(&vbar_param0, 5, 100);
-    gui_ValueBarSetSize(&vbar_param0, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param0, StageSetValue0, StageGetValue0);
-
-    gui_ValueBarInit(&vbar_param1);
-    gui_ValueBarSetPos(&vbar_param1, 5, 160);
-    gui_ValueBarSetSize(&vbar_param1, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param1, StageSetValue1, StageGetValue1);
-
-    gui_ValueBarInit(&vbar_param2);
-    gui_ValueBarSetPos(&vbar_param2, 5, 220);
-    gui_ValueBarSetSize(&vbar_param2, (240 - 10), 25);
-    gui_ValueBarSetCallbacks(&vbar_param2, StageSetValue2, StageGetValue2);
-
-    /* Stage widget */
-    gui_ButtonInit(&btn_stage0);
-    gui_ButtonSetPos(&btn_stage0, 5, 20);
-    gui_ButtonSetSize(&btn_stage0, 40, 40);
-    gui_ButtonSetColor(&btn_stage0, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage0, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage0, Stage0Next);
-
-    gui_ButtonInit(&btn_stage1);
-    gui_ButtonSetPos(&btn_stage1, 5, 65);
-    gui_ButtonSetSize(&btn_stage1, 40, 40);
-    gui_ButtonSetColor(&btn_stage1, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage1, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage1, Stage1Next);
-
-    gui_ButtonInit(&btn_stage2);
-    gui_ButtonSetPos(&btn_stage2, 5, 110);
-    gui_ButtonSetSize(&btn_stage2, 40, 40);
-    gui_ButtonSetColor(&btn_stage2, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage2, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage2, Stage2Next);
-
-    gui_ButtonInit(&btn_stage3);
-    gui_ButtonSetPos(&btn_stage3, 5, 155);
-    gui_ButtonSetSize(&btn_stage3, 40, 40);
-    gui_ButtonSetColor(&btn_stage3, LCD_COLOR_RED);
-    gui_ButtonSetRenderType(&btn_stage3, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_stage3, Stage3Next);
-
-    /* Global */
-    gui_ButtonInit(&btn_StageWidget);
-    gui_ButtonSetPos(&btn_StageWidget,  5, (320 - 10 - 5));
-    gui_ButtonSetSize(&btn_StageWidget, ((240 - 5 * 3) / 2), 10);
-    gui_ButtonSetColor(&btn_StageWidget, LCD_COLOR_BLACK);
-    gui_ButtonSetRenderType(&btn_StageWidget, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_StageWidget, SelectStageWidget);
-
-    gui_ButtonInit(&btn_ParamWidget);
-    gui_ButtonSetPos(&btn_ParamWidget, (240 - 5 - ((240 - 5 * 3) / 2)), (320 - 10 - 5));
-    gui_ButtonSetSize(&btn_ParamWidget, ((240 - 5 * 3) / 2), 10);
-    gui_ButtonSetColor(&btn_ParamWidget, LCD_COLOR_BLACK);
-    gui_ButtonSetRenderType(&btn_ParamWidget, BUTTON_RENDER_TYPE_FILL);
-    gui_ButtonSetCallback(&btn_ParamWidget, SelectParamWidget);
-
-    while(1){
-        while(1){
-            BSP_TS_GetState(&tp);
-            if(tp.TouchDetected != lastTouchState){
-                if(tp.TouchDetected == 1){
-                    lastTouchState = 1;
-                    event.eventType = TP_PRESSED;
-                    event.touchX = tp.X;
-                    event.touchY = tp.Y;
-                }else if(tp.TouchDetected == 0){
-                    lastTouchState = 0;
-                    event.eventType = TP_RELEASED;
-                    event.touchX = tp.X;
-                    event.touchY = tp.Y;
-                }
-                break;
-            }
-            vTaskDelay(50);
-        }
-
-        switch(widget){
-        case WIDGET_STAGE:
-            /* Event handle & update part */
-            gui_ButtonHandleEvent(&btn_nextStage, &event);
-            gui_ButtonHandleEvent(&btn_prevStage, &event);
-
-            gui_ValueBarHandleEvent(&vbar_param0, &event);
-            gui_ValueBarHandleEvent(&vbar_param1, &event);
-            gui_ValueBarHandleEvent(&vbar_param2, &event);
-
-            /* Render part */
-            BSP_LCD_Clear(LCD_COLOR_WHITE);
-
-            BSP_LCD_DisplayStringAt(0, 0, (uint8_t*) "uROCK", CENTER_MODE);
-            intToStr(controllingStage, stageNum, 2);
-            BSP_LCD_DisplayStringAt(0, 20, (uint8_t*) stageNum, CENTER_MODE);
-
-            if(EffectList[EffectStages[controllingStage]] != NULL)
-                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) EffectList[EffectStages[controllingStage]]->name, CENTER_MODE);
-            else
-                BSP_LCD_DisplayStringAt(0, 40, (uint8_t*) "< None >", CENTER_MODE);
-
-            gui_ButtonRender(&btn_nextStage);
-            gui_ButtonRender(&btn_prevStage);
-
-            gui_ValueBarRender(&vbar_param0);
-            gui_ValueBarRender(&vbar_param1);
-            gui_ValueBarRender(&vbar_param2);
-
-            if (EffectList[EffectStages[controllingStage]]) {
-                    EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[controllingStage]], paramList, &paramNum);
-                    for (int i = 0; i < paramNum; ++i)
-                            BSP_LCD_DisplayStringAt(0, 80 + 60 * i, (uint8_t*) paramList[i]->name, CENTER_MODE);
-            }
-            break;
-        case WIDGET_PARAM:
-            gui_ButtonHandleEvent(&btn_stage0, &event);
-            gui_ButtonHandleEvent(&btn_stage1, &event);
-            gui_ButtonHandleEvent(&btn_stage2, &event);
-            gui_ButtonHandleEvent(&btn_stage3, &event);
-
-            BSP_LCD_Clear(LCD_COLOR_YELLOW);
-
-            for(int8_t i = 0; i < STAGE_NUM; i++){
-                if(EffectStages[i])
-                    BSP_LCD_DisplayStringAt(0, 30 + 45 * i,(uint8_t*) EffectList[EffectStages[i]]->name, CENTER_MODE);
-                else
-                    BSP_LCD_DisplayStringAt(0, 30 + 45 * i, (uint8_t*) "< NONE >", CENTER_MODE);
-            }
-
-            gui_ButtonRender(&btn_stage0);
-            gui_ButtonRender(&btn_stage1);
-            gui_ButtonRender(&btn_stage2);
-            gui_ButtonRender(&btn_stage3);
-            break;
-        }
-
-        gui_ButtonHandleEvent(&btn_StageWidget, &event);
-        gui_ButtonHandleEvent(&btn_ParamWidget, &event);
-
-        gui_ButtonRender(&btn_StageWidget);
-        gui_ButtonRender(&btn_ParamWidget);
-
-
-        present();
-    }
+			if (((GEventGWinSlider *)event)->slider == vbar_param0)
+				StageSetValue(0, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
+			else if (((GEventGWinSlider *)event)->slider == vbar_param1)
+				StageSetValue(1, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
+			else if (((GEventGWinSlider *)event)->slider == vbar_param2)
+				StageSetValue(2, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
+			break;
+		}
+	}
 }

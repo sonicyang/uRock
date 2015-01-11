@@ -1,7 +1,7 @@
 #ifndef __SETTING_H__
 #define __SETTING_H__
 
-#define DITHERING_AMP 768;
+#define DITHERING_AMP 256;
 
 #define BUFFER_NUM 4
 #define STAGE_NUM 4
@@ -9,7 +9,7 @@
 
 #define SAMPLE_MAX 2047
 
-#define SAMPLING_RATE 44.1 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLING_RATE 48 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD (1.0f / SAMPLING_RATE)
 
 #define Q_1 1048576

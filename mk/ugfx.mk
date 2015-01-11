@@ -7,7 +7,9 @@ UGFXSRCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/ginput \
 			 Middlewares/ugfx/src/gevent \
 			 Middlewares/ugfx/src/gtimer \
-			 Middlewares/ugfx/src/gdriver
+			 Middlewares/ugfx/src/gwin \
+			 Middlewares/ugfx/src/gdriver \
+			 Middlewares/ugfx/src/gqueue
 
 UGFXINCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/gdisp \
@@ -15,7 +17,9 @@ UGFXINCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/ginput \
 			 Middlewares/ugfx/src/gevent \
 			 Middlewares/ugfx/src/gtimer \
-			 Middlewares/ugfx/src/gdriver
+			 Middlewares/ugfx/src/gdriver \
+			 Middlewares/ugfx/src/gwin \
+			 Middlewares/ugfx/drivers/ginput/toggle/Pal
 
 UGFXSRC += $(wildcard $(addsuffix /*.c,$(UGFXSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(UGFXSRCDIR)))
@@ -27,9 +31,9 @@ INCLUDES += $(addprefix -I,$(UGFXINCDIR))
 UGFXOBJS += $(addprefix $(OUTDIR)/$(UGFXOUTDIR)/,$(patsubst %.s,%.o,$(UGFXSRC:.c=.o)))
 
 $(OUTDIR)/$(UGFXOUTDIR)/%.o: %.c
-	@echo "   UGFX   |   CC    "$@	
+	@echo "   UGFX  |   CC    "$@	
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MF $(patsubst %.o,%.d,$@) -c $(INCLUDES) $< -o $@
 
 .PHONY: clean-ugfx
 clean-ugfx:

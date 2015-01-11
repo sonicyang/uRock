@@ -88,8 +88,6 @@ int main(void){
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
     BSP_LCD_SetFont(&Font20);
 
-    BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
-
     MX_GPIO_Init();
     MX_SDIO_SD_Init();
     MX_DMA_Init();

@@ -32,7 +32,7 @@ CFLAGS += -g3 -std=c99 -Wall  \
 CFLAGS += -O0 -ffast-math \
 		  -ffunction-sections -fdata-sections \
 		  -fno-common \
-		  --param max-inline-insns-single=1000
+		  --param max-inline-insns-single=1000 \
 
 # specify STM32F429
 CFLAGS += -DSTM32F429xx -DARM_MATH_CM4 -D__FPU_PRESENT
@@ -47,6 +47,7 @@ SRCDIR = src \
 
 INCDIR = inc \
 		 inc/audio-effects \
+		 ./
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
 	  $(wildcard $(addsuffix /*.s,$(SRCDIR)))
@@ -55,7 +56,7 @@ OBJS += $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(SRC:.c=.o)))
 
 INCLUDES = $(addprefix -I,$(INCDIR))
 
-DEP = $(OBJ:.o=.o.d)
+DEP = $(OBJS:.o=.d)
 
 MAKDIR = mk
 MAK = $(wildcard $(MAKDIR)/*.mk)
@@ -73,19 +74,19 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	@echo "   ALL   |  OBJDUMP   "$(LIST_FILE)
 	@$(SIZE) $(EXECUTABLE)
 	
-$(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS) $(FATOBJS) $(UGFXOBJS)
+$(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS) $(FATOBJS) $(USBOBJS) $(UGFXOBJS)
 	@echo "   ALL   |   LD    "$@	
 	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
 	@echo "   MAIN  |   CC    "$@	
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MF $(patsubst %.o,%.d,$@) -c $(INCLUDES) $< -o $@
 
 $(OUTDIR)/%.o: %.s
 	@echo "   MAIN  |   AS    "$@	
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MF $(patsubst %.o,%.d,$@) -c $(INCLUDES) $< -o $@
 
 flash: $(EXECUTABLE)
 	st-flash write $(BIN_IMAGE) 0x8000000
