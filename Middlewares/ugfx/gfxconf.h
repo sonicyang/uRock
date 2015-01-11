@@ -66,4 +66,6 @@
 /* Features for the GINPUT sub-system. */
 #define GINPUT_NEED_MOUSE		TRUE
 
+#define GTIMER_THREAD_WORKAREA_SIZE 128
+
 #endif /* _GFXCONF_H */

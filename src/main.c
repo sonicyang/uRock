@@ -47,10 +47,6 @@
 #include "ui.h"
 #include "spu.h"
 
-#include "gfxconf.example.h"
-#include "gfx.h"
-#include "src/gwin/sys_defs.h"
-
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
 
@@ -65,58 +61,129 @@ char SD_Path[4];           /* SD card logical drive path */
 FATFS FatFs;
 FIL fil;
 
-static GListener gl;
-/*static GHandle   ghButton1;*/
+int main(void){
+	/* STM32F4xx HAL library initialization:
+	   - Configure the Flash prefetch, instruction and Data caches
+	   - Configure the Systick to generate an interrupt each 1 msec
+	   - Set NVIC Group Priority to 4
+	   - Global MSP (MCU Support Package) initialization
+	   */
 
-static void createWidgets(void) {
-	GWidgetInit	wi;
+	/* Configure the system clock to 180 Mhz */
+	SystemClock_Config();
 
-	//Apply some default values for GWIN
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
+	HAL_Init();
 
-	// Apply the button parameters	
-	wi.g.width = 100;
-	wi.g.height = 30;
-	wi.g.y = 10;
-	wi.g.x = 10;
-	wi.text = "Push Button";
+	BSP_SDRAM_Init();
 
-	// Create the actual button
-	/*ghButton1 = gwinButtonCreate(NULL, &wi);*/
-	gwinButtonCreate(NULL, &wi);
+	BSP_LCD_Init();
+	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+	BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER + BUFFER_OFFSET);
+	BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+
+	BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+
+    MX_GPIO_Init();
+    MX_SDIO_SD_Init();
+    MX_DMA_Init();
+    MX_TIM2_Init();
+    MX_ADC1_Init();
+    MX_ADC2_Init();
+    MX_DAC_Init();
+    NVIC_Init();
+
+    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+    
+	xTaskCreate(SignalProcessingUnit,
+	            (signed char*)"SPU",
+	            2048, NULL, tskIDLE_PRIORITY + 2, NULL);
+
+	xTaskCreate(UserInterface,
+	            (signed char*)"UI",
+	            512, NULL, tskIDLE_PRIORITY + 2, NULL);
+
+	vTaskStartScheduler();
+
+	while (1);
 }
 
-int main(void) {
-	GEvent* pe;
+/**
+ * @brief  System Clock Configuration
+ *         The system Clock is configured as follow : 
+ *            System Clock source            = PLL (HSE)
+ *            SYSCLK(Hz)                     = 180000000
+ *            HCLK(Hz)                       = 180000000
+ *            AHB Prescaler                  = 1
+ *            APB1 Prescaler                 = 4
+ *            APB2 Prescaler                 = 2
+ *            HSE Frequency(Hz)              = 8000000
+ *            PLL_M                          = 8
+ *            PLL_N                          = 360
+ *            PLL_P                          = 2
+ *            PLL_Q                          = 7
+ *            VDD(V)                         = 3.3
+ *            Main regulator output voltage  = Scale1 mode
+ *            Flash Latency(WS)              = 5
+ * @param  None
+ * @retval None
+ */
+static void SystemClock_Config(void){
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+	RCC_OscInitTypeDef RCC_OscInitStruct;
 
-	// Initialize the display
-	gfxInit();
+	/* Enable Power Control clock */
+	__PWR_CLK_ENABLE();
 
-	// Set the widget defaults
-	gwinSetDefaultFont(gdispOpenFont("UI2"));
-	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
-	gdispClear(White);
+	/* The voltage scaling allows optimizing the power consumption when the device is 
+	   clocked below the maximum system frequency, to update the voltage scaling SignalPipe 
+	   regarding system frequency refer to product datasheet.  */
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-	// Attach the mouse input
-	gwinAttachMouse(0);
+	/* Enable HSE Oscillator and activate PLL with HSE as source */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLM = 8;
+	RCC_OscInitStruct.PLL.PLLN = 384;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLQ = 8;
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-	// create the widget
-	createWidgets();
+	/* Activate the Over-Drive mode */
+	HAL_PWREx_ActivateOverDrive();
 
-	// We want to listen for widget events
-	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
+	/* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
+	   clocks dividers */
+	RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;  
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-	while(1) {
-		// Get an Event
-		pe = geventEventWait(&gl, TIME_INFINITE);
+	__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
 
-		switch(pe->type) {
-		default:
-			break;
-		}
-	}
-
-	return 0;
+	__HAL_FLASH_INSTRUCTION_CACHE_ENABLE(); 
+	__HAL_FLASH_DATA_CACHE_ENABLE();
 }
+
+#ifdef  USE_FULL_ASSERT
+/**
+ * @brief  Reports the name of the source file and the source line number
+ *   where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
+void assert_failed(uint8_t* file, uint32_t line){
+	/* User can add his own implementation to report the file name and line number,
+ex: printf("Wrong parameters SignalPipe: file %s on line %d\r\n", file, line) */
+
+	/* Infinite loop */
+	while (1);
+}
+#endif
+
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -31,7 +31,7 @@ INCLUDES += $(addprefix -I,$(UGFXINCDIR))
 UGFXOBJS += $(addprefix $(OUTDIR)/$(UGFXOUTDIR)/,$(patsubst %.s,%.o,$(UGFXSRC:.c=.o)))
 
 $(OUTDIR)/$(UGFXOUTDIR)/%.o: %.c
-	@echo "   UGFX   |   CC    "$@	
+	@echo "   UGFX  |   CC    "$@	
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MMD -MF $@.d -c $(INCLUDES) $< -o $@
 

@@ -68,7 +68,7 @@
  * @name   Some basic colors
  * @{
  */
-#define HTML2COLORSTM(g) ((color_t)((g) | 0xFF000000))
+#define HTML2COLOR(g) ((color_t)((g) | 0xFF000000))
 
 #define White			(color_t)0xFFFFFFFF
 #define Black			(color_t)0xFF000000
@@ -300,7 +300,7 @@
 	#else // COLOR_BITS_B + COLOR_SHIFT_B < 8
 		#define HTML2COLOR_B(h)		(((h) & (0xFF & ~((1<<(8-COLOR_BITS_B))-1))) >> (8-(COLOR_BITS_B+COLOR_SHIFT_B)))
 	#endif
-	#define HTML2COLOR(h)		((COLOR_TYPE)(HTML2COLOR_R(h) | HTML2COLOR_G(h) | HTML2COLOR_B(h)))
+	//#define HTML2COLOR(h)		((COLOR_TYPE)(HTML2COLOR_R(h) | HTML2COLOR_G(h) | HTML2COLOR_B(h)))
 
 //-------------------------
 //	Gray-scale color system

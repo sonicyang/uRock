@@ -42,13 +42,13 @@ typedef int32_t				semcount_t;
 typedef void				threadreturn_t;
 typedef portBASE_TYPE		threadpriority_t;
 
-#define MAX_SEMAPHORE_COUNT	((semcount_t)(((unsigned long)((semcount_t)(-1))) >> 1))
+#define MAX_SEMAPHORE_COUNT	8
 #define LOW_PRIORITY		0
 #define NORMAL_PRIORITY		configMAX_PRIORITIES/2
 #define HIGH_PRIORITY		configMAX_PRIORITIES-1
 
 /* FreeRTOS will allocate the stack when creating the thread, so pass the size instead of a working area */
-#define DECLARE_THREAD_STACK(name, sz)			size_t *name = (size_t *)sz
+#define DECLARE_THREAD_STACK(name, sz)			uint8_t name[sz];
 #define DECLARE_THREAD_FUNCTION(fnName, param)	threadreturn_t fnName(void *param)
 portTickType MS2ST(portTickType ms);
 
