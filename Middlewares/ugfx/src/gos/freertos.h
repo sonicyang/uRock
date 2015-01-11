@@ -42,7 +42,7 @@ typedef int32_t				semcount_t;
 typedef void				threadreturn_t;
 typedef portBASE_TYPE		threadpriority_t;
 
-#define MAX_SEMAPHORE_COUNT	8
+#define MAX_SEMAPHORE_COUNT	32
 #define LOW_PRIORITY		0
 #define NORMAL_PRIORITY		configMAX_PRIORITIES/2
 #define HIGH_PRIORITY		configMAX_PRIORITIES-1
