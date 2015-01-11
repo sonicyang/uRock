@@ -13,7 +13,17 @@ extern SD_HandleTypeDef hsd;
 extern DMA_HandleTypeDef hdma_sdiorx;
 extern DMA_HandleTypeDef hdma_sdiotx;
 
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
+
 void NVIC_Init(void){
+
+    /* SDIO IRQ */
+    HAL_NVIC_SetPriority(OTG_HS_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
+
+    /* SDIO IRQ */
+    HAL_NVIC_SetPriority(OTG_HS_WKUP_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(OTG_HS_WKUP_IRQn);
 
     /* SDIO IRQ */
     HAL_NVIC_SetPriority(SDIO_IRQn, 6, 0);
@@ -60,4 +70,28 @@ void DMA2_Stream0_IRQHandler(void){
 void DMA1_Stream6_IRQHandler(void){
     HAL_DMA_IRQHandler(&hdma_dac2);
     return;
+}
+
+void OTG_HS_IRQHandler(void)
+{
+      /* USER CODE BEGIN OTG_HS_IRQn 0 */
+
+      /* USER CODE END OTG_HS_IRQn 0 */
+      HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+      /* USER CODE BEGIN OTG_HS_IRQn 1 */
+
+      /* USER CODE END OTG_HS_IRQn 1 */
+
+}
+
+void OTG_HS_WKUP_IRQHandler(void)
+{
+      /* USER CODE BEGIN OTG_HS_WKUP_IRQn 0 */
+
+      /* USER CODE END OTG_HS_WKUP_IRQn 0 */
+      HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+      /* USER CODE BEGIN OTG_HS_WKUP_IRQn 1 */
+
+      /* USER CODE END OTG_HS_WKUP_IRQn 1 */
+
 }
