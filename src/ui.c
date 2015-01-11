@@ -44,35 +44,6 @@ static void createWidgets(void) {
 }
 
 void UserInterface(void *argument){
-	GEvent* pe;
-
-	// Initialize the display
-	gfxInit();
-
-	gdispClear(White);
-	// Set the widget defaults
-	gwinSetDefaultFont(gdispOpenFont("UI2"));
-	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
-
-	// Attach the mouse input
-	gwinAttachMouse(0);
-
-	// create the widget
-	createWidgets();
-
-	// We want to listen for widget events
-	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
-
-	while(1) {
-		// Get an Event
-		pe = geventEventWait(&gl, TIME_INFINITE);
-
-		switch(pe->type) {
-		default:
-			break;
-		}
-	}
     uint8_t values[3];
     //char buf[16];
     //
