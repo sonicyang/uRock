@@ -12,13 +12,67 @@
 
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
+#include "gfxconf.h"
+#include "gfx.h"
+#include "src/gwin/sys_defs.h"
 
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
 
 extern struct Effect_t *EffectStages[STAGE_NUM];
 
+static GListener gl;
+/*static GHandle   ghButton1;*/
+
+static void createWidgets(void) {
+	GWidgetInit	wi;
+
+	//Apply some default values for GWIN
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+
+	// Apply the button parameters	
+	wi.g.width = 100;
+	wi.g.height = 30;
+	wi.g.y = 10;
+	wi.g.x = 10;
+	wi.text = "Push Button";
+
+	// Create the actual button
+	/*ghButton1 = gwinButtonCreate(NULL, &wi);*/
+	gwinButtonCreate(NULL, &wi);
+}
+
 void UserInterface(void *argument){
+	GEvent* pe;
+
+	// Initialize the display
+	gfxInit();
+
+	gdispClear(White);
+	// Set the widget defaults
+	gwinSetDefaultFont(gdispOpenFont("UI2"));
+	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
+
+	// Attach the mouse input
+	gwinAttachMouse(0);
+
+	// create the widget
+	createWidgets();
+
+	// We want to listen for widget events
+	geventListenerInit(&gl);
+	gwinAttachListener(&gl);
+
+	while(1) {
+		// Get an Event
+		pe = geventEventWait(&gl, TIME_INFINITE);
+
+		switch(pe->type) {
+		default:
+			break;
+		}
+	}
     uint8_t values[3];
     //char buf[16];
     //

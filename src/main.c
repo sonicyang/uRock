@@ -100,7 +100,7 @@ int main(void){
 
 	xTaskCreate(UserInterface,
 	            (signed char*)"UI",
-	            256, NULL, tskIDLE_PRIORITY + 1, NULL);
+	            512, NULL, tskIDLE_PRIORITY + 2, NULL);
 
 	vTaskStartScheduler();
 
