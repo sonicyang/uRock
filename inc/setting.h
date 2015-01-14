@@ -3,6 +3,8 @@
 
 #define DITHERING_AMP 0;
 
+#define MAX_EFFECT_PARAM 4
+
 #define BUFFER_NUM 4
 #define STAGE_NUM 4
 #define SAMPLE_NUM 256

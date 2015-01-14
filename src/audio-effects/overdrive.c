@@ -71,17 +71,17 @@ struct Effect_t* new_Overdrive(){
     tmp->parent.adj = adjust_Overdrive;
     tmp->parent.getParam = getParam_Overdrive;
 
-    strcpy(tmp->gain.name, "Gain");
+    tmp->gain.name = "Gain";
     tmp->gain.upperBound = 0.0f;
     tmp->gain.lowerBound = 1.0f;
     tmp->gain.value = 1.0f;
 
-    strcpy(tmp->volume.name, "Volume");
+    tmp->volume.name = "Volume";
     tmp->volume.upperBound = 0.0f;
     tmp->volume.lowerBound = -30.0f;
     tmp->volume.value = 0.0f;
 
-    strcpy(tmp->ratio.name, "Ratio");
+    tmp->ratio.name = "Ratio";
     tmp->ratio.upperBound = 0.99f;
     tmp->ratio.lowerBound = 0.5f;
     tmp->ratio.value = 0.99f;

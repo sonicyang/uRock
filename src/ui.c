@@ -19,22 +19,34 @@
 #include "gfx.h"
 #include "src/gwin/sys_defs.h"
 
+#include "volume.h"
+#include "compressor.h"
+
+#include "distortion.h"
+#include "overdrive.h"
+
+#include "equalizer.h"
+
+#include "delay.h"
+#include "reverb.h"
+
+#include "phaser.h"
+#include "flanger.h"
+
 #define TAB_GROUP_1 0
 
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
 
-extern int8_t EffectStages[STAGE_NUM];
 extern struct Effect_t *EffectList[EFFECT_NUM];
-extern uint8_t ValueForEachStage[STAGE_NUM][3];
+extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 extern int8_t controllingStage;
 
 static GHandle label_uRock;
+static GHandle label_effectName;
 static GHandle btn_prevStage;
 static GHandle btn_nextStage;
-static GHandle vbar_param0;
-static GHandle vbar_param1;
-static GHandle vbar_param2;
+static GHandle vbar_param[MAX_EFFECT_PARAM];
 static GHandle btn_StageWidget;
 static GHandle btn_ParamWidget;
 static GHandle btn_stage0;
@@ -44,11 +56,10 @@ static GHandle btn_stage3;
 
 static char defaultName[8] = "";
 
-static char *parameterNameHook[3] = {defaultName};
-
 static GListener gl;
 
 static void createWidgets(void) {
+    uint32_t i;
 	GWidgetInit wi;
 
 	gwinWidgetClearInit(&wi);
@@ -59,6 +70,15 @@ static void createWidgets(void) {
 	wi.g.height = 20;
 	wi.text = "uRock";
 	label_uRock = gwinLabelCreate(NULL, &wi);
+
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+	wi.g.x = 80;
+	wi.g.y = 30;
+	wi.g.width = 80;
+	wi.g.height = 20;
+	wi.text = "TITLE";
+	label_effectName = gwinLabelCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
@@ -78,41 +98,16 @@ static void createWidgets(void) {
 	wi.text = "Next";
 	btn_nextStage = gwinButtonCreate(NULL, &wi);
 
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = (240 - 40 - 5);
-	wi.g.y = 20;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_nextStage = gwinButtonCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 100;
-	wi.g.width = (240 - 10);
-	wi.g.height = 25;
-	wi.text = parameterNameHook[0];
-	vbar_param0 = gwinSliderCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 160;
-	wi.g.width = (240 - 10);
-	wi.g.height = 25;
-	wi.text = parameterNameHook[1];
-	vbar_param1 = gwinSliderCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 220;
-	wi.g.width = (240 - 10);
-	wi.g.height = 25;
-	wi.text = parameterNameHook[2];
-	vbar_param2 = gwinSliderCreate(NULL, &wi);
+    for(i = 0; i < MAX_EFFECT_PARAM; i++){
+        gwinWidgetClearInit(&wi);
+        wi.g.show = TRUE;
+        wi.g.x = 5;
+        wi.g.y = 100 + i * 60;
+        wi.g.width = (240 - 10);
+        wi.g.height = 25;
+        wi.text = defaultName;
+        vbar_param[i] = gwinSliderCreate(NULL, &wi);
+    }
 
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
@@ -166,12 +161,14 @@ static void createWidgets(void) {
 }
 
 void SwitchTab(GHandle tab){
+    uint32_t i;
+
 	gwinSetVisible(label_uRock, FALSE);
 	gwinSetVisible(btn_prevStage, FALSE);
 	gwinSetVisible(btn_nextStage, FALSE);
-	gwinSetVisible(vbar_param0, FALSE);
-	gwinSetVisible(vbar_param1, FALSE);
-	gwinSetVisible(vbar_param2, FALSE);
+    for(i = 0; i < MAX_EFFECT_PARAM; i++){
+	    gwinSetVisible(vbar_param[i], FALSE);
+    }
 	gwinSetVisible(btn_stage0, FALSE);
 	gwinSetVisible(btn_stage1, FALSE);
 	gwinSetVisible(btn_stage2, FALSE);
@@ -181,9 +178,9 @@ void SwitchTab(GHandle tab){
 		gwinSetVisible(label_uRock, TRUE);
 		gwinSetVisible(btn_prevStage, TRUE);
 		gwinSetVisible(btn_nextStage, TRUE);
-		gwinSetVisible(vbar_param0, TRUE);
-		gwinSetVisible(vbar_param1, TRUE);
-		gwinSetVisible(vbar_param2, TRUE);
+        for(i = 0; i < MAX_EFFECT_PARAM; i++){
+            gwinSetVisible(vbar_param[i], TRUE);
+        }
 	} else if (tab == btn_ParamWidget) {
 		gwinSetVisible(btn_stage0, TRUE);
 		gwinSetVisible(btn_stage1, TRUE);
@@ -192,40 +189,43 @@ void SwitchTab(GHandle tab){
 	}
 }
 
+static void RefreshScreen(void){
+    struct parameter_t *parameterList[5];
+    uint8_t paraNum;
+    uint32_t i = 0;
+
+    if (EffectList[controllingStage]){
+        EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
+        for(; i < paraNum; i++){
+	        gwinSetVisible(vbar_param[i], TRUE);
+            gwinSetText(vbar_param[i], parameterList[i]->name, 0);
+        }
+        i = paraNum;
+    }
+    for(; i < MAX_EFFECT_PARAM; i++){
+	    gwinSetVisible(vbar_param[i], FALSE);
+    }
+    return;
+}
+
 static void StageSetValue(uint8_t whichParam, uint8_t value)
 {
     ValueForEachStage[controllingStage][whichParam] = value;
-    if (EffectList[EffectStages[controllingStage]]){
-        EffectList[EffectStages[controllingStage]]->adj(
-            EffectList[EffectStages[controllingStage]],
+    if (EffectList[controllingStage]){
+        EffectList[controllingStage]->adj(
+            EffectList[controllingStage],
             ValueForEachStage[controllingStage]);
     }
 }
 
 static void SelectNextStage()
 {
-    struct parameter_t *parameterList[5];
-    uint8_t paraNum;
-    uint32_t i;
-
     controllingStage++;
 
     if(controllingStage >= STAGE_NUM)
         controllingStage = 0;
 
-    if (EffectList[EffectStages[controllingStage]]){
-        EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[0]], parameterList, &paraNum);
-        for(i = 0; i < paraNum; i++){
-            parameterNameHook[i] = parameterList[i]->name;
-        }
-        for(i = paraNum; i < 3; i++){
-            parameterNameHook[i] = defaultName;
-        }
-    }else{
-        for(i = 0; i < 3; i++){
-            parameterNameHook[i] = defaultName;    
-        }
-    }    
+    return;
 }
 
 static void SelectPrevStage()
@@ -235,44 +235,32 @@ static void SelectPrevStage()
     if(controllingStage < 0)
         controllingStage = STAGE_NUM - 1;
 
-    //TODO: make a refresh Function
-    if (EffectList[EffectStages[controllingStage]]){
-        EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[0]], parameterList, &paraNum);
-        for(i = 0; i < paraNum; i++){
-            parameterNameHook[i] = parameterList[i]->name;
-        }
-        for(i = paraNum; i < 3; i++){
-            parameterNameHook[i] = defaultName;
-        }
-    }else{
-        for(i = 0; i < 3; i++){
-            parameterNameHook[i] = defaultName;    
-        }
-    }    
+    return;
 }
 
 static void StageEffectNext(uint8_t whichStage)
 {
+    if(EffectList[whichStage]){
+        EffectList[whichStage]->del(EffectList[whichStage]);
+        EffectList[whichStage] = NULL;
+    }else{
+        EffectList[whichStage] = new_Volume();
+    }
 
-    EffectStages[whichStage]++;
-    if (EffectStages[whichStage] == EFFECT_NUM)
-        EffectStages[whichStage] = 0;
-
-    //TODO: WHY Reset?
     /* Reset value in this stage */
     ValueForEachStage[whichStage][0] = 0;
     ValueForEachStage[whichStage][1] = 0;
     ValueForEachStage[whichStage][2] = 0;
 
-    if (EffectList[EffectStages[whichStage]]){
-        EffectList[EffectStages[whichStage]]->adj(EffectList[EffectStages[0]], ValueForEachStage[0]);
+    if (EffectList[whichStage]){
+        EffectList[whichStage]->adj(EffectList[whichStage], ValueForEachStage[0]);
     }    
 }
 
 void UserInterface(void *argument){
-<<<<<<< HEAD
 	GEvent* event;
 	char digits[4];
+    uint32_t i;
 
 	gfxInit();
 
@@ -280,7 +268,8 @@ void UserInterface(void *argument){
 
 	gwinSetDefaultFont(gdispOpenFont("fixed_7x14"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
-
+    
+    vTaskDelay(100);
 	// Attach the mouse input
 	gwinAttachMouse(0);
 
@@ -308,9 +297,9 @@ void UserInterface(void *argument){
 
 		case GEVENT_GWIN_BUTTON:
 			if (((GEventGWinButton*)event)->button == btn_prevStage)
-				SelectNextStage();
-			else if (((GEventGWinButton*)event)->button == btn_nextStage)
 				SelectPrevStage();
+			else if (((GEventGWinButton*)event)->button == btn_nextStage)
+				SelectNextStage();
 			else if (((GEventGWinButton*)event)->button == btn_stage0)
 				StageEffectNext(0);
 			else if (((GEventGWinButton*)event)->button == btn_stage1)
@@ -324,15 +313,15 @@ void UserInterface(void *argument){
 		case GEVENT_GWIN_SLIDER:
 			itoa(((GEventGWinSlider *)event)->position, digits);
 			gdispDrawString(0, 50, digits, gdispOpenFont("UI2"), HTML2COLOR(0xFF0000));
-
-			if (((GEventGWinSlider *)event)->slider == vbar_param0){
-				StageSetValue(0, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-            }else if (((GEventGWinSlider *)event)->slider == vbar_param1){
-				StageSetValue(1, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-            }else if (((GEventGWinSlider *)event)->slider == vbar_param2){
-				StageSetValue(2, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-            }
+            
+            for(i = 0; i < MAX_EFFECT_PARAM; i++){
+                if (((GEventGWinSlider *)event)->slider == vbar_param[i]){
+                    StageSetValue(i, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
+                }
+            }            
 			break;
 		}
+
+        RefreshScreen();
 	}
 }

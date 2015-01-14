@@ -57,12 +57,12 @@ struct Effect_t* new_Delay(){
     tmp->parent.adj = adjust_Delay;
     tmp->parent.getParam = getParam_Delay;
 
-    strcpy(tmp->attenuation.name, "Attenuation");
+    tmp->attenuation.name = "Attenuation";
     tmp->attenuation.upperBound = -5.0f;
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -10.0f;
 
-    strcpy(tmp->delayTime.name, "Delay");
+    tmp->delayTime.name = "Delay";
     tmp->delayTime.upperBound = 500.0f;
     tmp->delayTime.lowerBound = 50.0f;
     tmp->delayTime.value = 50.0f;

@@ -81,12 +81,12 @@ struct Effect_t* new_Flanger(){
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -30.0f;
 
-    strcpy(tmp->speed.name, "Speed");
+    tmp->speed.name = "Speed";
     tmp->speed.upperBound = 500.0f;
     tmp->speed.lowerBound = 5000.0;
     tmp->speed.value = 2000.0f;
 
-    strcpy(tmp->depth.name, "Depth");
+    tmp->depth.name = "Depth";
     tmp->depth.upperBound = 200.0f;
     tmp->depth.lowerBound = 10.0;
     tmp->depth.value = 25.0f;
