@@ -73,9 +73,9 @@ static void createWidgets(void) {
 
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
-	wi.g.x = 80;
+	wi.g.x = 60;
 	wi.g.y = 30;
-	wi.g.width = 80;
+	wi.g.width = 120;
 	wi.g.height = 20;
 	wi.text = "TITLE";
 	label_effectName = gwinLabelCreate(NULL, &wi);
@@ -195,12 +195,16 @@ static void RefreshScreen(void){
     uint32_t i = 0;
 
     if (EffectList[controllingStage]){
+        gwinSetText(label_effectName, EffectList[controllingStage]->name, 0);
+
         EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
         for(; i < paraNum; i++){
 	        gwinSetVisible(vbar_param[i], TRUE);
             gwinSetText(vbar_param[i], parameterList[i]->name, 0);
         }
         i = paraNum;
+    }else{
+        gwinSetText(label_effectName, "", 0);
     }
     for(; i < MAX_EFFECT_PARAM; i++){
 	    gwinSetVisible(vbar_param[i], FALSE);
