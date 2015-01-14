@@ -15,6 +15,6 @@ struct Flanger_t{
     q31_t cache;
 };
 
-struct Effect_t* new_Flanger(struct Flanger_t* opaque);
+struct Effect_t* new_Flanger();
 
 #endif //__FLANGER_H__

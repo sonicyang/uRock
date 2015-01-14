@@ -9,6 +9,6 @@ struct Volume_t{
     q31_t cache;
 };
 
-struct Effect_t* new_Volume(struct Volume_t* opaque);
+struct Effect_t* new_Volume();
 
 #endif //__VOLUME_H__

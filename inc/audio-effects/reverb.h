@@ -7,6 +7,6 @@ struct Reverb_t{
     struct Delay_t parent;
 };
 
-struct Effect_t* new_Reverb(struct Reverb_t* opaque);
+struct Effect_t* new_Reverb();
 
 #endif //__REVERB_H__

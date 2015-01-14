@@ -10,6 +10,6 @@ struct Phaser_t{
     struct parameter_t speed;
 };
 
-struct Effect_t* new_Phaser(struct Phaser_t* opaque);
+struct Effect_t* new_Phaser();
 
 #endif //__PHASER_H__

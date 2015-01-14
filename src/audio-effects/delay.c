@@ -1,5 +1,6 @@
 #include "delay.h"
 #include "helper.h"
+#include "FreeRTOS.h"
 
 void Delay(q31_t* pData, void *opaque){
     struct Delay_t *tmp = (struct Delay_t*)opaque;
@@ -26,6 +27,7 @@ void Delay(q31_t* pData, void *opaque){
 void delete_Delay(void *opaque){
     struct Delay_t *tmp = (struct Delay_t*)opaque;
     releaseDelayLine(tmp->baseAddress);
+    vPortFree(tmp); 
     return;
 }
 
@@ -47,28 +49,31 @@ void getParam_Delay(void *opaque, struct parameter_t *param[], uint8_t* paramNum
     return;
 }
 
-struct Effect_t* new_Delay(struct Delay_t* opaque){
-    strcpy(opaque->parent.name, "Delay");
-    opaque->parent.func = Delay;
-    opaque->parent.del = delete_Delay;
-    opaque->parent.adj = adjust_Delay;
-    opaque->parent.getParam = getParam_Delay;
+struct Effect_t* new_Delay(){
+    struct Delay_t* tmp = pvPortMalloc(sizeof(struct Delay_t));
+    strcpy(tmp->parent.name, "Delay");
+    tmp->parent.func = Delay;
+    tmp->parent.del = delete_Delay;
+    tmp->parent.adj = adjust_Delay;
+    tmp->parent.getParam = getParam_Delay;
 
-    opaque->attenuation.upperBound = -5.0f;
-    opaque->attenuation.lowerBound = -30.0f;
-    opaque->attenuation.value = -10.0f;
+    strcpy(tmp->attenuation.name, "Attenuation");
+    tmp->attenuation.upperBound = -5.0f;
+    tmp->attenuation.lowerBound = -30.0f;
+    tmp->attenuation.value = -10.0f;
 
-    opaque->delayTime.upperBound = 500.0f;
-    opaque->delayTime.lowerBound = 50.0f;
-    opaque->delayTime.value = 50.0f;
+    strcpy(tmp->delayTime.name, "Delay");
+    tmp->delayTime.upperBound = 500.0f;
+    tmp->delayTime.lowerBound = 50.0f;
+    tmp->delayTime.value = 50.0f;
 
-    opaque->blockPtr = 0;
-    opaque->baseAddress = allocateDelayLine();
+    tmp->blockPtr = 0;
+    tmp->baseAddress = allocateDelayLine();
 
-    if(opaque->baseAddress < 0)
+    if(tmp->baseAddress < 0)
         return NULL;
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 
 

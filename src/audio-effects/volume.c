@@ -1,6 +1,7 @@
 #include "volume.h"
 #include "helper.h"
 #include "math.h"
+#include "FreeRTOS.h"
 
 #include "arm_math.h"
 
@@ -13,6 +14,8 @@ void Volume(q31_t* pData, void *opaque){
 }
 
 void delete_Volume(void *opaque){
+    struct Volume_t *tmp = (struct Volume_t*)opaque;
+    vPortFree(tmp); 
     return;
 }
 
@@ -32,18 +35,19 @@ void getParam_Volume(void *opaque, struct parameter_t* param[], uint8_t* paramNu
     return;
 }
 
-struct Effect_t* new_Volume(struct Volume_t* opaque){
-    strcpy(opaque->parent.name, "Volume");
-    opaque->parent.func = Volume;
-    opaque->parent.del = delete_Volume;
-    opaque->parent.adj = adjust_Volume;
-    opaque->parent.getParam = getParam_Volume;
+struct Effect_t* new_Volume(){
+    struct Volume_t* tmp = pvPortMalloc(sizeof(struct Volume_t));
+    strcpy(tmp->parent.name, "Volume");
+    tmp->parent.func = Volume;
+    tmp->parent.del = delete_Volume;
+    tmp->parent.adj = adjust_Volume;
+    tmp->parent.getParam = getParam_Volume;
 
-    opaque->gain.upperBound = 0.0f;
-    opaque->gain.lowerBound = -30.0f;
-    opaque->gain.value = 0.0f;
-    opaque->gain.name = "gain";
+    strcpy(tmp->gain.name, "Volume");
+    tmp->gain.upperBound = 0.0f;
+    tmp->gain.lowerBound = -30.0f;
+    tmp->gain.value = 0.0f;
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 

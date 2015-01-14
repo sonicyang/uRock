@@ -11,6 +11,6 @@ struct Overdrive_t{
     q31_t cache;
 };
 
-struct Effect_t* new_Overdrive(struct Overdrive_t* opaque);
+struct Effect_t* new_Overdrive();
 
 #endif //__OVERDRIVE_H__

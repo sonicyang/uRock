@@ -270,6 +270,7 @@ static void StageEffectNext(uint8_t whichStage)
 }
 
 void UserInterface(void *argument){
+<<<<<<< HEAD
 	GEvent* event;
 	char digits[4];
 

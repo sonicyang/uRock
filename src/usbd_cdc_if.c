@@ -35,6 +35,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -299,8 +301,10 @@ int VCP_read(void *pBuffer, int size)
     return todo;
 }
 
-int VCP_write(const void *pBuffer, int size)
+int VCP_write(const void *pBuffer, int size, int timeout)
 {
+    uint32_t tout; 
+
     if (size > CDC_DATA_HS_OUT_PACKET_SIZE)
     {
         int offset;
@@ -308,7 +312,7 @@ int VCP_write(const void *pBuffer, int size)
         {
             int todo = MIN(CDC_DATA_HS_OUT_PACKET_SIZE, 
                            size - offset);
-            int done = VCP_write(((char *)pBuffer) + offset, todo);
+            int done = VCP_write(((char *)pBuffer) + offset, todo, timeout);
             if (done != todo)
                 return offset + done;
         }
@@ -318,13 +322,28 @@ int VCP_write(const void *pBuffer, int size)
 
     USBD_CDC_HandleTypeDef *pCDC = 
             (USBD_CDC_HandleTypeDef *)hUsbDeviceHS.pClassData;
-    while(pCDC->TxState) { } //Wait for previous transfer
+
+    tout = timeout;
+    while(pCDC->TxState) { 
+        tout -= 5;
+        if(tout <= 0){         
+            return 0;
+        }
+        vTaskDelay(5 / portTICK_RATE_MS);
+    } //Wait for previous transfer
 
     USBD_CDC_SetTxBuffer(&hUsbDeviceHS, (uint8_t *)pBuffer, size);
     if (USBD_CDC_TransmitPacket(&hUsbDeviceHS) != USBD_OK)
         return 0;
 
-    while(pCDC->TxState) { } //Wait until transfer is done
+    tout = timeout;
+    while(pCDC->TxState) { 
+        tout -= 5;
+        if(tout <= 0){         
+            return 0;
+        }
+        vTaskDelay(5 / portTICK_RATE_MS);
+    } //Wait for previous transfer
     //TODO: Implement Time Out
 
     return size;

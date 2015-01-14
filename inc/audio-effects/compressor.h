@@ -11,6 +11,6 @@ struct Compressor_t{
     float env;
 };
 
-struct Effect_t* new_Compressor(struct Compressor_t* opaque);
+struct Effect_t* new_Compressor();
 
 #endif //__COMPRESSOR_H__
