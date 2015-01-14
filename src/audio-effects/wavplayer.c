@@ -35,6 +35,9 @@ void readWaveTask(void *pvParameters){
         }
     }
 
+    arm_fill_q31(0, tmp->dataBuffer[0], SAMPLE_NUM);
+    arm_fill_q31(0, tmp->dataBuffer[1], SAMPLE_NUM);
+
     while(1);
 }
 
