@@ -442,7 +442,7 @@ void UserInterface(void *argument){
             if(EffectList[controllingStage])
                 EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
             
-            if(tabState != PARAM_TAB){
+            if(tabState == LIST_TAB){
                 orig = tabState;
                 SwitchTab(PARAM_TAB);
             }
