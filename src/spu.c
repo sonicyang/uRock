@@ -35,7 +35,7 @@ volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM];
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 
 struct Effect_t *EffectList[EFFECT_NUM];
-uint8_t ValueForEachStage[STAGE_NUM][3];
+uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 int8_t controllingStage = 0;
 
 struct Volume_t vol;

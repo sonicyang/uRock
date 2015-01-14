@@ -52,13 +52,22 @@ enum {
     EFFECT_TYPE_NUM
 };
 
+enum{
+    LIST_TAB,
+    PARAM_TAB,
+    SELECT_EFFECT_TAB
+};
+
 static GHandle label_uRock;
-static GHandle label_effectName;
+static GHandle btn_effectIndicate[STAGE_NUM];
+static GHandle label_effectName[STAGE_NUM];
+static GHandle btn_effectSwitch[STAGE_NUM];
+static GHandle label_effectTitle;
 static GHandle btn_prevStage;
 static GHandle btn_nextStage;
 static GHandle vbar_param[MAX_EFFECT_PARAM];
-static GHandle btn_StageWidget;
-static GHandle btn_SelectEffectWidget;
+//static GHandle btn_StageWidget;
+//static GHandle btn_SelectEffectWidget;
 static GHandle btn_effectTypes[EFFECT_TYPE_NUM];
 
 static char defaultName[8] = "";
@@ -99,6 +108,36 @@ static void createWidgets(void) {
 	wi.text = "uRock";
 	label_uRock = gwinLabelCreate(NULL, &wi);
 
+    for(i = 0; i < STAGE_NUM; i++){
+        gwinWidgetClearInit(&wi);
+        wi.g.show = TRUE;
+        wi.g.x = 10;
+        wi.g.y = 50 + 40 * i;
+        wi.g.width = 30;
+        wi.g.height = 30;
+        wi.text = "";
+        btn_effectIndicate[i] = gwinButtonCreate(NULL, &wi);
+
+        gwinWidgetClearInit(&wi);
+        wi.g.show = TRUE;
+        wi.g.x = 50;
+        wi.g.y = 50 + 40 * i;
+        wi.g.width = 140;
+        wi.g.height = 30;
+        wi.text = "";
+        label_effectName[i] = gwinLabelCreate(NULL, &wi);
+
+        gwinWidgetClearInit(&wi);
+        wi.g.show = TRUE;
+        wi.g.x = 200;
+        wi.g.y = 50 + 40 * i;
+        wi.g.width = 30;
+        wi.g.height = 30;
+        wi.text = "";
+        btn_effectSwitch[i] = gwinButtonCreate(NULL, &wi);
+    }
+
+    /* ParamTab */
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
 	wi.g.x = 60;
@@ -106,7 +145,7 @@ static void createWidgets(void) {
 	wi.g.width = 120;
 	wi.g.height = 20;
 	wi.text = "";
-	label_effectName = gwinLabelCreate(NULL, &wi);
+	label_effectTitle = gwinLabelCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
@@ -148,7 +187,8 @@ static void createWidgets(void) {
         wi.text = cvtToEffectName(i);
         btn_effectTypes[i] = gwinButtonCreate(NULL, &wi);
     }
-
+    
+    /*
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
 	wi.customDraw = gwinRadioDraw_Tab;
@@ -162,38 +202,54 @@ static void createWidgets(void) {
 	wi.g.x = 1 * wi.g.width;
 	wi.text = "Tab 2";
 	btn_SelectEffectWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
+    */
 }
 
-void SwitchTab(GHandle tab){
+void SwitchTab(uint32_t tab){
     uint32_t i;
 
 	gwinSetVisible(label_uRock, FALSE);
-	gwinSetVisible(label_effectName, FALSE);
+    for(i = 0; i < STAGE_NUM; i++){
+        gwinSetVisible(btn_effectIndicate[i], FALSE);
+        gwinSetVisible(label_effectName[i], FALSE);
+        gwinSetVisible(btn_effectSwitch[i], FALSE);
+    }
+
+	gwinSetVisible(label_effectTitle, FALSE);
 	gwinSetVisible(btn_prevStage, FALSE);
 	gwinSetVisible(btn_nextStage, FALSE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
 	    gwinSetVisible(vbar_param[i], FALSE);
     }
+
     for(i = 0; i < EFFECT_TYPE_NUM; i++){
 	    gwinSetVisible(btn_effectTypes[i], FALSE);
     }
 
-	if (tab == btn_StageWidget) {
+    if(tab == LIST_TAB){
 		gwinSetVisible(label_uRock, TRUE);
-    	gwinSetVisible(label_effectName, TRUE);
+        for(i = 0; i < STAGE_NUM; i++){
+            gwinSetVisible(btn_effectIndicate[i], TRUE);
+            gwinSetVisible(label_effectName[i], TRUE);
+            gwinSetVisible(btn_effectSwitch[i], TRUE);
+        }
+
+        tabState = LIST_TAB;
+    }else if (tab == PARAM_TAB) {
+    	gwinSetVisible(label_effectTitle, TRUE);
 		gwinSetVisible(btn_prevStage, TRUE);
 		gwinSetVisible(btn_nextStage, TRUE);
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(vbar_param[i], TRUE);
         }
 
-        tabState = 0;
-	} else if (tab == btn_SelectEffectWidget) {
+        tabState = PARAM_TAB;
+	} else if (tab == SELECT_EFFECT_TAB) {
         for(i = 0; i < EFFECT_TYPE_NUM; i++){
             gwinSetVisible(btn_effectTypes[i], TRUE);
         }
 
-        tabState = 1;
+        tabState = SELECT_EFFECT_TAB;
 	}
 }
 
@@ -202,9 +258,24 @@ static void RefreshScreen(void){
     uint8_t paraNum;
     uint32_t i = 0;
 
-    if(tabState == 0){
+    if(tabState == LIST_TAB){
+        for(i = 0; i < STAGE_NUM; i++){
+            if (EffectList[i]){
+                gwinSetText(label_effectName[i], EffectList[i]->name, 0);
+
+            }else{
+                gwinSetText(label_effectName[i], "", 0);
+            }
+            if(i == controllingStage){
+                gwinSetText(btn_effectIndicate[i], "->", 0);
+            }else{
+                gwinSetText(btn_effectIndicate[i], "", 0);
+
+            }
+        }
+    }else if(tabState == PARAM_TAB){
         if (EffectList[controllingStage]){
-            gwinSetText(label_effectName, EffectList[controllingStage]->name, 0);
+            gwinSetText(label_effectTitle, EffectList[controllingStage]->name, 0);
 
             EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
             for(; i < paraNum; i++){
@@ -213,12 +284,12 @@ static void RefreshScreen(void){
             }
             i = paraNum;
         }else{
-            gwinSetText(label_effectName, "", 0);
+            gwinSetText(label_effectTitle, "", 0);
         }
         for(; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(vbar_param[i], FALSE);
         }
-    }else if(tabState == 1){
+    }else if(tabState == SELECT_EFFECT_TAB){
 
     }
     return;
@@ -316,7 +387,7 @@ void UserInterface(void *argument){
 	geventListenerInit(&gl);
 	gwinAttachListener(&gl);
 
-    SwitchTab(btn_StageWidget);
+    SwitchTab(LIST_TAB);
     RefreshScreen();
 
 	while(1) {
@@ -327,7 +398,7 @@ void UserInterface(void *argument){
 		case GEVENT_GWIN_RADIO:
 			switch(((GEventGWinRadio *)event)->group) {
 			case TAB_GROUP_1:
-				SwitchTab(((GEventGWinRadio *)event)->radio);
+	//			SwitchTab(((GEventGWinRadio *)event)->radio);
 				break;
 			default:
 				break;
@@ -335,15 +406,23 @@ void UserInterface(void *argument){
 			break;
 
 		case GEVENT_GWIN_BUTTON:
-			if (((GEventGWinButton*)event)->button == btn_prevStage)
-				SelectPrevStage();
-			else if (((GEventGWinButton*)event)->button == btn_nextStage)
-				SelectNextStage();
+            for(i = 0; i < STAGE_NUM; i++){
+			    if (((GEventGWinButton*)event)->button == btn_effectIndicate[i]){
+                    controllingStage = i;
+                }
+            }
+
+            for(i = 0; i < STAGE_NUM; i++){
+			    if (((GEventGWinButton*)event)->button == btn_effectSwitch[i]){
+                    controllingStage = i;
+                    SwitchTab(SELECT_EFFECT_TAB);
+                }
+            }
 
             for(i = 0; i < EFFECT_TYPE_NUM; i++){
 			    if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
     				StageEffectSelect(i);
-                    SwitchTab(btn_StageWidget);
+                    SwitchTab(LIST_TAB);
                 }
             }
 			break;
