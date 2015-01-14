@@ -101,7 +101,7 @@ int main(void){
 
     xTaskCreate(SignalProcessingUnit,
         (signed char*)"SPU",
-        2048, NULL, tskIDLE_PRIORITY + 2, NULL);
+        1024, NULL, tskIDLE_PRIORITY + 3, NULL);
 
     xTaskCreate(UserInterface,
         (signed char*)"UI",

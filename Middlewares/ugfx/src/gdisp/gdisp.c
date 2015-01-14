@@ -590,8 +590,7 @@ void _gdispInit(void)
 			g->flags = 0;
 			gdisp_lld_init(g);
 			MUTEX_EXIT(g);
-	}
-
+        }
 	// Set the orientation, the clipping area, clear all the displays (and add the logo if required)
 	for(g = GDisplayArray, i = 0; i < GDISP_TOTAL_DISPLAYS; g++, i++) {
 		#if defined(GDISP_DEFAULT_ORIENTATION) && GDISP_NEED_CONTROL && GDISP_HARDWARE_CONTROL

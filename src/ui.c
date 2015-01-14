@@ -186,7 +186,7 @@ static void createWidgets(void) {
         wi.g.width = (240 - 10);
         wi.g.height = 25;
         wi.text = defaultName;
-        vbar_param[i] = gwinSliderCreate(NULL, &wi);
+        vbar_param[i] = gwinProgressbarCreate(NULL, &wi);
     }
 
     /* SelectStageTab */
@@ -285,6 +285,7 @@ static void RefreshScreen(void){
             for(; i < paraNum; i++){
                 gwinSetVisible(vbar_param[i], TRUE);
                 gwinSetText(vbar_param[i], parameterList[i]->name, 0);
+                gwinProgressbarSetPosition(vbar_param[i], map(parameterList[i]->value, parameterList[i]->lowerBound, parameterList[i]->upperBound, 0, 100));
             }
             i = paraNum;
         }else{
@@ -366,11 +367,11 @@ void UserInterface(void *argument){
 
 	gfxInit();
 
+    
 	gdispClear(White);
 
 	gwinSetDefaultFont(gdispOpenFont("fixed_7x14"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
-    
     vTaskDelay(100);
 	// Attach the mouse input
 	gwinAttachMouse(0);
@@ -385,10 +386,10 @@ void UserInterface(void *argument){
     SwitchTab(LIST_TAB);
 
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
-
+   
 	while(1) {
 		// Get an Event
-		event = geventEventWait(&gl, 10);
+		event = geventEventWait(&gl, 20);
 
 		switch(event->type) {
 		case GEVENT_GWIN_BUTTON:
@@ -416,21 +417,9 @@ void UserInterface(void *argument){
                 SwitchTab(LIST_TAB);
             }
 			break;
-
-		case GEVENT_GWIN_SLIDER:
-			itoa(((GEventGWinSlider *)event)->position, digits);
-			gdispDrawString(0, 50, digits, gdispOpenFont("UI2"), HTML2COLOR(0xFF0000));
-            
-            for(i = 0; i < MAX_EFFECT_PARAM; i++){
-                if (((GEventGWinSlider *)event)->slider == vbar_param[i]){
-                    StageSetValue(i, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-                }
-            }            
-			break;
 		}
 
 
-        /* Pot Controll */
         diff = 0;
 
         for(i = 0; i < 4; i++){
@@ -449,7 +438,6 @@ void UserInterface(void *argument){
             cnt = 0;
         }
 
-        /* save previous values */
         for(i = 0; i < 4; i++){
             potValues[1][i] = potValues[0][i];
         }
@@ -463,4 +451,7 @@ void UserInterface(void *argument){
 
         RefreshScreen();
 	}
+
+    while(1){
+    }
 }

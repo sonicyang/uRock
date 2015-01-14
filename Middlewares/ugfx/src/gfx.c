@@ -67,6 +67,7 @@ void gfxInit(void)
 	// These must be initialised in the order of their dependancies
 
 	_gosInit();
+    
 	#if GFX_USE_GQUEUE
 		_gqueueInit();
 	#endif
@@ -82,11 +83,12 @@ void gfxInit(void)
 	#if GFX_USE_GDISP
 		_gdispInit();
 	#endif
+        
 	#if GFX_USE_GWIN
 		_gwinInit();
 	#endif
 	#if GFX_USE_GINPUT
-		_ginputInit();
+		//_ginputInit();
 	#endif
 	#if GFX_USE_GADC
 		_gadcInit();
@@ -94,6 +96,7 @@ void gfxInit(void)
 	#if GFX_USE_GAUDIO
 		_gaudioInit();
 	#endif
+    
 }
 
 void gfxDeinit(void)

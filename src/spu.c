@@ -38,15 +38,6 @@ struct Effect_t *EffectList[EFFECT_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 int8_t controllingStage = 0;
 
-struct Volume_t vol;
-struct Distortion_t distor;
-struct Overdrive_t overdrive;
-struct Reverb_t delay;
-struct Flanger_t flanger;
-struct Phaser_t phaser;
-struct Equalizer_t equalizer;
-struct Compressor_t compressor;
-
 void SignalProcessingUnit(void *pvParameters){
     uint32_t index = 0;
     uint32_t pipeindex = 0;

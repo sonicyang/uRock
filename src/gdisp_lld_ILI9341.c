@@ -58,10 +58,10 @@ static inline void init_board(GDisplay *g) {
 	g->board = 0;
 
 	/* Init LCD and LTCD. Enable layer1 only. */
-	BSP_LCD_Init();
-	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
-	BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER + BUFFER_OFFSET);
-	BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+	//BSP_LCD_Init();
+	//BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER, LCD_FRAME_BUFFER);
+	//BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER, LCD_FRAME_BUFFER + BUFFER_OFFSET);
+	//BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
 }
 
 static inline void set_backlight(GDisplay *g, uint8_t percent) {
