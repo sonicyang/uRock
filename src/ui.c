@@ -42,6 +42,16 @@ extern struct Effect_t *EffectList[EFFECT_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 extern int8_t controllingStage;
 
+enum {
+    NONE,
+    VOL,
+    DISTOR,
+    OVERDR,
+    FLANGE,
+    EQULIZ,
+    EFFECT_TYPE_NUM
+};
+
 static GHandle label_uRock;
 static GHandle label_effectName;
 static GHandle btn_prevStage;
@@ -49,10 +59,7 @@ static GHandle btn_nextStage;
 static GHandle vbar_param[MAX_EFFECT_PARAM];
 static GHandle btn_StageWidget;
 static GHandle btn_SelectEffectWidget;
-static GHandle btn_stage0;
-static GHandle btn_stage1;
-static GHandle btn_stage2;
-static GHandle btn_stage3;
+static GHandle btn_effectTypes[EFFECT_TYPE_NUM];
 
 static char defaultName[8] = "";
 
@@ -60,10 +67,29 @@ static GListener gl;
 
 static uint32_t tabState = 0;
 
+static char *cvtToEffectName(uint32_t ee){
+    switch(ee){
+        case VOL:
+            return "Volume";
+        case DISTOR:
+            return "Distortion";
+        case OVERDR:
+            return "OverDrive";
+        case FLANGE:
+            return "Flanger";
+        case EQULIZ:
+            return "Equalizer";
+        default:
+            return "None";
+    }
+    return "None";
+}
+
 static void createWidgets(void) {
     uint32_t i;
 	GWidgetInit wi;
 
+    /* StageTab */
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
 	wi.g.x = 0;
@@ -111,41 +137,17 @@ static void createWidgets(void) {
         vbar_param[i] = gwinSliderCreate(NULL, &wi);
     }
 
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 20;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_stage0 = gwinButtonCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 65;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_stage1 = gwinButtonCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 110;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_stage2 = gwinButtonCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 155;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_stage3 = gwinButtonCreate(NULL, &wi);
+    /* SelectStageTab */
+    for(i = 0; i < EFFECT_TYPE_NUM; i++){
+        gwinWidgetClearInit(&wi);
+        wi.g.show = TRUE;
+        wi.g.x = 5;
+        wi.g.y = 5 + 35 * i;
+        wi.g.width = 230;
+        wi.g.height = 30;
+        wi.text = cvtToEffectName(i);
+        btn_effectTypes[i] = gwinButtonCreate(NULL, &wi);
+    }
 
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
@@ -166,18 +168,19 @@ void SwitchTab(GHandle tab){
     uint32_t i;
 
 	gwinSetVisible(label_uRock, FALSE);
+	gwinSetVisible(label_effectName, FALSE);
 	gwinSetVisible(btn_prevStage, FALSE);
 	gwinSetVisible(btn_nextStage, FALSE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
 	    gwinSetVisible(vbar_param[i], FALSE);
     }
-	gwinSetVisible(btn_stage0, FALSE);
-	gwinSetVisible(btn_stage1, FALSE);
-	gwinSetVisible(btn_stage2, FALSE);
-	gwinSetVisible(btn_stage3, FALSE);
+    for(i = 0; i < EFFECT_TYPE_NUM; i++){
+	    gwinSetVisible(btn_effectTypes[i], FALSE);
+    }
 
 	if (tab == btn_StageWidget) {
 		gwinSetVisible(label_uRock, TRUE);
+    	gwinSetVisible(label_effectName, TRUE);
 		gwinSetVisible(btn_prevStage, TRUE);
 		gwinSetVisible(btn_nextStage, TRUE);
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
@@ -186,10 +189,9 @@ void SwitchTab(GHandle tab){
 
         tabState = 0;
 	} else if (tab == btn_SelectEffectWidget) {
-		gwinSetVisible(btn_stage0, TRUE);
-		gwinSetVisible(btn_stage1, TRUE);
-		gwinSetVisible(btn_stage2, TRUE);
-		gwinSetVisible(btn_stage3, TRUE);
+        for(i = 0; i < EFFECT_TYPE_NUM; i++){
+            gwinSetVisible(btn_effectTypes[i], TRUE);
+        }
 
         tabState = 1;
 	}
@@ -252,22 +254,42 @@ static void SelectPrevStage()
     return;
 }
 
-static void StageEffectNext(uint8_t whichStage)
+static void StageEffectSelect(uint8_t whichEffect)
 {
-    if(EffectList[whichStage]){
-        EffectList[whichStage]->del(EffectList[whichStage]);
-        EffectList[whichStage] = NULL;
-    }else{
-        EffectList[whichStage] = new_Volume();
+    struct Effect_t *recycle = EffectList[controllingStage];
+
+    switch(whichEffect){
+        case VOL:
+            EffectList[controllingStage] = new_Volume();
+            break;
+        case DISTOR:
+            EffectList[controllingStage] = new_Distortion();
+            break;
+        case OVERDR:
+            EffectList[controllingStage] = new_Overdrive();
+            break;
+        case FLANGE:
+            EffectList[controllingStage] = new_Flanger();
+            break;
+        case EQULIZ:
+            EffectList[controllingStage] = new_Equalizer();
+            break;
+        default:
+            EffectList[controllingStage] = NULL;
+            break;
+    }
+
+    if(recycle){
+        recycle->del(recycle);
     }
 
     /* Reset value in this stage */
-    ValueForEachStage[whichStage][0] = 0;
-    ValueForEachStage[whichStage][1] = 0;
-    ValueForEachStage[whichStage][2] = 0;
+    ValueForEachStage[controllingStage][0] = 0;
+    ValueForEachStage[controllingStage][1] = 0;
+    ValueForEachStage[controllingStage][2] = 0;
 
-    if (EffectList[whichStage]){
-        EffectList[whichStage]->adj(EffectList[whichStage], ValueForEachStage[0]);
+    if (EffectList[controllingStage]){
+        EffectList[controllingStage]->adj(EffectList[controllingStage], ValueForEachStage[0]);
     }    
 }
 
@@ -317,14 +339,13 @@ void UserInterface(void *argument){
 				SelectPrevStage();
 			else if (((GEventGWinButton*)event)->button == btn_nextStage)
 				SelectNextStage();
-			else if (((GEventGWinButton*)event)->button == btn_stage0)
-				StageEffectNext(0);
-			else if (((GEventGWinButton*)event)->button == btn_stage1)
-				StageEffectNext(1);
-			else if (((GEventGWinButton*)event)->button == btn_stage2)
-				StageEffectNext(2);
-			else if (((GEventGWinButton*)event)->button == btn_stage3)
-				StageEffectNext(3);
+
+            for(i = 0; i < EFFECT_TYPE_NUM; i++){
+			    if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
+    				StageEffectSelect(i);
+                    SwitchTab(btn_StageWidget);
+                }
+            }
 			break;
 
 		case GEVENT_GWIN_SLIDER:
