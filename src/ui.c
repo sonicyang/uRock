@@ -1,3 +1,4 @@
+#include "stm32f4xx_hal.h"
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
@@ -45,8 +46,11 @@ extern int8_t controllingStage;
 enum {
     NONE,
     VOL,
+    COMP,
     DISTOR,
     OVERDR,
+    DELAY,
+    REVERB,
     FLANGE,
     EQULIZ,
     EFFECT_TYPE_NUM
@@ -76,14 +80,22 @@ static GListener gl;
 
 static uint32_t tabState = 0;
 
+uint8_t potValues[2][4];
+
 static char *cvtToEffectName(uint32_t ee){
     switch(ee){
         case VOL:
             return "Volume";
+        case COMP:
+            return "Compressor";
         case DISTOR:
             return "Distortion";
         case OVERDR:
             return "OverDrive";
+        case DELAY:
+            return "Delay";
+        case REVERB:
+            return "Reverb";
         case FLANGE:
             return "Flanger";
         case EQULIZ:
@@ -181,28 +193,13 @@ static void createWidgets(void) {
         gwinWidgetClearInit(&wi);
         wi.g.show = TRUE;
         wi.g.x = 5;
-        wi.g.y = 5 + 35 * i;
+        wi.g.y = 5 + 25 * i;
         wi.g.width = 230;
-        wi.g.height = 30;
+        wi.g.height = 20;
         wi.text = cvtToEffectName(i);
         btn_effectTypes[i] = gwinButtonCreate(NULL, &wi);
     }
     
-    /*
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.customDraw = gwinRadioDraw_Tab;
-	wi.g.width = gdispGetWidth() / 2;
-	wi.g.height = 50;
-	wi.g.y = gdispGetHeight() - 15;
-	wi.g.x = 0 * wi.g.width;
-	wi.text = "Tab 1";
-	btn_StageWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
-
-	wi.g.x = 1 * wi.g.width;
-	wi.text = "Tab 2";
-	btn_SelectEffectWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
-    */
 }
 
 void SwitchTab(uint32_t tab){
@@ -237,8 +234,6 @@ void SwitchTab(uint32_t tab){
         tabState = LIST_TAB;
     }else if (tab == PARAM_TAB) {
     	gwinSetVisible(label_effectTitle, TRUE);
-		gwinSetVisible(btn_prevStage, TRUE);
-		gwinSetVisible(btn_nextStage, TRUE);
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(vbar_param[i], TRUE);
         }
@@ -305,26 +300,6 @@ static void StageSetValue(uint8_t whichParam, uint8_t value)
     }
 }
 
-static void SelectNextStage()
-{
-    controllingStage++;
-
-    if(controllingStage >= STAGE_NUM)
-        controllingStage = 0;
-
-    return;
-}
-
-static void SelectPrevStage()
-{
-    controllingStage--;
-
-    if(controllingStage < 0)
-        controllingStage = STAGE_NUM - 1;
-
-    return;
-}
-
 static void StageEffectSelect(uint8_t whichEffect)
 {
     struct Effect_t *recycle = EffectList[controllingStage];
@@ -333,11 +308,20 @@ static void StageEffectSelect(uint8_t whichEffect)
         case VOL:
             EffectList[controllingStage] = new_Volume();
             break;
+        case COMP:
+            EffectList[controllingStage] = new_Compressor();
+            break;
         case DISTOR:
             EffectList[controllingStage] = new_Distortion();
             break;
         case OVERDR:
             EffectList[controllingStage] = new_Overdrive();
+            break;
+        case DELAY:
+            EffectList[controllingStage] = new_Delay();
+            break;
+        case REVERB:
+            EffectList[controllingStage] = new_Reverb();
             break;
         case FLANGE:
             EffectList[controllingStage] = new_Flanger();
@@ -368,6 +352,7 @@ void UserInterface(void *argument){
 	GEvent* event;
 	char digits[4];
     uint32_t i;
+    uint32_t diff, cnt, orig;
 
 	gfxInit();
 
@@ -388,23 +373,14 @@ void UserInterface(void *argument){
 	gwinAttachListener(&gl);
 
     SwitchTab(LIST_TAB);
-    RefreshScreen();
+
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
 
 	while(1) {
 		// Get an Event
-		event = geventEventWait(&gl, TIME_INFINITE);
+		event = geventEventWait(&gl, 10);
 
 		switch(event->type) {
-		case GEVENT_GWIN_RADIO:
-			switch(((GEventGWinRadio *)event)->group) {
-			case TAB_GROUP_1:
-	//			SwitchTab(((GEventGWinRadio *)event)->radio);
-				break;
-			default:
-				break;
-			}
-			break;
-
 		case GEVENT_GWIN_BUTTON:
             for(i = 0; i < STAGE_NUM; i++){
 			    if (((GEventGWinButton*)event)->button == btn_effectIndicate[i]){
@@ -438,6 +414,38 @@ void UserInterface(void *argument){
             }            
 			break;
 		}
+
+
+        /* Pot Controll */
+        diff = 0;
+
+        for(i = 0; i < 4; i++){
+            if(((potValues[1][i] - potValues[0][i]) > 4) || ((potValues[0][i] - potValues[1][i]) > 4))
+                diff++;
+        }
+
+        if(diff){
+            if(EffectList[controllingStage])
+                EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
+            
+            if(tabState != PARAM_TAB){
+                orig = tabState;
+                SwitchTab(PARAM_TAB);
+            }
+            cnt = 0;
+        }
+
+        /* save previous values */
+        for(i = 0; i < 4; i++){
+            potValues[1][i] = potValues[0][i];
+        }
+
+        if(cnt == 75){
+            SwitchTab(orig);
+            cnt++;
+        }else if(cnt < 75){
+            cnt++;
+        }
 
         RefreshScreen();
 	}
