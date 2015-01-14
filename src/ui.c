@@ -48,7 +48,7 @@ static GHandle btn_prevStage;
 static GHandle btn_nextStage;
 static GHandle vbar_param[MAX_EFFECT_PARAM];
 static GHandle btn_StageWidget;
-static GHandle btn_ParamWidget;
+static GHandle btn_SelectEffectWidget;
 static GHandle btn_stage0;
 static GHandle btn_stage1;
 static GHandle btn_stage2;
@@ -57,6 +57,8 @@ static GHandle btn_stage3;
 static char defaultName[8] = "";
 
 static GListener gl;
+
+static uint32_t tabState = 0;
 
 static void createWidgets(void) {
     uint32_t i;
@@ -77,7 +79,7 @@ static void createWidgets(void) {
 	wi.g.y = 30;
 	wi.g.width = 120;
 	wi.g.height = 20;
-	wi.text = "TITLE";
+	wi.text = "";
 	label_effectName = gwinLabelCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
@@ -157,7 +159,7 @@ static void createWidgets(void) {
 
 	wi.g.x = 1 * wi.g.width;
 	wi.text = "Tab 2";
-	btn_ParamWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
+	btn_SelectEffectWidget = gwinRadioCreate(NULL, &wi, TAB_GROUP_1);
 }
 
 void SwitchTab(GHandle tab){
@@ -181,11 +183,15 @@ void SwitchTab(GHandle tab){
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(vbar_param[i], TRUE);
         }
-	} else if (tab == btn_ParamWidget) {
+
+        tabState = 0;
+	} else if (tab == btn_SelectEffectWidget) {
 		gwinSetVisible(btn_stage0, TRUE);
 		gwinSetVisible(btn_stage1, TRUE);
 		gwinSetVisible(btn_stage2, TRUE);
 		gwinSetVisible(btn_stage3, TRUE);
+
+        tabState = 1;
 	}
 }
 
@@ -194,20 +200,24 @@ static void RefreshScreen(void){
     uint8_t paraNum;
     uint32_t i = 0;
 
-    if (EffectList[controllingStage]){
-        gwinSetText(label_effectName, EffectList[controllingStage]->name, 0);
+    if(tabState == 0){
+        if (EffectList[controllingStage]){
+            gwinSetText(label_effectName, EffectList[controllingStage]->name, 0);
 
-        EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
-        for(; i < paraNum; i++){
-	        gwinSetVisible(vbar_param[i], TRUE);
-            gwinSetText(vbar_param[i], parameterList[i]->name, 0);
+            EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
+            for(; i < paraNum; i++){
+                gwinSetVisible(vbar_param[i], TRUE);
+                gwinSetText(vbar_param[i], parameterList[i]->name, 0);
+            }
+            i = paraNum;
+        }else{
+            gwinSetText(label_effectName, "", 0);
         }
-        i = paraNum;
-    }else{
-        gwinSetText(label_effectName, "", 0);
-    }
-    for(; i < MAX_EFFECT_PARAM; i++){
-	    gwinSetVisible(vbar_param[i], FALSE);
+        for(; i < MAX_EFFECT_PARAM; i++){
+            gwinSetVisible(vbar_param[i], FALSE);
+        }
+    }else if(tabState == 1){
+
     }
     return;
 }
@@ -283,6 +293,9 @@ void UserInterface(void *argument){
 	// We want to listen for widget events
 	geventListenerInit(&gl);
 	gwinAttachListener(&gl);
+
+    SwitchTab(btn_StageWidget);
+    RefreshScreen();
 
 	while(1) {
 		// Get an Event
