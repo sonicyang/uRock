@@ -40,10 +40,12 @@ struct Effect_t* new_Distortion(){
     tmp->parent.adj = adjust_Distortion;
     tmp->parent.getParam = getParam_Distortion;
 
+    strcpy(tmp->gain.name, "Gain");
     tmp->gain.upperBound = 200.0f;
     tmp->gain.lowerBound = 10.0f;
     tmp->gain.value = 10.0f;
 
+    strcpy(tmp->volume.name, "Volume");
     tmp->volume.upperBound = 0.0f;
     tmp->volume.lowerBound = -30.0f;
     tmp->volume.value = 0.0f;

@@ -86,16 +86,19 @@ struct Effect_t* new_Equalizer(){
     tmp->parent.adj = adjust_Equalizer;
     tmp->parent.getParam = getParam_Equalizer;
 
+    strcpy(tmp->low.name, "Low");
     tmp->low.upperBound = 0.0f;
     tmp->low.lowerBound = -20.0;
     tmp->low.value = 0.0f;
     tmp->cache[0] = (q31_t)(powf(10, (tmp->low.value * 0.1f)) * Q_1);
 
+    strcpy(tmp->mid.name, "Mid");
     tmp->mid.upperBound = 0.0f;
     tmp->mid.lowerBound = -20.0;
     tmp->mid.value = 0.0f;
     tmp->cache[1] = (q31_t)(powf(10, (tmp->mid.value * 0.1f)) * Q_1);
 
+    strcpy(tmp->high.name, "High");
     tmp->high.upperBound = 0.0f;
     tmp->high.lowerBound = -20.0;
     tmp->high.value = 0.0f;

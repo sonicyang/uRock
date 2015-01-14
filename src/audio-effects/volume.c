@@ -43,6 +43,7 @@ struct Effect_t* new_Volume(){
     tmp->parent.adj = adjust_Volume;
     tmp->parent.getParam = getParam_Volume;
 
+    strcpy(tmp->gain.name, "Volume");
     tmp->gain.upperBound = 0.0f;
     tmp->gain.lowerBound = -30.0f;
     tmp->gain.value = 0.0f;

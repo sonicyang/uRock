@@ -66,14 +66,17 @@ struct Effect_t* new_Compressor(){
     tmp->parent.adj = adjust_Compressor;
     tmp->parent.getParam = getParam_Compressor;
 
+    strcpy(tmp->threshold.name, "Threshold");
     tmp->threshold.upperBound = 500.0f;
     tmp->threshold.lowerBound = 100.0f;
     tmp->threshold.value = 100.0f;
 
+    strcpy(tmp->attack.name, "Attack");
     tmp->attack.upperBound = 0.2f;
     tmp->attack.lowerBound = 0.05f;
     tmp->attack.value = 0.05f;
     
+    strcpy(tmp->ratio.name, "Ratio");
     tmp->ratio.upperBound = 2.0f;
     tmp->ratio.lowerBound = 1.0f;
     tmp->ratio.value = 1.0f;
