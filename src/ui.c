@@ -53,6 +53,7 @@ enum {
     REVERB,
     FLANGE,
     EQULIZ,
+    BACK,
     EFFECT_TYPE_NUM
 };
 
@@ -189,7 +190,7 @@ static void createWidgets(void) {
     }
 
     /* SelectStageTab */
-    for(i = 0; i < EFFECT_TYPE_NUM; i++){
+    for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = TRUE;
         wi.g.x = 5;
@@ -199,6 +200,14 @@ static void createWidgets(void) {
         wi.text = cvtToEffectName(i);
         btn_effectTypes[i] = gwinButtonCreate(NULL, &wi);
     }
+    gwinWidgetClearInit(&wi);
+    wi.g.show = TRUE;
+    wi.g.x = 5;
+    wi.g.y = 290;
+    wi.g.width = 230;
+    wi.g.height = 20;
+    wi.text = "Back";
+    btn_effectTypes[EFFECT_TYPE_NUM - 1] = gwinButtonCreate(NULL, &wi);
     
 }
 
@@ -304,6 +313,7 @@ static void StageEffectSelect(uint8_t whichEffect)
 {
     struct Effect_t *recycle = EffectList[controllingStage];
 
+    //TODO: Implement FKING Factory
     switch(whichEffect){
         case VOL:
             EffectList[controllingStage] = new_Volume();
@@ -395,11 +405,15 @@ void UserInterface(void *argument){
                 }
             }
 
-            for(i = 0; i < EFFECT_TYPE_NUM; i++){
+            for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
 			    if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
     				StageEffectSelect(i);
                     SwitchTab(LIST_TAB);
                 }
+            }
+
+            if (((GEventGWinButton*)event)->button == btn_effectTypes[EFFECT_TYPE_NUM -1]){
+                SwitchTab(LIST_TAB);
             }
 			break;
 
