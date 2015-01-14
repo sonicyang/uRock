@@ -29,9 +29,6 @@ extern struct Effect_t *EffectList[EFFECT_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][3];
 extern int8_t controllingStage;
 
-static struct parameter_t* paramList[5];
-static uint8_t paramNum;
-
 static GHandle label_uRock;
 static GHandle btn_prevStage;
 static GHandle btn_nextStage;
@@ -45,9 +42,9 @@ static GHandle btn_stage1;
 static GHandle btn_stage2;
 static GHandle btn_stage3;
 
-uint8_t values[3];
+static char defaultName[8] = "";
 
-static char stageNum[3];
+static char *parameterNameHook[3] = {defaultName};
 
 static GListener gl;
 
@@ -96,7 +93,7 @@ static void createWidgets(void) {
 	wi.g.y = 100;
 	wi.g.width = (240 - 10);
 	wi.g.height = 25;
-	wi.text = "S0";
+	wi.text = parameterNameHook[0];
 	vbar_param0 = gwinSliderCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
@@ -105,7 +102,7 @@ static void createWidgets(void) {
 	wi.g.y = 160;
 	wi.g.width = (240 - 10);
 	wi.g.height = 25;
-	wi.text = "S1";
+	wi.text = parameterNameHook[1];
 	vbar_param1 = gwinSliderCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
@@ -114,7 +111,7 @@ static void createWidgets(void) {
 	wi.g.y = 220;
 	wi.g.width = (240 - 10);
 	wi.g.height = 25;
-	wi.text = "S2";
+	wi.text = parameterNameHook[2];
 	vbar_param2 = gwinSliderCreate(NULL, &wi);
 
 	gwinWidgetClearInit(&wi);
@@ -207,10 +204,28 @@ static void StageSetValue(uint8_t whichParam, uint8_t value)
 
 static void SelectNextStage()
 {
+    struct parameter_t *parameterList[5];
+    uint8_t paraNum;
+    uint32_t i;
+
     controllingStage++;
 
     if(controllingStage >= STAGE_NUM)
         controllingStage = 0;
+
+    if (EffectList[EffectStages[controllingStage]]){
+        EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[0]], parameterList, &paraNum);
+        for(i = 0; i < paraNum; i++){
+            parameterNameHook[i] = parameterList[i]->name;
+        }
+        for(i = paraNum; i < 3; i++){
+            parameterNameHook[i] = defaultName;
+        }
+    }else{
+        for(i = 0; i < 3; i++){
+            parameterNameHook[i] = defaultName;    
+        }
+    }    
 }
 
 static void SelectPrevStage()
@@ -219,21 +234,39 @@ static void SelectPrevStage()
 
     if(controllingStage < 0)
         controllingStage = STAGE_NUM - 1;
+
+    //TODO: make a refresh Function
+    if (EffectList[EffectStages[controllingStage]]){
+        EffectList[EffectStages[controllingStage]]->getParam(EffectList[EffectStages[0]], parameterList, &paraNum);
+        for(i = 0; i < paraNum; i++){
+            parameterNameHook[i] = parameterList[i]->name;
+        }
+        for(i = paraNum; i < 3; i++){
+            parameterNameHook[i] = defaultName;
+        }
+    }else{
+        for(i = 0; i < 3; i++){
+            parameterNameHook[i] = defaultName;    
+        }
+    }    
 }
 
 static void StageEffectNext(uint8_t whichStage)
 {
+
     EffectStages[whichStage]++;
     if (EffectStages[whichStage] == EFFECT_NUM)
         EffectStages[whichStage] = 0;
 
+    //TODO: WHY Reset?
     /* Reset value in this stage */
     ValueForEachStage[whichStage][0] = 0;
     ValueForEachStage[whichStage][1] = 0;
     ValueForEachStage[whichStage][2] = 0;
 
-    if (EffectList[EffectStages[whichStage]])
+    if (EffectList[EffectStages[whichStage]]){
         EffectList[EffectStages[whichStage]]->adj(EffectList[EffectStages[0]], ValueForEachStage[0]);
+    }    
 }
 
 void UserInterface(void *argument){
@@ -291,12 +324,13 @@ void UserInterface(void *argument){
 			itoa(((GEventGWinSlider *)event)->position, digits);
 			gdispDrawString(0, 50, digits, gdispOpenFont("UI2"), HTML2COLOR(0xFF0000));
 
-			if (((GEventGWinSlider *)event)->slider == vbar_param0)
+			if (((GEventGWinSlider *)event)->slider == vbar_param0){
 				StageSetValue(0, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-			else if (((GEventGWinSlider *)event)->slider == vbar_param1)
+            }else if (((GEventGWinSlider *)event)->slider == vbar_param1){
 				StageSetValue(1, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
-			else if (((GEventGWinSlider *)event)->slider == vbar_param2)
+            }else if (((GEventGWinSlider *)event)->slider == vbar_param2){
 				StageSetValue(2, map(((GEventGWinSlider *)event)->position, 0, 100, 0, 255));
+            }
 			break;
 		}
 	}

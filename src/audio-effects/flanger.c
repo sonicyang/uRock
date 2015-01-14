@@ -56,12 +56,12 @@ void adjust_Flanger(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Flanger(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Flanger(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     struct Flanger_t *tmp = (struct Flanger_t*)opaque;
     *paramNum = 3;
-    param[0].value = tmp->attenuation.value;
-    param[1].value = tmp->speed.value;
-    param[2].value = tmp->depth.value;
+    param[0] = &tmp->attenuation;
+    param[1] = &tmp->speed;
+    param[2] = &tmp->depth;
     return;
 }
 

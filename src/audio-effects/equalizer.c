@@ -60,12 +60,12 @@ void adjust_Equalizer(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Equalizer(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Equalizer(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     struct Equalizer_t *tmp = (struct Equalizer_t*)opaque;
     *paramNum = 3;
-    param[0].value = tmp->low.value;
-    param[1].value = tmp->mid.value;
-    param[2].value = tmp->high.value;
+    param[0] = &tmp->low;
+    param[1] = &tmp->mid;
+    param[2] = &tmp->high;
     return;
 }
 

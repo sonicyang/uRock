@@ -22,11 +22,11 @@ void adjust_Distortion(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Distortion(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Distortion(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     struct Distortion_t *tmp = (struct Distortion_t*)opaque;
     *paramNum = 2;
-    param[0].value = tmp->gain.value;
-    param[1].value = tmp->volume.value;
+    param[0] = &tmp->gain;
+    param[1] = &tmp->volume;
     return;
 }
 
