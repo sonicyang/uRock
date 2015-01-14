@@ -76,7 +76,7 @@ struct Effect_t* new_Flanger(){
     tmp->parent.adj = adjust_Flanger;
     tmp->parent.getParam = getParam_Flanger;
 
-    strcpy(tmp->attenuation.name, "Attenuation");
+    tmp->attenuation.name = "Attenuation";
     tmp->attenuation.upperBound = -2.0f;
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -30.0f;
