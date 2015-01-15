@@ -21,17 +21,17 @@ void readWaveTask(void *pvParameters){
 
     f_read(&fil, &tmp->header, sizeof(struct wavHeader_t), &i);
     if(i < sizeof(struct wavHeader_t)) //Check Read a File
-        while(1);
+        vTaskDelete(NULL);
 
     if((strncmp(tmp->header.filID, "RIFF", 4) != 0) ||\
        (strncmp(tmp->header.waveID, "WAVE", 4) != 0))
-        while(1);
+        vTaskDelete(NULL);
 
     if((tmp->header.nChannels > 2) ||\
        (tmp->header.wFormatTag != 0x0001) ||\
        (tmp->header.nSamplesPerSec != 44100) ||\
        (tmp->header.wBitsPerSample != 16))
-        while(1);
+        vTaskDelete(NULL);
 
     wavDataLeft = tmp->header.dataSize;
 
@@ -51,7 +51,7 @@ void readWaveTask(void *pvParameters){
     arm_fill_q31(0, tmp->dataBuffer[0], SAMPLE_NUM);
     arm_fill_q31(0, tmp->dataBuffer[1], SAMPLE_NUM);
 
-    while(1);
+    vTaskDelete(NULL);
 }
 
 void WavPlayer(q31_t* pData, void *opaque){
