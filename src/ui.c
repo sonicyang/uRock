@@ -154,9 +154,9 @@ static void createWidgets(void) {
     /* ParamTab */
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
-	wi.g.x = 60;
+	wi.g.x = 20;
 	wi.g.y = 30;
-	wi.g.width = 120;
+	wi.g.width = (240 - 20);
 	wi.g.height = 20;
 	wi.text = "";
 	label_effectTitle = gwinLabelCreate(NULL, &wi);
@@ -165,13 +165,13 @@ static void createWidgets(void) {
         gwinWidgetClearInit(&wi);
         wi.g.show = TRUE;
         wi.g.x = 5;
-        wi.g.y = 100 + i * 60;
+        wi.g.y = 60 + i * 60;
         wi.g.width = (240 - 10);
         wi.g.height = 25;
         wi.text = defaultName;
         label_param[i] = gwinLabelCreate(NULL, &wi);
 
-        wi.g.y = 125 + i * 60;
+        wi.g.y += 25;
         vbar_param[i] = gwinProgressbarCreate(NULL, &wi);
     }
 
@@ -268,7 +268,11 @@ static void RefreshScreen(void){
         }
     }else if(tabState == PARAM_TAB){
         if (EffectList[controllingStage]){
-            gwinSetText(label_effectTitle, EffectList[controllingStage]->name, 0);
+            strcpy(buf, "Stage ");
+            itoa(controllingStage + 1, buf + 6);
+            strcat(buf, ":");
+            strcat(buf, EffectList[controllingStage]->name);
+            gwinSetText(label_effectTitle, buf, 1);
 
             EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
             for(; i < paraNum; i++){
@@ -345,7 +349,6 @@ static void StageEffectSelect(uint8_t whichEffect)
 
 void UserInterface(void *argument){
 	GEvent* event;
-	char digits[4];
     uint32_t i;
     uint32_t diff, cnt, orig;
 
