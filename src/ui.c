@@ -357,7 +357,7 @@ void UserInterface(void *argument){
     
 	gdispClear(White);
 
-	gwinSetDefaultFont(gdispOpenFont("fixed_7x14"));
+	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
     vTaskDelay(100);
 	// Attach the mouse input
