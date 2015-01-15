@@ -161,24 +161,6 @@ static void createWidgets(void) {
 	wi.text = "";
 	label_effectTitle = gwinLabelCreate(NULL, &wi);
 
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 5;
-	wi.g.y = 20;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Prev";
-	btn_prevStage = gwinButtonCreate(NULL, &wi);
-
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = (240 - 40 - 5);
-	wi.g.y = 20;
-	wi.g.width = 40;
-	wi.g.height = 40;
-	wi.text = "Next";
-	btn_nextStage = gwinButtonCreate(NULL, &wi);
-
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = TRUE;
@@ -310,16 +292,6 @@ static void RefreshScreen(void){
 
     }
     return;
-}
-
-static void StageSetValue(uint8_t whichParam, uint8_t value)
-{
-    ValueForEachStage[controllingStage][whichParam] = value;
-    if (EffectList[controllingStage]){
-        EffectList[controllingStage]->adj(
-            EffectList[controllingStage],
-            ValueForEachStage[controllingStage]);
-    }
 }
 
 static void StageEffectSelect(uint8_t whichEffect)
