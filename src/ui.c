@@ -246,7 +246,7 @@ void SwitchTab(uint32_t tab){
 }
 
 static void RefreshScreen(void){
-    char buf[16];
+    char buf[32];
     struct parameter_t *parameterList[5];
     uint8_t paraNum;
     uint32_t i = 0;
@@ -270,7 +270,7 @@ static void RefreshScreen(void){
         if (EffectList[controllingStage]){
             strcpy(buf, "Stage ");
             itoa(controllingStage + 1, buf + 6);
-            strcat(buf, ":");
+            strcat(buf, " : ");
             strcat(buf, EffectList[controllingStage]->name);
             gwinSetText(label_effectTitle, buf, 1);
 
