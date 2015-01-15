@@ -17,15 +17,25 @@ void readWaveTask(void *pvParameters){
 
     FIL fil;
 
-    if (f_open(&fil, "0:/tst.wav", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+    if (f_open(&fil, tmp->filename, FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
 
     f_read(&fil, &tmp->header, sizeof(struct wavHeader_t), &i);
-    if(i < sizeof(struct wavHeader_t))
+    if(i < sizeof(struct wavHeader_t)) //Check Read a File
+        while(1);
+
+    if((strncmp(tmp->header.filID, "RIFF", 4) != 0) ||\
+       (strncmp(tmp->header.waveID, "WAVE", 4) != 0))
+        while(1);
+
+    if((tmp->header.nChannels > 2) ||\
+       (tmp->header.wFormatTag != 0x0001) ||\
+       (tmp->header.nSamplesPerSec != 44100) ||\
+       (tmp->header.wBitsPerSample != 16))
         while(1);
 
     wavDataLeft = tmp->header.dataSize;
 
-    while(wavDataLeft){
+    while(wavDataLeft > 0){
         if(xSemaphoreTake(tmp->Read_Hold, portMAX_DELAY)){
             f_read(&fil, buffer, SAMPLE_NUM * 2 * 2, &i);
             for(i = 0; i < SAMPLE_NUM; i++){
@@ -33,7 +43,7 @@ void readWaveTask(void *pvParameters){
             }
             arm_q15_to_q31((q15_t*)buffer, tmp->dataBuffer[bufferIndex], SAMPLE_NUM);
 
-            wavDataLeft -= SAMPLE_NUM * 2 * 2;
+            wavDataLeft -= i;
             bufferIndex = !bufferIndex;
         }
     }

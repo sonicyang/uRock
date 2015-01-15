@@ -68,6 +68,8 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Effect Stage Setting*/ 
 
+    wav.filename = "0:/tst.wav";
+
     EffectStages[0] = new_WavPlayer(&wav);
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Compressor(&compressor);
