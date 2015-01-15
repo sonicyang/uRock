@@ -10,7 +10,7 @@
 void readWaveTask(void *pvParameters){
     struct WavPlayer_t *tmp = (struct WavPlayer_t*)pvParameters;
 
-    uint8_t buffer[1024];
+    uint16_t buffer[SAMPLE_NUM * 2];
     uint32_t bufferIndex = 1;
     uint16_t wavDataLeft = 0;
     UINT i;
@@ -28,7 +28,10 @@ void readWaveTask(void *pvParameters){
     while(wavDataLeft){
         if(xSemaphoreTake(tmp->Read_Hold, portMAX_DELAY)){
             f_read(&fil, buffer, SAMPLE_NUM * 2 * 2, &i);
-            arm_q15_to_q31((q15_t*)buffer, tmp->dataBuffer[bufferIndex], SAMPLE_NUM * 2);
+            for(i = 0; i < SAMPLE_NUM; i++){
+                buffer[i] = buffer[i * 2];
+            }
+            arm_q15_to_q31((q15_t*)buffer, tmp->dataBuffer[bufferIndex], SAMPLE_NUM);
 
             wavDataLeft -= SAMPLE_NUM * 2 * 2;
             bufferIndex = !bufferIndex;
@@ -95,7 +98,7 @@ struct Effect_t* new_WavPlayer(struct WavPlayer_t* opaque){
 
 	xTaskCreate(readWaveTask,
 	            (signed char*)"RWT",
-	            2048, NULL, tskIDLE_PRIORITY + 1, NULL);
+	            2048, opaque, tskIDLE_PRIORITY + 1, NULL);
 
     return (struct Effect_t*)opaque;
 }
