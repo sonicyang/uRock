@@ -275,7 +275,7 @@ static void RefreshScreen(void){
             gwinSetText(label_effectTitle, buf, 1);
 
             EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
-            for(; i < paraNum; i++){
+            for(i = 0; i < paraNum; i++){
                 gwinSetVisible(label_param[i], TRUE);
                 gwinSetText(label_param[i], parameterList[i]->name, 0);
 
@@ -415,14 +415,16 @@ void UserInterface(void *argument){
         }
 
         if(diff){
-            if(EffectList[controllingStage])
+            if(EffectList[controllingStage]){
                 EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
             
-            if(tabState == LIST_TAB){
-                orig = tabState;
-                SwitchTab(PARAM_TAB);
+                if(tabState == LIST_TAB){
+                    orig = tabState;
+                    SwitchTab(PARAM_TAB);
+                }
+                cnt = 0;
+
             }
-            cnt = 0;
         }
 
         for(i = 0; i < 4; i++){
