@@ -154,10 +154,10 @@ static void createWidgets(void) {
     /* ParamTab */
 	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
-	wi.g.x = 20;
+	wi.g.x = 15;
 	wi.g.y = 30;
 	wi.g.width = (240 - 20);
-	wi.g.height = 20;
+	wi.g.height = 25;
 	wi.text = "";
 	label_effectTitle = gwinLabelCreate(NULL, &wi);
 
