@@ -27,6 +27,8 @@ struct WavPlayer_t{
     struct parameter_t volume;
     q31_t cache; 
 
+    uint32_t loop;
+
     char *filename;
     struct wavHeader_t header;
 

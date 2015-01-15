@@ -13,7 +13,7 @@ void readWaveTask(void *pvParameters){
     uint16_t buffer[SAMPLE_NUM * 2];
     uint32_t bufferIndex = 1;
     uint16_t wavDataLeft = 0;
-    UINT i;
+    UINT i, j;
 
     FIL fil;
 
@@ -33,20 +33,27 @@ void readWaveTask(void *pvParameters){
        (tmp->header.wBitsPerSample != 16))
         vTaskDelete(NULL);
 
-    wavDataLeft = tmp->header.dataSize;
-
-    while(wavDataLeft > 0){
+    do{
         if(xSemaphoreTake(tmp->Read_Hold, portMAX_DELAY)){
-            f_read(&fil, buffer, SAMPLE_NUM * 2 * 2, &i);
-            for(i = 0; i < SAMPLE_NUM; i++){
-                buffer[i] = buffer[i * 2];
+            f_read(&fil, buffer, SAMPLE_NUM * 2 * tmp->header.nChannels, &i);
+
+            if(tmp->loop && (i < SAMPLE_NUM * 2 * tmp->header.nChannels)){
+                f_lseek(&fil, sizeof(struct wavHeader_t));
+                f_read(&fil, buffer + (i >> 2), SAMPLE_NUM * 2 * tmp->header.nChannels - i, &i);
             }
+
+            if(tmp->header.nChannels > 1){
+                for(j = 0; j < SAMPLE_NUM; j++){
+                    buffer[j] = buffer[j * 2];
+                }
+            }
+
             arm_q15_to_q31((q15_t*)buffer, tmp->dataBuffer[bufferIndex], SAMPLE_NUM);
 
-            wavDataLeft -= i;
             bufferIndex = !bufferIndex;
         }
-    }
+
+    }while(i);
 
     arm_fill_q31(0, tmp->dataBuffer[0], SAMPLE_NUM);
     arm_fill_q31(0, tmp->dataBuffer[1], SAMPLE_NUM);
