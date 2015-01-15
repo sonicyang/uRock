@@ -70,6 +70,7 @@ static GHandle btn_effectSwitch[STAGE_NUM];
 static GHandle label_effectTitle;
 static GHandle btn_prevStage;
 static GHandle btn_nextStage;
+static GHandle label_param[MAX_EFFECT_PARAM];
 static GHandle vbar_param[MAX_EFFECT_PARAM];
 //static GHandle btn_StageWidget;
 //static GHandle btn_SelectEffectWidget;
@@ -186,6 +187,9 @@ static void createWidgets(void) {
         wi.g.width = (240 - 10);
         wi.g.height = 25;
         wi.text = defaultName;
+        label_param[i] = gwinLabelCreate(NULL, &wi);
+
+        wi.g.y = 125 + i * 60;
         vbar_param[i] = gwinProgressbarCreate(NULL, &wi);
     }
 
@@ -225,6 +229,7 @@ void SwitchTab(uint32_t tab){
 	gwinSetVisible(btn_prevStage, FALSE);
 	gwinSetVisible(btn_nextStage, FALSE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
+        gwinSetVisible(label_param[i], FALSE);
 	    gwinSetVisible(vbar_param[i], FALSE);
     }
 
@@ -244,6 +249,7 @@ void SwitchTab(uint32_t tab){
     }else if (tab == PARAM_TAB) {
     	gwinSetVisible(label_effectTitle, TRUE);
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
+            gwinSetVisible(label_param[i], TRUE);
             gwinSetVisible(vbar_param[i], TRUE);
         }
 
@@ -258,6 +264,7 @@ void SwitchTab(uint32_t tab){
 }
 
 static void RefreshScreen(void){
+    char buf[16];
     struct parameter_t *parameterList[5];
     uint8_t paraNum;
     uint32_t i = 0;
@@ -283,8 +290,12 @@ static void RefreshScreen(void){
 
             EffectList[controllingStage]->getParam(EffectList[controllingStage], parameterList, &paraNum);
             for(; i < paraNum; i++){
+                gwinSetVisible(label_param[i], TRUE);
+                gwinSetText(label_param[i], parameterList[i]->name, 0);
+
                 gwinSetVisible(vbar_param[i], TRUE);
-                gwinSetText(vbar_param[i], parameterList[i]->name, 0);
+                ftoa(parameterList[i]->value, buf, 2);
+                gwinSetText(vbar_param[i], buf, 1);
                 gwinProgressbarSetPosition(vbar_param[i], map(parameterList[i]->value, parameterList[i]->lowerBound, parameterList[i]->upperBound, 0, 100));
             }
             i = paraNum;
@@ -293,6 +304,7 @@ static void RefreshScreen(void){
         }
         for(; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(vbar_param[i], FALSE);
+            gwinSetVisible(label_param[i], FALSE);
         }
     }else if(tabState == SELECT_EFFECT_TAB){
 
