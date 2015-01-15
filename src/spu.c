@@ -49,16 +49,6 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Effect Stage Setting*/
 
-    //EffectList[0] = new_Distortion(&distor);
-    //EffectList[0] = NULL;
-    //EffectList[1] = new_Volume(&vol);
-    //EffectList[2] = new_Compressor(&compressor);
-    //EffectList[3] = new_Overdrive(&overdrive);
-    //EffectList[0] = new_Phaser(&phaser);
-    //EffectList[2] = new_Equalizer(&equalizer);
-    //EffectList[3] = new_Reverb(&delay);
-    //EffectList[0] = new_Flanger(&flanger);
-
     SPU_Hold = xSemaphoreCreateBinary();
 
     /* Init */
