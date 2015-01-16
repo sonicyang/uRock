@@ -59,7 +59,6 @@ DMA_HandleTypeDef hdma_sdiotx;
 uint8_t SD_DriverNum;      /* FatFS SD part */
 char SD_Path[4];           /* SD card logical drive path */
 FATFS FatFs;
-FIL fil;
 
 int main(void){
     /* STM32F4xx HAL library initialization:

@@ -40,7 +40,6 @@
 
 extern char SD_Path[4];
 extern FATFS FatFs;
-extern FIL fil;
 
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;
@@ -49,7 +48,7 @@ extern struct Effect_t *EffectList[EFFECT_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 extern int8_t controllingStage;
 
-enum {
+enum{
     NONE,
     VOL,
     COMP,
@@ -78,8 +77,6 @@ static GHandle btn_prevStage;
 static GHandle btn_nextStage;
 static GHandle label_param[MAX_EFFECT_PARAM];
 static GHandle vbar_param[MAX_EFFECT_PARAM];
-//static GHandle btn_StageWidget;
-//static GHandle btn_SelectEffectWidget;
 static GHandle btn_effectTypes[EFFECT_TYPE_NUM];
 
 static char defaultName[8] = "";
@@ -354,11 +351,42 @@ static void StageEffectSelect(uint8_t whichEffect)
 
 void SaveCurrentStageSetting(){
 	FIL fil;
-	char str[] = "jfjfjfjf";
+	uint32_t i;
 
-	if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+	if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
 
-	f_write(&fil, str, strlen(str), NULL);
+	for (i = 0; i < STAGE_NUM; ++i) {
+		uint8_t paramNum;
+		struct parameter_t* params[3];
+		char buf[5];
+		uint32_t j;
+
+		if (EffectList[i]) {
+			EffectList[i]->getParam(
+				EffectList[i], params, &paramNum);
+
+			f_write(&fil,
+				EffectList[i]->name,
+				strlen(EffectList[i]->name),
+				NULL);
+			f_write(&fil, " ", 1, NULL);
+
+			for (j = 0; j < paramNum; ++j) {
+				ftoa(params[j]->value, buf, 2);
+
+				f_write(&fil,
+					buf,
+					strlen(buf),
+					NULL);
+
+				f_write(&fil, " ", 1, NULL);
+			}
+
+			f_write(&fil, "\n", 1, NULL);
+		} else {
+			f_write(&fil, "None\n", 5, NULL);
+		}
+	}
 
 	f_close(&fil);
 }
@@ -387,8 +415,6 @@ void UserInterface(void *argument){
 
     SwitchTab(LIST_TAB);
 
-    SaveCurrentStageSetting();
-
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
 
     while(1) {
@@ -414,6 +440,7 @@ void UserInterface(void *argument){
                 if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
                     StageEffectSelect(i);
                     SwitchTab(LIST_TAB);
+		    SaveCurrentStageSetting();
                 }
             }
 
@@ -441,6 +468,8 @@ void UserInterface(void *argument){
                 }
                 cnt = 0;
             }
+
+	    SaveCurrentStageSetting();
         }
 
         for(i = 0; i < 4; i++){
