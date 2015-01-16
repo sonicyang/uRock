@@ -35,10 +35,10 @@ void adjust_Phaser(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_Phaser(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_Phaser(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     struct Phaser_t *tmp = (struct Phaser_t*)opaque;
     *paramNum = 1;
-    param[0].value = tmp->speed.value;
+    param[0] = &tmp->speed;
     return;
 }
 
