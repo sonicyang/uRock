@@ -40,4 +40,20 @@ struct Effect_t{
     getParamFunc getParam;
 };
 
+struct wavHeader_t{
+    char        filID[4];
+    uint32_t    filSize;
+    char        waveID[4];
+    char        fmtID[4];
+    uint32_t    fmtSize;
+    uint16_t    wFormatTag;
+    uint16_t    nChannels;
+    uint32_t    nSamplesPerSec;
+    uint32_t    nAvgBytesPerSec;
+    uint16_t    nBlockAlign;
+    uint16_t    wBitsPerSample;
+    char        dataID[4];
+    uint32_t    dataSize;
+} __attribute__((packed));
+
 #endif //__AUDIO_EFFECT_H__

@@ -21,6 +21,7 @@
 #include "flanger.h"
 
 #include "wavplayer.h"
+#include "wavrecoder.h"
 
 #include "ff.h"
 
@@ -42,7 +43,7 @@ q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectStages[STAGE_NUM];
 
 struct Volume_t vol;
-struct WavPlayer_t wav;
+struct WavRecoder_t wav;
 struct Distortion_t distor;
 struct Overdrive_t overdrive;
 struct Reverb_t delay;
@@ -68,10 +69,9 @@ void SignalProcessingUnit(void *pvParameters){
 
     /* Effect Stage Setting*/ 
 
-    wav.filename = "0:/tst.wav";
-    wav.loop = 1;
+    wav.filename = "0:/rec.wav";
 
-    EffectStages[0] = new_WavPlayer(&wav);
+    EffectStages[0] = new_WavRecoder(&wav);
     //EffectStages[0] = new_Distortion(&distor);
     //EffectStages[0] = new_Compressor(&compressor);
     //EffectStages[1] = new_Overdrive(&overdrive);

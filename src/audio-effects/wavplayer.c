@@ -62,12 +62,12 @@ void readWaveTask(void *pvParameters){
 
 void WavPlayer(q31_t* pData, void *opaque){
     struct WavPlayer_t *tmp = (struct WavPlayer_t*)opaque;
+    xSemaphoreGive(tmp->Read_Hold);
 
     arm_scale_q31(tmp->dataBuffer[tmp->bufferIndex], tmp->cache, Q_MULT_SHIFT, tmp->dataBuffer[tmp->bufferIndex], SAMPLE_NUM);
     arm_add_q31(pData, tmp->dataBuffer[tmp->bufferIndex], pData, SAMPLE_NUM);
     tmp->bufferIndex = !tmp->bufferIndex;
 
-    xSemaphoreGive(tmp->Read_Hold);
 
     return;
 }
