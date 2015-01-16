@@ -12,7 +12,7 @@
 struct tab_list_t{
     struct tab_t parent;
 
-	GHandle label_uRock;
+    GHandle label_uRock;
     GHandle btn_effectIndicate[STAGE_NUM];
 
     GHandle label_effectName[STAGE_NUM];

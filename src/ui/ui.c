@@ -80,33 +80,33 @@ void StageEffectSelect(uint8_t whichEffect){
 
     //TODO: Implement FKING Factory
     switch(whichEffect){
-        case VOL:
-            EffectList[controllingStage] = new_Volume();
-            break;
-        case COMP:
-            EffectList[controllingStage] = new_Compressor();
-            break;
-        case DISTOR:
-            EffectList[controllingStage] = new_Distortion();
-            break;
-        case OVERDR:
-            EffectList[controllingStage] = new_Overdrive();
-            break;
-        case DELAY:
-            EffectList[controllingStage] = new_Delay();
-            break;
-        case REVERB:
-            EffectList[controllingStage] = new_Reverb();
-            break;
-        case FLANGE:
-            EffectList[controllingStage] = new_Flanger();
-            break;
-        case EQULIZ:
-            EffectList[controllingStage] = new_Equalizer();
-            break;
-        default:
-            EffectList[controllingStage] = NULL;
-            break;
+    case VOL:
+        EffectList[controllingStage] = new_Volume();
+        break;
+    case COMP:
+        EffectList[controllingStage] = new_Compressor();
+        break;
+    case DISTOR:
+        EffectList[controllingStage] = new_Distortion();
+        break;
+    case OVERDR:
+        EffectList[controllingStage] = new_Overdrive();
+        break;
+    case DELAY:
+        EffectList[controllingStage] = new_Delay();
+        break;
+    case REVERB:
+        EffectList[controllingStage] = new_Reverb();
+        break;
+    case FLANGE:
+        EffectList[controllingStage] = new_Flanger();
+        break;
+    case EQULIZ:
+        EffectList[controllingStage] = new_Equalizer();
+        break;
+    default:
+        EffectList[controllingStage] = NULL;
+        break;
     }
 
     if(recycle){
@@ -120,48 +120,47 @@ void StageEffectSelect(uint8_t whichEffect){
 
     if (EffectList[controllingStage]){
         EffectList[controllingStage]->adj(EffectList[controllingStage], ValueForEachStage[0]);
-    }    
+    }
 }
 
 void UserInterface(void *argument){
-	GEvent* event;
+    GEvent* event;
     uint32_t i;
     uint32_t diff, cnt, orig;
 
     if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
-	gfxInit();
-	gdispClear(White);
+    gfxInit();
+    gdispClear(White);
 
-	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
-	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
+    gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
+    gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
     vTaskDelay(100);
-	// Attach the mouse input
-	gwinAttachMouse(0);
+    // Attach the mouse input
+    gwinAttachMouse(0);
 
-	// create the widget
+    // create the widget
     tabs[LIST_TAB] = tab_list_init(&listTab); 
     tabs[PARAM_TAB] = tab_param_init(&paramTab); 
     tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
 
-	// We want to listen for widget events
-	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
+    // We want to listen for widget events
+    geventListenerInit(&gl);
+    gwinAttachListener(&gl);
 
     SwitchTab(LIST_TAB);
 
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
-   
-	while(1) {
-		// Get an Event
-		event = geventEventWait(&gl, 50);
 
-		switch(event->type) {
-		case GEVENT_GWIN_BUTTON:
+    while(1) {
+        // Get an Event
+        event = geventEventWait(&gl, 50);
+
+        switch(event->type) {
+        case GEVENT_GWIN_BUTTON:
             current_tab->eHandle(current_tab, (GEventGWinButton*)event);
-			break;
-		}
-
+            break;
+        }
 
         diff = 0;
 
@@ -173,7 +172,7 @@ void UserInterface(void *argument){
         if(diff){
             if(EffectList[controllingStage]){
                 EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
-            
+
                 if(tabState == LIST_TAB){
                     orig = tabState;
                     SwitchTab(PARAM_TAB);
@@ -193,9 +192,9 @@ void UserInterface(void *argument){
         }else if(cnt < 75){
             cnt++;
         }
-        
+
         current_tab->refresh(current_tab);
-	}
+    }
 
     while(1){
     }
