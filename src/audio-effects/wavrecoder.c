@@ -115,6 +115,9 @@ struct Effect_t* new_WavRecoder(){
     tmp->parent.adj = adjust_WavRecoder;
     tmp->parent.getParam = getParam_WavRecoder;
 
+    /* FIXME Hardcode */
+    tmp->filename = "0:/rec.wav";
+
     tmp->bufferIndex = 0;
     
     tmp->Write_Hold = xSemaphoreCreateBinary();

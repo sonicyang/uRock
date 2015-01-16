@@ -4,10 +4,10 @@
 extern uint8_t currentConfig;
 
 enum{
-    LIST_TAB,
-    PARAM_TAB,
-    SELECT_EFFECT_TAB,
-    TAB_NUM
+	LIST_TAB,
+	PARAM_TAB,
+	SELECT_EFFECT_TAB,
+	TAB_NUM
 };
 
 void UserInterface(void *argument);

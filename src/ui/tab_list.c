@@ -6,6 +6,8 @@
 #include "gfx.h"
 #include "src/gwin/sys_defs.h"
 #include "cfgFunc.h"
+#include "wavplayer.h"
+#include "wavrecoder.h"
 
 #include "setting.h"
 
@@ -60,6 +62,20 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
         }
     }
 
+    if ((event)->button == tmp->btn_playWav){
+	if (EffectList[3])
+		EffectList[3]->del(EffectList[3]);
+
+	EffectList[3] = new_WavPlayer();
+    }
+
+    if ((event)->button == tmp->btn_recordWav){
+	if (EffectList[3])
+		EffectList[3]->del(EffectList[3]);
+
+	EffectList[3] = new_WavRecoder();
+    }
+
     return;
 }
 
@@ -77,6 +93,9 @@ void tab_list_show(void* opaque){
     for (i = 0; i < 3; ++i)
         gwinSetVisible(tmp->btn_configSwitch[i], TRUE);
 
+    gwinSetVisible(tmp->btn_playWav, TRUE);
+    gwinSetVisible(tmp->btn_recordWav, TRUE);
+
     return;
 }
 
@@ -93,6 +112,9 @@ void tab_list_hide(void* opaque){
 
     for (i = 0; i < 3; ++i)
         gwinSetVisible(tmp->btn_configSwitch[i], FALSE);
+
+    gwinSetVisible(tmp->btn_playWav, FALSE);
+    gwinSetVisible(tmp->btn_recordWav, FALSE);
 
     return;
 }
@@ -150,6 +172,24 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
         wi.text = "";
         opaque->btn_configSwitch[i] = gwinButtonCreate(NULL, &wi);
     }
+
+    gwinWidgetClearInit(&wi);
+    wi.g.show = FALSE;
+    wi.g.x = 200;
+    wi.g.y = 250;
+    wi.g.width = 30;
+    wi.g.height = 30;
+    wi.text = "P";
+    opaque->btn_playWav = gwinButtonCreate(NULL, &wi);
+
+    gwinWidgetClearInit(&wi);
+    wi.g.show = FALSE;
+    wi.g.x = 240;
+    wi.g.y = 250;
+    wi.g.width = 30;
+    wi.g.height = 30;
+    wi.text = "R";
+    opaque->btn_recordWav = gwinButtonCreate(NULL, &wi);
 
     opaque->parent.show = tab_list_show;
     opaque->parent.hide = tab_list_hide;

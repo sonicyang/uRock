@@ -113,17 +113,20 @@ struct Effect_t* new_WavPlayer(){
     tmp->volume.lowerBound = -20.0;
     tmp->volume.value = 0.0f;
 
+    /* FIXME Hardcode */
+    tmp->loop = 1;
+    tmp->filename = "0:/rec.wav";
+
     tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
     tmp->bufferIndex = 0;
-    
+
     tmp->Read_Hold = xSemaphoreCreateBinary();
     xSemaphoreGive(tmp->Read_Hold);
 
-	xTaskCreate(readWaveTask,
-	            (signed char*)"RWT",
-                2048, tmp, tskIDLE_PRIORITY + 2, &tmp->rwt);
+    xTaskCreate(readWaveTask,
+            (signed char*)"RWT",
+            2048, tmp, tskIDLE_PRIORITY + 2, &tmp->rwt);
 
     return (struct Effect_t*)tmp;
 }
-
