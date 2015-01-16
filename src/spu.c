@@ -37,7 +37,7 @@ xSemaphoreHandle SPU_Hold;
 volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
 q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 
-struct Effect_t *EffectList[EFFECT_NUM];
+struct Effect_t *EffectList[STAGE_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 int8_t controllingStage = 0;
     
