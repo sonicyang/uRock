@@ -70,6 +70,8 @@ void SwitchTab(uint32_t tab){
 
     current_tab = tabs[tab];
     current_tab->show(current_tab);
+
+    tabState = tab;
     return;
 }
 
@@ -152,7 +154,7 @@ void UserInterface(void *argument){
    
 	while(1) {
 		// Get an Event
-		event = geventEventWait(&gl, 20);
+		event = geventEventWait(&gl, 50);
 
 		switch(event->type) {
 		case GEVENT_GWIN_BUTTON:
