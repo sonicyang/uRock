@@ -2,7 +2,7 @@
 #define __WAVPLAYER_H__
 
 #include "FreeRTOS.h"
-#include "Task.h"
+#include "task.h"
 #include "semphr.h"
 
 #include "base-effect.h"
