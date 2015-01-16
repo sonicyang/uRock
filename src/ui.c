@@ -92,41 +92,41 @@ uint8_t potValues[2][4];
 
 static char *cvtToEffectName(uint32_t ee){
     switch(ee){
-        case VOL:
-            return "Volume";
-        case COMP:
-            return "Compressor";
-        case DISTOR:
-            return "Distortion";
-        case OVERDR:
-            return "OverDrive";
-        case DELAY:
-            return "Delay";
-        case REVERB:
-            return "Reverb";
-        case FLANGE:
-            return "Flanger";
-        case EQULIZ:
-            return "Equalizer";
-        default:
-            return "None";
+    case VOL:
+        return "Volume";
+    case COMP:
+        return "Compressor";
+    case DISTOR:
+        return "Distortion";
+    case OVERDR:
+        return "OverDrive";
+    case DELAY:
+        return "Delay";
+    case REVERB:
+        return "Reverb";
+    case FLANGE:
+        return "Flanger";
+    case EQULIZ:
+        return "Equalizer";
+    default:
+        return "None";
     }
     return "None";
 }
 
 static void createWidgets(void) {
     uint32_t i;
-	GWidgetInit wi;
+    GWidgetInit wi;
 
     /* StageTab */
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 0;
-	wi.g.y = 0;
-	wi.g.width = 100;
-	wi.g.height = 20;
-	wi.text = "uRock";
-	label_uRock = gwinLabelCreate(NULL, &wi);
+    gwinWidgetClearInit(&wi);
+    wi.g.show = TRUE;
+    wi.g.x = 0;
+    wi.g.y = 0;
+    wi.g.width = 100;
+    wi.g.height = 20;
+    wi.text = "uRock";
+    label_uRock = gwinLabelCreate(NULL, &wi);
 
     for(i = 0; i < STAGE_NUM; i++){
         gwinWidgetClearInit(&wi);
@@ -158,14 +158,14 @@ static void createWidgets(void) {
     }
 
     /* ParamTab */
-	gwinWidgetClearInit(&wi);
-	wi.g.show = TRUE;
-	wi.g.x = 15;
-	wi.g.y = 30;
-	wi.g.width = (240 - 20);
-	wi.g.height = 25;
-	wi.text = "";
-	label_effectTitle = gwinLabelCreate(NULL, &wi);
+    gwinWidgetClearInit(&wi);
+    wi.g.show = TRUE;
+    wi.g.x = 15;
+    wi.g.y = 30;
+    wi.g.width = (240 - 20);
+    wi.g.height = 25;
+    wi.text = "";
+    label_effectTitle = gwinLabelCreate(NULL, &wi);
 
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
         gwinWidgetClearInit(&wi);
@@ -205,27 +205,27 @@ static void createWidgets(void) {
 void SwitchTab(uint32_t tab){
     uint32_t i;
 
-	gwinSetVisible(label_uRock, FALSE);
+    gwinSetVisible(label_uRock, FALSE);
     for(i = 0; i < STAGE_NUM; i++){
         gwinSetVisible(btn_effectIndicate[i], FALSE);
         gwinSetVisible(label_effectName[i], FALSE);
         gwinSetVisible(btn_effectSwitch[i], FALSE);
     }
 
-	gwinSetVisible(label_effectTitle, FALSE);
-	gwinSetVisible(btn_prevStage, FALSE);
-	gwinSetVisible(btn_nextStage, FALSE);
+    gwinSetVisible(label_effectTitle, FALSE);
+    gwinSetVisible(btn_prevStage, FALSE);
+    gwinSetVisible(btn_nextStage, FALSE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
         gwinSetVisible(label_param[i], FALSE);
-	    gwinSetVisible(vbar_param[i], FALSE);
+        gwinSetVisible(vbar_param[i], FALSE);
     }
 
     for(i = 0; i < EFFECT_TYPE_NUM; i++){
-	    gwinSetVisible(btn_effectTypes[i], FALSE);
+        gwinSetVisible(btn_effectTypes[i], FALSE);
     }
 
     if(tab == LIST_TAB){
-		gwinSetVisible(label_uRock, TRUE);
+        gwinSetVisible(label_uRock, TRUE);
         for(i = 0; i < STAGE_NUM; i++){
             gwinSetVisible(btn_effectIndicate[i], TRUE);
             gwinSetVisible(label_effectName[i], TRUE);
@@ -234,20 +234,20 @@ void SwitchTab(uint32_t tab){
 
         tabState = LIST_TAB;
     }else if (tab == PARAM_TAB) {
-    	gwinSetVisible(label_effectTitle, TRUE);
+        gwinSetVisible(label_effectTitle, TRUE);
         for(i = 0; i < MAX_EFFECT_PARAM; i++){
             gwinSetVisible(label_param[i], TRUE);
             gwinSetVisible(vbar_param[i], TRUE);
         }
 
         tabState = PARAM_TAB;
-	} else if (tab == SELECT_EFFECT_TAB) {
+    } else if (tab == SELECT_EFFECT_TAB) {
         for(i = 0; i < EFFECT_TYPE_NUM; i++){
             gwinSetVisible(btn_effectTypes[i], TRUE);
         }
 
         tabState = SELECT_EFFECT_TAB;
-	}
+    }
 }
 
 static void RefreshScreen(void){
@@ -309,33 +309,33 @@ static void StageEffectSelect(uint8_t whichEffect)
 
     //TODO: Implement FKING Factory
     switch(whichEffect){
-        case VOL:
-            EffectList[controllingStage] = new_Volume();
-            break;
-        case COMP:
-            EffectList[controllingStage] = new_Compressor();
-            break;
-        case DISTOR:
-            EffectList[controllingStage] = new_Distortion();
-            break;
-        case OVERDR:
-            EffectList[controllingStage] = new_Overdrive();
-            break;
-        case DELAY:
-            EffectList[controllingStage] = new_Delay();
-            break;
-        case REVERB:
-            EffectList[controllingStage] = new_Reverb();
-            break;
-        case FLANGE:
-            EffectList[controllingStage] = new_Flanger();
-            break;
-        case EQULIZ:
-            EffectList[controllingStage] = new_Equalizer();
-            break;
-        default:
-            EffectList[controllingStage] = NULL;
-            break;
+    case VOL:
+        EffectList[controllingStage] = new_Volume();
+        break;
+    case COMP:
+        EffectList[controllingStage] = new_Compressor();
+        break;
+    case DISTOR:
+        EffectList[controllingStage] = new_Distortion();
+        break;
+    case OVERDR:
+        EffectList[controllingStage] = new_Overdrive();
+        break;
+    case DELAY:
+        EffectList[controllingStage] = new_Delay();
+        break;
+    case REVERB:
+        EffectList[controllingStage] = new_Reverb();
+        break;
+    case FLANGE:
+        EffectList[controllingStage] = new_Flanger();
+        break;
+    case EQULIZ:
+        EffectList[controllingStage] = new_Equalizer();
+        break;
+    default:
+        EffectList[controllingStage] = NULL;
+        break;
     }
 
     if(recycle){
@@ -352,55 +352,67 @@ static void StageEffectSelect(uint8_t whichEffect)
     }    
 }
 
+void SaveCurrentStageSetting(){
+	FIL fil;
+	char str[] = "jfjfjfjf";
+
+	if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+
+	f_write(&fil, str, strlen(str), NULL);
+
+	f_close(&fil);
+}
+
 void UserInterface(void *argument){
-	GEvent* event;
+    GEvent* event;
     uint32_t i;
     uint32_t diff, cnt, orig;
 
     if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
-	gfxInit();
-	gdispClear(White);
+    gfxInit();
+    gdispClear(White);
 
-	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
-	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
+    gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
+    gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
     vTaskDelay(100);
-	// Attach the mouse input
-	gwinAttachMouse(0);
+    // Attach the mouse input
+    gwinAttachMouse(0);
 
-	// create the widget
-	createWidgets();
-
-	// We want to listen for widget events
-	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
+    // create the widget
+    createWidgets(); 
+    // We want to listen for widget events
+    geventListenerInit(&gl);
+    gwinAttachListener(&gl);
 
     SwitchTab(LIST_TAB);
 
-    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
-   
-	while(1) {
-		// Get an Event
-		event = geventEventWait(&gl, 20);
+    SaveCurrentStageSetting();
 
-		switch(event->type) {
-		case GEVENT_GWIN_BUTTON:
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
+
+    while(1) {
+        // Get an Event
+        event = geventEventWait(&gl, 20);
+
+        switch(event->type) {
+        case GEVENT_GWIN_BUTTON:
             for(i = 0; i < STAGE_NUM; i++){
-			    if (((GEventGWinButton*)event)->button == btn_effectIndicate[i]){
+                if (((GEventGWinButton*)event)->button == btn_effectIndicate[i]){
                     controllingStage = i;
                 }
             }
 
             for(i = 0; i < STAGE_NUM; i++){
-			    if (((GEventGWinButton*)event)->button == btn_effectSwitch[i]){
+                if (((GEventGWinButton*)event)->button == btn_effectSwitch[i]){
                     controllingStage = i;
                     SwitchTab(SELECT_EFFECT_TAB);
                 }
             }
 
             for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
-			    if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
-    				StageEffectSelect(i);
+                if (((GEventGWinButton*)event)->button == btn_effectTypes[i]){
+                    StageEffectSelect(i);
                     SwitchTab(LIST_TAB);
                 }
             }
@@ -408,8 +420,8 @@ void UserInterface(void *argument){
             if (((GEventGWinButton*)event)->button == btn_effectTypes[EFFECT_TYPE_NUM -1]){
                 SwitchTab(LIST_TAB);
             }
-			break;
-		}
+            break;
+        }
 
 
         diff = 0;
@@ -422,13 +434,12 @@ void UserInterface(void *argument){
         if(diff){
             if(EffectList[controllingStage]){
                 EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
-            
+
                 if(tabState == LIST_TAB){
                     orig = tabState;
                     SwitchTab(PARAM_TAB);
                 }
                 cnt = 0;
-
             }
         }
 
@@ -444,7 +455,7 @@ void UserInterface(void *argument){
         }
 
         RefreshScreen();
-	}
+    }
 
     while(1){
     }
