@@ -169,7 +169,7 @@ void ReadStageSetting(uint32_t saveSlot){
 		/* Read line */
 		while (1) {
 			f_read(&fil, &c, 1, NULL);
-			if ((c == '\n') || (c == EOF)) {
+			if ((c == '\n') || (c == EOF) || (c == '\0')) {
 				buf[bufPos] = '\0';
 				break;
 			} else if (c == ' ') {

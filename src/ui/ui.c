@@ -57,6 +57,8 @@ struct tab_list_t listTab;
 struct tab_param_t paramTab;
 struct tab_select_effect_t selectEffectTab;
 
+uint8_t currentConfig;
+
 struct tab_t *tabs[TAB_NUM];
 struct tab_t *current_tab = NULL;
 
@@ -130,6 +132,8 @@ void UserInterface(void *argument){
     uint32_t i;
     uint32_t diff, cnt, orig;
 
+    currentConfig = 0;
+
     if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
     gfxInit();
@@ -192,7 +196,7 @@ void UserInterface(void *argument){
 
         if(cnt == 75){
             SwitchTab(orig);
-	    SaveStageSetting(0);
+	    SaveStageSetting(currentConfig);
             cnt++;
         }else if(cnt < 75){
             cnt++;

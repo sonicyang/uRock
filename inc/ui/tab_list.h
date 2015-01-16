@@ -17,6 +17,7 @@ struct tab_list_t{
 
     GHandle label_effectName[STAGE_NUM];
     GHandle btn_effectSwitch[STAGE_NUM];
+    GHandle btn_configSwitch[3];
 };
 
 struct tab_t *tab_list_init(struct tab_list_t* opaque);

@@ -5,6 +5,7 @@
 #include "gfxconf.h"
 #include "gfx.h"
 #include "src/gwin/sys_defs.h"
+#include "cfgFunc.h"
 
 #include "setting.h"
 
@@ -28,7 +29,6 @@ void tab_list_refresh(void* opaque){
             gwinSetText(tmp->btn_effectIndicate[i], "->", 0);
         }else{
             gwinSetText(tmp->btn_effectIndicate[i], "", 0);
-
         }
     }
 
@@ -52,6 +52,14 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
         }
     }
 
+    for (i = 0; i < 3; ++i){
+	    if ((event)->button == tmp->btn_configSwitch[i]){
+		    SaveStageSetting(currentConfig);
+		    currentConfig = i;
+		    ReadStageSetting(currentConfig);
+	    }
+    }
+
     return;
 }
 
@@ -66,6 +74,9 @@ void tab_list_show(void* opaque){
         gwinSetVisible(tmp->btn_effectSwitch[i], TRUE);
     }
 
+    for (i = 0; i < 3; ++i)
+        gwinSetVisible(tmp->btn_configSwitch[i], TRUE);
+
     return;
 }
 
@@ -79,6 +90,9 @@ void tab_list_hide(void* opaque){
         gwinSetVisible(tmp->label_effectName[i], FALSE);
         gwinSetVisible(tmp->btn_effectSwitch[i], FALSE);
     }
+
+    for (i = 0; i < 3; ++i)
+        gwinSetVisible(tmp->btn_configSwitch[i], FALSE);
 
     return;
 }
@@ -124,6 +138,17 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
         wi.g.height = 30;
         wi.text = "";
         opaque->btn_effectSwitch[i] = gwinButtonCreate(NULL, &wi);
+    }
+
+    for (i = 0; i < 3; ++i){
+        gwinWidgetClearInit(&wi);
+        wi.g.show = FALSE;
+        wi.g.x = 10 + 40 * i;
+        wi.g.y = 250;
+        wi.g.width = 30;
+        wi.g.height = 30;
+        wi.text = "";
+        opaque->btn_configSwitch[i] = gwinButtonCreate(NULL, &wi);
     }
 
     opaque->parent.show = tab_list_show;
