@@ -2,7 +2,6 @@
 #define __EQUALIZER_H__
 
 #include "base-effect.h"
-#include "lowFreqOsc.h"
 
 struct Equalizer_t{
     struct Effect_t parent;

@@ -22,6 +22,15 @@
 #include "phaser.h"
 #include "flanger.h"
 
+#include "wavplayer.h"
+#include "wavrecoder.h"
+
+#include "ff.h"
+
+extern char SD_Path[4];
+extern FATFS FatFs;
+extern FIL fil;
+
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
@@ -37,18 +46,20 @@ q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
 struct Effect_t *EffectList[EFFECT_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 int8_t controllingStage = 0;
+    
+int16_t wavData[4200];
 
 void SignalProcessingUnit(void *pvParameters){
     uint32_t index = 0;
     uint32_t pipeindex = 0;
     uint32_t i;
 
-    for(i = 0; i < EFFECT_NUM; i++){
-        EffectList[i] = NULL;
+    /* Effect Stage Setting*/
+    for(i = 0; i < STAGE_NUM; i++){
+        EffectStages[i] = NULL;
     }
 
-    /* Effect Stage Setting*/
-
+    /* Effect Stage Setting*/ 
     SPU_Hold = xSemaphoreCreateBinary();
 
     /* Init */

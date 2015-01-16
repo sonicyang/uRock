@@ -194,7 +194,6 @@ static void createWidgets(void) {
     wi.g.height = 20;
     wi.text = "Back";
     btn_effectTypes[EFFECT_TYPE_NUM - 1] = gwinButtonCreate(NULL, &wi);
-    
 }
 
 void SwitchTab(uint32_t tab){
@@ -352,9 +351,9 @@ void UserInterface(void *argument){
     uint32_t i;
     uint32_t diff, cnt, orig;
 
-	gfxInit();
+    if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
-    
+	gfxInit();
 	gdispClear(White);
 
 	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
