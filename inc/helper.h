@@ -12,4 +12,6 @@ void itoa(int n, char s[]);
 int intToStr(int x, char str[], int d);
 void ftoa(float n, char *res, int afterpoint);
 
+float atof(const char* s);
+
 #endif //__HELPER_H__

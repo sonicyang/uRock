@@ -36,6 +36,8 @@
 #include "phaser.h"
 #include "flanger.h"
 
+#include "cfgFunc.h"
+
 #include "ff.h"
 
 #define TAB_GROUP_1 0
@@ -152,6 +154,8 @@ void UserInterface(void *argument){
 
     HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
 
+    ReadStageSetting(0);
+
     while(1) {
         // Get an Event
         event = geventEventWait(&gl, 50);
@@ -188,6 +192,7 @@ void UserInterface(void *argument){
 
         if(cnt == 75){
             SwitchTab(orig);
+	    SaveStageSetting(0);
             cnt++;
         }else if(cnt < 75){
             cnt++;
