@@ -34,7 +34,13 @@
 #include "phaser.h"
 #include "flanger.h"
 
+#include "ff.h"
+
 #define TAB_GROUP_1 0
+
+extern char SD_Path[4];
+extern FATFS FatFs;
+extern FIL fil;
 
 DMA_HandleTypeDef hdma_adc2;
 ADC_HandleTypeDef hadc2;

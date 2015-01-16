@@ -73,6 +73,12 @@ void WavPlayer(q31_t* pData, void *opaque){
 }
 
 void delete_WavPlayer(void *opaque){
+    struct WavPlayer_t *tmp = (struct WavPlayer_t*)opaque;
+
+    vTaskDelete(tmp->rwt);
+    vSemaphoreDelete(tmp->Read_Hold);
+
+    vPortFree(tmp);
     return;
 }
 
@@ -86,36 +92,38 @@ void adjust_WavPlayer(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_WavPlayer(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_WavPlayer(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     struct WavPlayer_t *tmp = (struct WavPlayer_t*)opaque;
     *paramNum = 1;
-    param[0].value = tmp->volume.value;
+    param[0] = &tmp->volume;
     return;
 }
 
-struct Effect_t* new_WavPlayer(struct WavPlayer_t* opaque){
+struct Effect_t* new_WavPlayer(){
+    struct WavPlayer_t* tmp = pvPortMalloc(sizeof(struct WavPlayer_t));
 
-    strcpy(opaque->parent.name, "WavPlayer");
-    opaque->parent.func = WavPlayer;
-    opaque->parent.del = delete_WavPlayer;
-    opaque->parent.adj = adjust_WavPlayer;
-    opaque->parent.getParam = getParam_WavPlayer;
+    strcpy(tmp->parent.name, "WavPlayer");
+    tmp->parent.func = WavPlayer;
+    tmp->parent.del = delete_WavPlayer;
+    tmp->parent.adj = adjust_WavPlayer;
+    tmp->parent.getParam = getParam_WavPlayer;
 
-    opaque->volume.upperBound = 0.0f;
-    opaque->volume.lowerBound = -20.0;
-    opaque->volume.value = 0.0f;
+    tmp->volume.name = "Volume";
+    tmp->volume.upperBound = 0.0f;
+    tmp->volume.lowerBound = -20.0;
+    tmp->volume.value = 0.0f;
 
-    opaque->cache = (q31_t)(powf(10, (opaque->volume.value * 0.1f)) * Q_1);
+    tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
-    opaque->bufferIndex = 0;
+    tmp->bufferIndex = 0;
     
-    opaque->Read_Hold = xSemaphoreCreateBinary();
-    xSemaphoreGive(opaque->Read_Hold);
+    tmp->Read_Hold = xSemaphoreCreateBinary();
+    xSemaphoreGive(tmp->Read_Hold);
 
 	xTaskCreate(readWaveTask,
 	            (signed char*)"RWT",
-	            2048, opaque, tskIDLE_PRIORITY + 1, NULL);
+                2048, tmp, tskIDLE_PRIORITY + 2, &tmp->rwt);
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 

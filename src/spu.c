@@ -25,12 +25,6 @@
 #include "wavplayer.h"
 #include "wavrecoder.h"
 
-#include "ff.h"
-
-extern char SD_Path[4];
-extern FATFS FatFs;
-extern FIL fil;
-
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
@@ -54,9 +48,8 @@ void SignalProcessingUnit(void *pvParameters){
     uint32_t pipeindex = 0;
     uint32_t i;
 
-    /* Effect Stage Setting*/
-    for(i = 0; i < STAGE_NUM; i++){
-        EffectStages[i] = NULL;
+    for(i = 0; i < EFFECT_NUM; i++){
+        EffectList[i] = NULL;
     }
 
     /* Effect Stage Setting*/ 

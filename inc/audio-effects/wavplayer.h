@@ -2,6 +2,7 @@
 #define __WAVPLAYER_H__
 
 #include "FreeRTOS.h"
+#include "Task.h"
 #include "semphr.h"
 
 #include "base-effect.h"
@@ -18,10 +19,11 @@ struct WavPlayer_t{
 
     uint32_t bufferIndex;
     q31_t dataBuffer[2][SAMPLE_NUM];
-
+    
+    xTaskHandle rwt;
     xSemaphoreHandle Read_Hold;
 };
 
-struct Effect_t* new_WavPlayer(struct WavPlayer_t* opaque);
+struct Effect_t* new_WavPlayer();
 
 #endif //__WAVPLAYER_H__

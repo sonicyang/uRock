@@ -88,6 +88,12 @@ void WavRecoder(q31_t* pData, void *opaque){
 }
 
 void delete_WavRecoder(void *opaque){
+    struct WavRecoder_t *tmp = (struct WavRecoder_t*)opaque;
+
+    vTaskDelete(tmp->wwt);
+    vSemaphoreDelete(tmp->Write_Hold);
+
+    vPortFree(tmp);
     return;
 }
 
@@ -95,28 +101,29 @@ void adjust_WavRecoder(void *opaque, uint8_t* values){
     return;
 }
 
-void getParam_WavRecoder(void *opaque, struct parameter_t param[], uint8_t* paramNum){
+void getParam_WavRecoder(void *opaque, struct parameter_t *param[], uint8_t* paramNum){
     *paramNum = 0;
     return;
 }
 
-struct Effect_t* new_WavRecoder(struct WavRecoder_t* opaque){
+struct Effect_t* new_WavRecoder(){
+    struct WavRecoder_t* tmp = pvPortMalloc(sizeof(struct WavRecoder_t));
 
-    strcpy(opaque->parent.name, "WavRecoder");
-    opaque->parent.func = WavRecoder;
-    opaque->parent.del = delete_WavRecoder;
-    opaque->parent.adj = adjust_WavRecoder;
-    opaque->parent.getParam = getParam_WavRecoder;
+    strcpy(tmp->parent.name, "WavRecoder");
+    tmp->parent.func = WavRecoder;
+    tmp->parent.del = delete_WavRecoder;
+    tmp->parent.adj = adjust_WavRecoder;
+    tmp->parent.getParam = getParam_WavRecoder;
 
-    opaque->bufferIndex = 0;
+    tmp->bufferIndex = 0;
     
-    opaque->Write_Hold = xSemaphoreCreateBinary();
-    xSemaphoreGive(opaque->Write_Hold);
+    tmp->Write_Hold = xSemaphoreCreateBinary();
+    xSemaphoreGive(tmp->Write_Hold);
 
 	xTaskCreate(writeWaveTask,
 	            (signed char*)"WWT",
-	            2048, opaque, tskIDLE_PRIORITY + 2, NULL);
+	            2048, tmp, tskIDLE_PRIORITY + 2, &tmp->wwt);
 
-    return (struct Effect_t*)opaque;
+    return (struct Effect_t*)tmp;
 }
 
