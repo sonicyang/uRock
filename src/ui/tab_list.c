@@ -53,11 +53,11 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
     }
 
     for (i = 0; i < 3; ++i){
-	    if ((event)->button == tmp->btn_configSwitch[i]){
-		    SaveStageSetting(currentConfig);
-		    currentConfig = i;
-		    ReadStageSetting(currentConfig);
-	    }
+        if ((event)->button == tmp->btn_configSwitch[i]){
+            SaveStageSetting(currentConfig);
+            currentConfig = i;
+            ReadStageSetting(currentConfig);
+        }
     }
 
     return;
@@ -84,7 +84,7 @@ void tab_list_hide(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
 
-	gwinSetVisible(tmp->label_uRock, FALSE);
+    gwinSetVisible(tmp->label_uRock, FALSE);
     for(i = 0; i < STAGE_NUM; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], FALSE);
         gwinSetVisible(tmp->label_effectName[i], FALSE);
@@ -99,17 +99,17 @@ void tab_list_hide(void* opaque){
 
 struct tab_t *tab_list_init(struct tab_list_t* opaque){
     uint32_t i;
-	GWidgetInit wi;
+    GWidgetInit wi;
 
     /* StageTab */
-	gwinWidgetClearInit(&wi);
-	wi.g.show = FALSE;
-	wi.g.x = 0;
-	wi.g.y = 0;
-	wi.g.width = 100;
-	wi.g.height = 20;
-	wi.text = "uRock";
-	opaque->label_uRock = gwinLabelCreate(NULL, &wi);
+    gwinWidgetClearInit(&wi);
+    wi.g.show = FALSE;
+    wi.g.x = 0;
+    wi.g.y = 0;
+    wi.g.width = 100;
+    wi.g.height = 20;
+    wi.text = "uRock";
+    opaque->label_uRock = gwinLabelCreate(NULL, &wi);
 
     for(i = 0; i < STAGE_NUM; i++){
         gwinWidgetClearInit(&wi);

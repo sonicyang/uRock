@@ -196,7 +196,7 @@ void UserInterface(void *argument){
 
         if(cnt == 75){
             SwitchTab(orig);
-	    SaveStageSetting(currentConfig);
+            SaveStageSetting(currentConfig);
             cnt++;
         }else if(cnt < 75){
             cnt++;
