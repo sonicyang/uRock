@@ -12,7 +12,6 @@ void readWaveTask(void *pvParameters){
 
     uint16_t buffer[SAMPLE_NUM * 2];
     uint32_t bufferIndex = 1;
-    uint16_t wavDataLeft = 0;
     UINT i, j;
 
     FIL fil;
