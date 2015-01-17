@@ -175,7 +175,7 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
 
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 200;
+    wi.g.x = 170;
     wi.g.y = 250;
     wi.g.width = 30;
     wi.g.height = 30;
@@ -184,7 +184,7 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
 
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 240;
+    wi.g.x = 210;
     wi.g.y = 250;
     wi.g.width = 30;
     wi.g.height = 30;
