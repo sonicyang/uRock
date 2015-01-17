@@ -125,7 +125,7 @@ struct Effect_t* new_WavRecoder(){
 
 	xTaskCreate(writeWaveTask,
 	            (signed char*)"WWT",
-	            2048, tmp, tskIDLE_PRIORITY + 2, &tmp->wwt);
+	            1024, tmp, tskIDLE_PRIORITY + 2, &tmp->wwt);
 
     return (struct Effect_t*)tmp;
 }

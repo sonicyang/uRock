@@ -126,7 +126,7 @@ struct Effect_t* new_WavPlayer(){
 
     xTaskCreate(readWaveTask,
             (signed char*)"RWT",
-            2048, tmp, tskIDLE_PRIORITY + 2, &tmp->rwt);
+            1024, tmp, tskIDLE_PRIORITY + 2, &tmp->rwt);
 
     return (struct Effect_t*)tmp;
 }
