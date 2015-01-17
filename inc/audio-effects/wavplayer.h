@@ -7,6 +7,8 @@
 
 #include "base-effect.h"
 
+#include "ff.h"
+
 struct WavPlayer_t{
     struct Effect_t parent;
     struct parameter_t volume;
@@ -14,6 +16,7 @@ struct WavPlayer_t{
 
     uint32_t loop;
 
+    FIL fil;
     char *filename;
     struct wavHeader_t header;
 

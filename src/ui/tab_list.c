@@ -63,17 +63,17 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
     }
 
     if ((event)->button == tmp->btn_playWav){
-	if (EffectList[3])
-		EffectList[3]->del(EffectList[3]);
+        if (EffectList[3])
+            EffectList[3]->del(EffectList[3]);
 
-	EffectList[3] = new_WavPlayer();
+        EffectList[3] = new_WavPlayer();
     }
 
     if ((event)->button == tmp->btn_recordWav){
-	if (EffectList[3])
-		EffectList[3]->del(EffectList[3]);
+        if (EffectList[3])
+            EffectList[3]->del(EffectList[3]);
 
-	EffectList[3] = new_WavRecoder();
+        EffectList[3] = new_WavRecoder();
     }
 
     return;

@@ -14,11 +14,9 @@ void readWaveTask(void *pvParameters){
     uint32_t bufferIndex = 1;
     UINT i, j;
 
-    FIL fil;
+    if (f_open(&tmp->fil, tmp->filename, FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
 
-    if (f_open(&fil, tmp->filename, FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
-
-    f_read(&fil, &tmp->header, sizeof(struct wavHeader_t), &i);
+    f_read(&tmp->fil, &tmp->header, sizeof(struct wavHeader_t), &i);
     if(i < sizeof(struct wavHeader_t)) //Check Read a File
         vTaskDelete(NULL);
 
@@ -34,11 +32,11 @@ void readWaveTask(void *pvParameters){
 
     do{
         if(xSemaphoreTake(tmp->Read_Hold, portMAX_DELAY)){
-            f_read(&fil, buffer, SAMPLE_NUM * 2 * tmp->header.nChannels, &i);
+            f_read(&tmp->fil, buffer, SAMPLE_NUM * 2 * tmp->header.nChannels, &i);
 
             if(tmp->loop && (i < SAMPLE_NUM * 2 * tmp->header.nChannels)){
-                f_lseek(&fil, sizeof(struct wavHeader_t));
-                f_read(&fil, buffer + (i >> 2), SAMPLE_NUM * 2 * tmp->header.nChannels - i, &i);
+                f_lseek(&tmp->fil, sizeof(struct wavHeader_t));
+                f_read(&tmp->fil, buffer + (i >> 2), SAMPLE_NUM * 2 * tmp->header.nChannels - i, &i);
             }
 
             if(tmp->header.nChannels > 1){
@@ -78,6 +76,8 @@ void delete_WavPlayer(void *opaque){
     vTaskDelete(tmp->rwt);
     vSemaphoreDelete(tmp->Read_Hold);
 
+    f_close(&tmp->fil);
+
     vPortFree(tmp);
     return;
 }
@@ -115,7 +115,7 @@ struct Effect_t* new_WavPlayer(){
 
     /* FIXME Hardcode */
     tmp->loop = 1;
-    tmp->filename = "0:/rec.wav";
+    tmp->filename = "0:/tst.wav";
 
     tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
