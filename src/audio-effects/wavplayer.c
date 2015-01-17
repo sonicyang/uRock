@@ -115,7 +115,7 @@ struct Effect_t* new_WavPlayer(){
 
     /* FIXME Hardcode */
     tmp->loop = 1;
-    tmp->filename = "0:/tst.wav";
+    tmp->filename = "0:/rec.wav";
 
     tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
