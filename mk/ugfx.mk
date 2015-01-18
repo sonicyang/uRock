@@ -1,28 +1,28 @@
 UGFXOUTDIR = UGFXLib
 
 UGFXSRCDIR = Middlewares/ugfx \
-			 Middlewares/ugfx/src \
-			 Middlewares/ugfx/src/gdisp \
-			 Middlewares/ugfx/src/gdisp/mcufont \
-			 Middlewares/ugfx/src/ginput \
-			 Middlewares/ugfx/src/gevent \
-			 Middlewares/ugfx/src/gtimer \
-			 Middlewares/ugfx/src/gwin \
-			 Middlewares/ugfx/src/gdriver \
-			 Middlewares/ugfx/src/gqueue
+	     Middlewares/ugfx/src \
+	     Middlewares/ugfx/src/gdisp \
+	     Middlewares/ugfx/src/gdisp/mcufont \
+	     Middlewares/ugfx/src/ginput \
+	     Middlewares/ugfx/src/gevent \
+	     Middlewares/ugfx/src/gtimer \
+	     Middlewares/ugfx/src/gwin \
+	     Middlewares/ugfx/src/gdriver \
+	     Middlewares/ugfx/src/gqueue
 
 UGFXINCDIR = Middlewares/ugfx \
-			 Middlewares/ugfx/src/gdisp \
-			 Middlewares/ugfx/src/gdisp/mcufont \
-			 Middlewares/ugfx/src/ginput \
-			 Middlewares/ugfx/src/gevent \
-			 Middlewares/ugfx/src/gtimer \
-			 Middlewares/ugfx/src/gdriver \
-			 Middlewares/ugfx/src/gwin \
-			 Middlewares/ugfx/drivers/ginput/toggle/Pal
+	     Middlewares/ugfx/src/gdisp \
+	     Middlewares/ugfx/src/gdisp/mcufont \
+	     Middlewares/ugfx/src/ginput \
+	     Middlewares/ugfx/src/gevent \
+	     Middlewares/ugfx/src/gtimer \
+	     Middlewares/ugfx/src/gdriver \
+	     Middlewares/ugfx/src/gwin \
+	     Middlewares/ugfx/drivers/ginput/toggle/Pal
 
 UGFXSRC += $(wildcard $(addsuffix /*.c,$(UGFXSRCDIR))) \
-		  $(wildcard $(addsuffix /*.s,$(UGFXSRCDIR)))
+	   $(wildcard $(addsuffix /*.s,$(UGFXSRCDIR)))
 
 UGFXSRC += Middlewares/ugfx/src/gos/freertos.c
 
