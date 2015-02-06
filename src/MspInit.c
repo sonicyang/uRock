@@ -254,10 +254,18 @@ void MX_DMA_Init(void) {
         * EXTI
 */
 void MX_GPIO_Init(void) {
- 
+  GPIO_InitTypeDef GPIO_InitStruct;
+
   /* GPIO Ports Clock Enable */
   __GPIOH_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
+  __GPIOE_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 }
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){

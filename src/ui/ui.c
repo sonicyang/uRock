@@ -2,6 +2,7 @@
 #include "stm32f429i_discovery.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_ts.h"
+#include "stm32f4xx_hal_gpio.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -70,6 +71,8 @@ static uint32_t tabState = 0;
 
 uint8_t potValues[2][4];
 
+GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
+
 void SwitchTab(uint32_t tab){
 	if(current_tab)
 		current_tab->hide(current_tab);
@@ -136,6 +139,11 @@ void UserInterface(void *argument){
 
 	currentConfig = 0;
 
+    buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
+    buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
+    buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
+    buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+
 	if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
 	gfxInit();
@@ -175,7 +183,7 @@ void UserInterface(void *argument){
 		diff = 0;
 
 		for(i = 0; i < 4; i++){
-			if(((potValues[1][i] - potValues[0][i]) > 4) || ((potValues[0][i] - potValues[1][i]) > 4))
+			if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5))
 				diff++;
 		}
 
@@ -196,15 +204,40 @@ void UserInterface(void *argument){
 			potValues[1][i] = potValues[0][i];
 		}
 
-		if(cnt == 75){
+		if(cnt == 50){
 			SwitchTab(orig);
 			SaveStageSetting(currentConfig);
 			cnt++;
-		}else if(cnt < 75){
+		}else if(cnt < 50){
 			cnt++;
 		}
 
 		current_tab->refresh(current_tab);
+
+        if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
+            buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
+            SaveStageSetting(currentConfig);
+            currentConfig = 0;
+            ReadStageSetting(currentConfig);
+        }
+        if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3)){
+            buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
+            SaveStageSetting(currentConfig);
+            currentConfig = 1;
+            ReadStageSetting(currentConfig);
+        }
+        if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4)){
+            buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
+            SaveStageSetting(currentConfig);
+            currentConfig = 2;
+            ReadStageSetting(currentConfig);
+        }
+        if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5)){
+            buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+            SaveStageSetting(currentConfig);
+            currentConfig = 3;
+            ReadStageSetting(currentConfig);
+        }
 	}
 
 	while(1){

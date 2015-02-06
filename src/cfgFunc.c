@@ -77,6 +77,9 @@ void SaveStageSetting(uint32_t saveSlot){
     case 2:
         if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
         break;
+    case 3:
+        if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
+        break;
     default:
         /* XXX Bad hack */
         while (1)
@@ -151,6 +154,9 @@ void ReadStageSetting(uint32_t saveSlot){
         break;
     case 2:
         if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+        break;
+    case 3:
+        if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
         break;
     default:
         /* XXX Bad hack */

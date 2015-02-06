@@ -54,14 +54,6 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
         }
     }
 
-    for (i = 0; i < 3; ++i){
-        if ((event)->button == tmp->btn_configSwitch[i]){
-            SaveStageSetting(currentConfig);
-            currentConfig = i;
-            ReadStageSetting(currentConfig);
-        }
-    }
-
     if ((event)->button == tmp->btn_playWav){
         if (EffectList[3])
             EffectList[3]->del(EffectList[3]);
@@ -90,9 +82,6 @@ void tab_list_show(void* opaque){
         gwinSetVisible(tmp->btn_effectSwitch[i], TRUE);
     }
 
-    for (i = 0; i < 3; ++i)
-        gwinSetVisible(tmp->btn_configSwitch[i], TRUE);
-
     gwinSetVisible(tmp->btn_playWav, TRUE);
     gwinSetVisible(tmp->btn_recordWav, TRUE);
 
@@ -109,9 +98,6 @@ void tab_list_hide(void* opaque){
         gwinSetVisible(tmp->label_effectName[i], FALSE);
         gwinSetVisible(tmp->btn_effectSwitch[i], FALSE);
     }
-
-    for (i = 0; i < 3; ++i)
-        gwinSetVisible(tmp->btn_configSwitch[i], FALSE);
 
     gwinSetVisible(tmp->btn_playWav, FALSE);
     gwinSetVisible(tmp->btn_recordWav, FALSE);
@@ -162,32 +148,21 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
         opaque->btn_effectSwitch[i] = gwinButtonCreate(NULL, &wi);
     }
 
-    for (i = 0; i < 3; ++i){
-        gwinWidgetClearInit(&wi);
-        wi.g.show = FALSE;
-        wi.g.x = 10 + 40 * i;
-        wi.g.y = 250;
-        wi.g.width = 30;
-        wi.g.height = 30;
-        wi.text = "";
-        opaque->btn_configSwitch[i] = gwinButtonCreate(NULL, &wi);
-    }
-
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 170;
-    wi.g.y = 250;
-    wi.g.width = 30;
-    wi.g.height = 30;
+    wi.g.x = 10;
+    wi.g.y = 210;
+    wi.g.width = 100;
+    wi.g.height = 100;
     wi.text = "P";
     opaque->btn_playWav = gwinButtonCreate(NULL, &wi);
 
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 210;
-    wi.g.y = 250;
-    wi.g.width = 30;
-    wi.g.height = 30;
+    wi.g.x = 120;
+    wi.g.y = 210;
+    wi.g.width = 100;
+    wi.g.height = 100;
     wi.text = "R";
     opaque->btn_recordWav = gwinButtonCreate(NULL, &wi);
 

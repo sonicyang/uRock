@@ -11,6 +11,8 @@
 
 #define SAMPLE_MAX 2047
 
+#define MAX_CONFIG_NUM 4
+
 #define SAMPLING_RATE 44.1 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD (1.0f / SAMPLING_RATE)
 
