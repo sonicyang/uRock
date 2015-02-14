@@ -215,25 +215,27 @@ void UserInterface(void *argument){
 		current_tab->refresh(current_tab);
 
         if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
-            buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
+            buttonPrevValue[0] = !buttonPrevValue[0];
             SaveStageSetting(currentConfig);
-            currentConfig = 0;
+            currentConfig++;
             ReadStageSetting(currentConfig);
         }
+
         if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3)){
-            buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
+            buttonPrevValue[1] = !buttonPrevValue[1];
             SaveStageSetting(currentConfig);
-            currentConfig = 1;
+            currentConfig--;
             ReadStageSetting(currentConfig);
         }
+
         if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4)){
-            buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
+            buttonPrevValue[2] = !buttonPrevValue[2];
             SaveStageSetting(currentConfig);
             currentConfig = 2;
             ReadStageSetting(currentConfig);
         }
         if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5)){
-            buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+            buttonPrevValue[3] = !buttonPrevValue[3];
             SaveStageSetting(currentConfig);
             currentConfig = 3;
             ReadStageSetting(currentConfig);

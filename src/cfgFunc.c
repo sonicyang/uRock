@@ -66,26 +66,13 @@ static uint32_t cvtToEffectId(const char* name){
 void SaveStageSetting(uint32_t saveSlot){
     FIL fil;
     uint32_t i;
+    char buffn[14] = "0:/config";
+    char buf2[5];
 
-    switch (saveSlot) {
-    case 0:
-        if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
-        break;
-    case 1:
-        if (f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
-        break;
-    case 2:
-        if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
-        break;
-    case 3:
-        if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
-        break;
-    default:
-        /* XXX Bad hack */
-        while (1)
-            ;
-        break;
-    }
+    itoa(saveSlot, buf2);
+    strcat(buffn, buf2);
+
+    if (f_open(&fil, buffn, FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
 
     for (i = 0; i < STAGE_NUM; ++i) {
         uint8_t paramNum;
@@ -144,26 +131,13 @@ void ReadStageSetting(uint32_t saveSlot){
     struct Effect_t *prevEffect;
     struct parameter_t* params[3];
     uint8_t paramNum;
+    char buffn[14] = "0:/config";
+    char buf2[5];
 
-    switch (saveSlot) {
-    case 0:
-        if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
-        break;
-    case 1:
-        if (f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
-        break;
-    case 2:
-        if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
-        break;
-    case 3:
-        if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
-        break;
-    default:
-        /* XXX Bad hack */
-        while (1)
-            ;
-        break;
-    }
+    itoa(saveSlot, buf2);
+    strcat(buffn, buf2);
+
+    if (f_open(&fil, buffn, FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
 
     for (i = 0; i < STAGE_NUM; ++i) {
         bufPos = 0;
