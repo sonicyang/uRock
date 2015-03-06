@@ -188,7 +188,7 @@ void UserInterface(void *argument){
                 potApply[i] = potValues[0][i];
 				diff++;
             }else{
-                potValues[0][i] = potApply[i];
+               potApply[i] = potValues[1][i];
 		    }
         }
 
@@ -216,32 +216,34 @@ void UserInterface(void *argument){
 		}else if(cnt < 50){
 			cnt++;
 		}
-
+        
 		current_tab->refresh(current_tab);
-
-        if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
-            buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
-            SaveStageSetting(currentConfig);
-            currentConfig = 0;
-            ReadStageSetting(currentConfig);
-        }
-        if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3)){
-            buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
-            SaveStageSetting(currentConfig);
-            currentConfig = 1;
-            ReadStageSetting(currentConfig);
-        }
-        if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4)){
-            buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
-            SaveStageSetting(currentConfig);
-            currentConfig = 2;
-            ReadStageSetting(currentConfig);
-        }
-        if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5)){
-            buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
-            SaveStageSetting(currentConfig);
-            currentConfig = 3;
-            ReadStageSetting(currentConfig);
+        
+        if(tabState == LIST_TAB){
+            if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
+                buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
+                SaveStageSetting(currentConfig);
+                currentConfig = 0;
+                ReadStageSetting(currentConfig);
+            }
+            if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3)){
+                buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
+                SaveStageSetting(currentConfig);
+                currentConfig = 1;
+                ReadStageSetting(currentConfig);
+            }
+            if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4)){
+                buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
+                SaveStageSetting(currentConfig);
+                currentConfig = 2;
+                ReadStageSetting(currentConfig);
+            }
+            if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5)){
+                buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+                SaveStageSetting(currentConfig);
+                currentConfig = 3;
+                ReadStageSetting(currentConfig);
+            }
         }
 	}
 
