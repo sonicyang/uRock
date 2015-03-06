@@ -136,6 +136,7 @@ void UserInterface(void *argument){
 	GEvent* event;
 	uint32_t i;
 	uint32_t diff, cnt, orig;
+    uint8_t potApply[4];
 
 	currentConfig = 0;
 
@@ -183,13 +184,17 @@ void UserInterface(void *argument){
 		diff = 0;
 
 		for(i = 0; i < 4; i++){
-			if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5))
+            if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5)){
+                potApply[i] = potValues[0][i];
 				diff++;
-		}
+            }else{
+                potValues[0][i] = potApply[i];
+		    }
+        }
 
 		if(diff){
 			if(EffectList[controllingStage]){
-				EffectList[controllingStage]->adj(EffectList[controllingStage], potValues[0]);
+				EffectList[controllingStage]->adj(EffectList[controllingStage], potApply);
 
 				if(tabState == LIST_TAB){
 					orig = tabState;
@@ -198,11 +203,11 @@ void UserInterface(void *argument){
 				cnt = 0;
 
 			}
+            for(i = 0; i < 4; i++){
+                potValues[1][i] = potApply[i];
+            }
 		}
 
-		for(i = 0; i < 4; i++){
-			potValues[1][i] = potValues[0][i];
-		}
 
 		if(cnt == 50){
 			SwitchTab(orig);
