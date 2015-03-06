@@ -58,6 +58,7 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
         if (EffectList[3])
             EffectList[3]->del(EffectList[3]);
 
+        vTaskDelay(1500 / portTICK_RATE_MS);
         EffectList[3] = new_WavPlayer();
     }
 
@@ -65,6 +66,7 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
         if (EffectList[3])
             EffectList[3]->del(EffectList[3]);
 
+        vTaskDelay(1500 / portTICK_RATE_MS);
         EffectList[3] = new_WavRecoder();
     }
 
