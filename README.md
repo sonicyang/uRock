@@ -9,6 +9,16 @@ The Source Code for
  - Ui control under  src/ui/
 
 
+
+
+Presentations & Dev-Reference
+-------------
+ - http://www.slideshare.net/zongfanyang/sitcon2015-slides-open
+ - http://www.slideshare.net/zongfanyang/urokc-jserv-course-final
+
+ - urock.hackpad.com
+
+
 The Hardware to evaluate this code
 -------------------------
 
