@@ -2,13 +2,13 @@
   ******************************************************************************
   * @file    wm8994.c
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V1.0.2
+  * @date    12-February-2015
   * @brief   This file provides the WM8994 Audio Codec driver.   
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -292,18 +292,14 @@ uint32_t wm8994_Init(uint16_t DeviceAddr, uint16_t OutputDevice, uint8_t Volume,
   /* Speaker output mode = Class D, Right Speaker Mixer Volume = 0dB ((0x23, 0x0100) = class AB)*/
   counter += CODEC_IO_Write(DeviceAddr, 0x23, 0x0000);
   
-  /* Volume Control */
-  wm8994_SetVolume(DeviceAddr, Volume);
-  
   /* Unmute DAC2 (Left) to Left Speaker Mixer (SPKMIXL) path, 
-  Unmute DAC2 (Right) to Right Speaker Mixer (SPKMIXR) path */
+     Unmute DAC2 (Right) to Right Speaker Mixer (SPKMIXR) path */
   counter += CODEC_IO_Write(DeviceAddr, 0x36, 0x0300);
   
   /* Enable bias generator, Enable VMID, Enable SPKOUTL, Enable SPKOUTR */
   counter += CODEC_IO_Write(DeviceAddr, 0x01, 0x3003);
   
-  /* Headphone/Speaker Enable */
-  
+  /* Headphone/Speaker Enable */  
   /* Enable Class W, Class W Envelope Tracking = AIF1 Timeslot 0 */
   counter += CODEC_IO_Write(DeviceAddr, 0x51, 0x0005);
   
@@ -319,6 +315,9 @@ uint32_t wm8994_Init(uint16_t DeviceAddr, uint16_t OutputDevice, uint8_t Volume,
   
   /* Add Delay */
   AUDIO_IO_Delay(15);
+
+  /* Volume Control */
+  wm8994_SetVolume(DeviceAddr, Volume);
   
   /* Select DAC1 (Left) to Left Headphone Output PGA (HPOUT1LVOL) path */
   counter += CODEC_IO_Write(DeviceAddr, 0x2D, 0x0001);

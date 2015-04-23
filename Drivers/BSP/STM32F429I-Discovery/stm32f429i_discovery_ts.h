@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f429i_discovery_ts.h
   * @author  MCD Application Team
-  * @version V2.1.0
-  * @date    19-June-2014
+  * @version V2.1.2
+  * @date    02-March-2015
   * @brief   This file contains all the functions prototypes for the
   *          stm32f429i_discovery_ts.c driver.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:

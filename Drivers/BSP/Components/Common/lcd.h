@@ -2,13 +2,13 @@
   ******************************************************************************
   * @file    lcd.h
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    21-March-2014
+  * @version V2.2.0
+  * @date    09-February-2015
   * @brief   This file contains all the functions prototypes for the LCD driver.   
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -61,8 +61,9 @@
 /** @defgroup LCD_Exported_Types
   * @{
   */
-/** 
-  * @brief  LCD driver structure definition  
+
+/** @defgroup LCD_Driver_structure  LCD Driver structure
+  * @{
   */
 typedef struct
 {
@@ -84,6 +85,9 @@ typedef struct
   void     (*DrawBitmap)(uint16_t, uint16_t, uint8_t*);
   void     (*DrawRGBImage)(uint16_t, uint16_t, uint16_t, uint16_t, uint8_t*);
 }LCD_DrvTypeDef;    
+/**
+  * @}
+  */
 
 /**
   * @}

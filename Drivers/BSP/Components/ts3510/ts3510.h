@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    ts3510.h
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V1.0.1
+  * @date    02-December-2014
   * @brief   This file contains all the functions prototypes for the
   *          ts3510.c IO expander driver.
   ******************************************************************************
@@ -45,7 +45,7 @@
 #endif   
    
 /* Includes ------------------------------------------------------------------*/
-#include "..\Common\ts.h"
+#include "../Common/ts.h"
 
 /** @addtogroup BSP
   * @{

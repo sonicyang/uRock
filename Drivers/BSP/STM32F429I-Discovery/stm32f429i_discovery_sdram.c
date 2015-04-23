@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f429i_discovery_sdram.c
   * @author  MCD Application Team
-  * @version V2.1.0
-  * @date    19-June-2014
+  * @version V2.1.2
+  * @date    02-March-2015
   * @brief   This file provides a set of functions needed to drive the
   *          IS42S16400J SDRAM memory mounted on STM32F429I-Discovery Kit.    
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -185,7 +185,7 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
   HAL_SDRAM_SendCommand(&SdramHandle, &Command, SDRAM_TIMEOUT);
   
   /* Step 5: Program the external memory mode register */
-  tmpmrd = (uint32_t)SDRAM_MODEREG_BURST_LENGTH_2          |
+  tmpmrd = (uint32_t)SDRAM_MODEREG_BURST_LENGTH_1          |
                      SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL   |
                      SDRAM_MODEREG_CAS_LATENCY_3           |
                      SDRAM_MODEREG_OPERATING_MODE_STANDARD |

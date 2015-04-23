@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file      startup_stm32f401xc.s
   * @author    MCD Application Team
-  * @version   V2.1.0
-  * @date      19-June-2014
+  * @version   V2.3.0
+  * @date      02-March-2015
   * @brief     STM32F401xCxx Devices vector table for Atollic TrueSTUDIO toolchain. 
   *            This module performs:
   *                - Set the initial SP
@@ -16,7 +16,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -177,8 +177,8 @@ g_pfnVectors:
   .word     DMA1_Stream5_IRQHandler           /* DMA1 Stream 5                */                   
   .word     DMA1_Stream6_IRQHandler           /* DMA1 Stream 6                */                   
   .word     ADC_IRQHandler                    /* ADC1                         */                   
-  .word     0               				          /* Reserved                     */                         
-  .word     0              					          /* Reserved                     */                          
+  .word     0               				  /* Reserved                     */                         
+  .word     0              					  /* Reserved                     */                          
   .word     0                                 /* Reserved                     */                          
   .word     0                                 /* Reserved                     */                          
   .word     EXTI9_5_IRQHandler                /* External Line[9:5]s          */                          
@@ -197,7 +197,7 @@ g_pfnVectors:
   .word     SPI2_IRQHandler                   /* SPI2                         */                   
   .word     USART1_IRQHandler                 /* USART1                       */                   
   .word     USART2_IRQHandler                 /* USART2                       */                   
-  .word     0               				          /* Reserved                     */                   
+  .word     0               				  /* Reserved                     */                   
   .word     EXTI15_10_IRQHandler              /* External Line[15:10]s        */                          
   .word     RTC_Alarm_IRQHandler              /* RTC Alarm (A and B) through EXTI Line */                 
   .word     OTG_FS_WKUP_IRQHandler            /* USB OTG FS Wakeup through EXTI line */                       

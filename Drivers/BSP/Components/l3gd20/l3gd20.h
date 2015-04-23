@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    l3gd20.h
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    10-June-2014
+  * @version V1.1.1
+  * @date    27-November-2014
   * @brief   This file contains all the functions prototypes for the l3gd20.c driver.
   ******************************************************************************
   * @attention
@@ -49,7 +49,11 @@
 
 /** @addtogroup BSP
   * @{
-  */
+  */ 
+
+/** @addtogroup Components
+  * @{
+  */ 
 
 /** @addtogroup L3GD20
   * @{
@@ -129,7 +133,7 @@
   * @}
   */
 
-/** @defgroup BandWidth_Selection 
+/** @defgroup Bandwidth_Selection 
   * @{
   */
 #define L3GD20_BANDWIDTH_1         ((uint8_t)0x00)
@@ -184,7 +188,7 @@
   * @{
   */   
 #define L3GD20_HIGHPASSFILTER_DISABLE      ((uint8_t)0x00)
-#define L3GD20_HIGHPASSFILTER_ENABLE	     ((uint8_t)0x10)
+#define L3GD20_HIGHPASSFILTER_ENABLE	   ((uint8_t)0x10)
 /**
   * @}
   */
@@ -265,33 +269,34 @@
 /**
   * @}
   */
-
  
 /** @defgroup L3GD20_Exported_Functions
   * @{
   */
 /* Sensor Configuration Functions */ 
-void      L3GD20_Init(uint16_t InitStruct);
-uint8_t   L3GD20_ReadID(void);
-void      L3GD20_RebootCmd(void);
+void    L3GD20_Init(uint16_t InitStruct);
+uint8_t L3GD20_ReadID(void);
+void    L3GD20_RebootCmd(void);
+
 /* Interrupt Configuration Functions */
-void      L3GD20_INT1InterruptConfig(uint16_t Int1Config);
-void      L3GD20_EnableIT(uint8_t IntSel);
-void      L3GD20_DisableIT(uint8_t IntSel);
+void    L3GD20_INT1InterruptConfig(uint16_t Int1Config);
+void    L3GD20_EnableIT(uint8_t IntSel);
+void    L3GD20_DisableIT(uint8_t IntSel);
+
 /* High Pass Filter Configuration Functions */
-void      L3GD20_FilterConfig(uint8_t FilterStruct);
-void      L3GD20_FilterCmd(uint8_t HighPassFilterState);
-void      L3GD20_ReadXYZAngRate(float* pfData);
-uint8_t   L3GD20_GetDataStatus(void);
+void    L3GD20_FilterConfig(uint8_t FilterStruct);
+void    L3GD20_FilterCmd(uint8_t HighPassFilterState);
+void    L3GD20_ReadXYZAngRate(float *pfData);
+uint8_t L3GD20_GetDataStatus(void);
+
+/* Gyroscope IO functions */
+void    GYRO_IO_Init(void);
+void    GYRO_IO_DeInit(void);
+void    GYRO_IO_Write(uint8_t *pBuffer, uint8_t WriteAddr, uint16_t NumByteToWrite);
+void    GYRO_IO_Read(uint8_t *pBuffer, uint8_t ReadAddr, uint16_t NumByteToRead);
 
 /* Gyroscope driver structure */
 extern GYRO_DrvTypeDef L3gd20Drv;
-
-/* Gyroscope IO functions */
-void      GYRO_IO_Init(void);
-void      GYRO_IO_DeInit(void);
-void      GYRO_IO_Write(uint8_t* pBuffer, uint8_t WriteAddr, uint16_t NumByteToWrite);
-void      GYRO_IO_Read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRead);
 
 /**
   * @}
@@ -301,6 +306,10 @@ void      GYRO_IO_Read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRea
   * @}
   */ 
   
+/**
+  * @}
+  */ 
+
 /**
   * @}
   */ 
@@ -310,6 +319,5 @@ void      GYRO_IO_Read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRea
 #endif
   
 #endif /* __L3GD20_H */
-
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/ 

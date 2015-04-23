@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stmpe1600.h
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V1.1.0
+  * @date    10-February-2015
   * @brief   This file contains all the functions prototypes for the
   *          stmpe1600.c IO expander driver.
   ******************************************************************************
@@ -45,7 +45,7 @@
 #endif   
    
 /* Includes ------------------------------------------------------------------*/
-#include "..\Common\io.h"
+#include "../Common/io.h"
 
 /** @addtogroup BSP
   * @{
@@ -165,18 +165,18 @@ void     stmpe1600_DisableGlobalIT(uint16_t DeviceAddr);
 /** 
   * @brief STMPE1600 IO functionalities functions
   */
-void     stmpe1600_IO_InitPin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t Direction);
-void     stmpe1600_IO_Config(uint16_t DeviceAddr, uint16_t IO_Pin, IO_ModeTypedef IO_Mode);
-void     stmpe1600_IO_PolarityInv_Enable(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_IO_PolarityInv_Disable(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_IO_WritePin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t PinState);
-uint16_t stmpe1600_IO_ReadPin(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_IO_EnablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_IO_DisablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-uint8_t  stmpe1600_IO_ITStatus(uint16_t DeviceAddr, uint16_t IO_Pin);
-uint8_t  stmpe1600_IO_ReadIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_IO_ClearIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe1600_Start(uint16_t DeviceAddr, uint16_t IO_Pin);
+void     stmpe1600_IO_InitPin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t Direction);
+uint8_t  stmpe1600_IO_Config(uint16_t DeviceAddr, uint32_t IO_Pin, IO_ModeTypedef IO_Mode);
+void     stmpe1600_IO_PolarityInv_Enable(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_IO_PolarityInv_Disable(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_IO_WritePin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t PinState);
+uint32_t stmpe1600_IO_ReadPin(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_IO_EnablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_IO_DisablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+uint32_t stmpe1600_IO_ITStatus(uint16_t DeviceAddr, uint32_t IO_Pin);
+uint8_t  stmpe1600_IO_ReadIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_IO_ClearIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe1600_Start(uint16_t DeviceAddr, uint32_t IO_Pin);
 
 void     IOE_Init(void);
 void     IOE_ITConfig (void);

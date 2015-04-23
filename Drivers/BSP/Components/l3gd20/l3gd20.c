@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    l3gd20.c
   * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    10-June-2014
+  * @version V1.1.1
+  * @date    27-November-2014
   * @brief   This file provides a set of functions needed to manage the L3GD20,
   *          ST MEMS motion sensor, 3-axis digital output gyroscope.  
   ******************************************************************************
@@ -42,14 +42,13 @@
   * @{
   */ 
 
-/** @addtogroup STM32F401_DISCOVERY
+/** @addtogroup Components
   * @{
   */ 
 
 /** @addtogroup L3GD20
   * @{
   */
-
 
 /** @defgroup L3GD20_Private_TypesDefinitions
   * @{
@@ -119,33 +118,33 @@ void L3GD20_Init(uint16_t InitStruct)
 {  
   uint8_t ctrl = 0x00;
   
-  /* Configure the low level interface ---------------------------------------*/
+  /* Configure the low level interface */
   GYRO_IO_Init();
-
-  /* Write value to MEMS CTRL_REG1 regsister */
+  
+  /* Write value to MEMS CTRL_REG1 register */
   ctrl = (uint8_t) InitStruct;
   GYRO_IO_Write(&ctrl, L3GD20_CTRL_REG1_ADDR, 1);
   
-  /* Write value to MEMS CTRL_REG4 regsister */  
+  /* Write value to MEMS CTRL_REG4 register */  
   ctrl = (uint8_t) (InitStruct >> 8);
   GYRO_IO_Write(&ctrl, L3GD20_CTRL_REG4_ADDR, 1);
 }
 
 /**
   * @brief  Read ID address of L3GD20
-  * @param  Device ID address
+  * @param  None
   * @retval ID name
   */
 uint8_t L3GD20_ReadID(void)
 {
   uint8_t tmp;
-
-  /* Configure the low level interface ---------------------------------------*/
+  
+  /* Configure the low level interface */
   GYRO_IO_Init();
   
   /* Read WHO I AM register */
   GYRO_IO_Read(&tmp, L3GD20_WHO_AM_I_ADDR, 1);
-
+  
   /* Return the ID */
   return (uint8_t)tmp;
 }
@@ -165,14 +164,13 @@ void L3GD20_RebootCmd(void)
   /* Enable or Disable the reboot memory */
   tmpreg |= L3GD20_BOOT_REBOOTMEMORY;
   
-  /* Write value to MEMS CTRL_REG5 regsister */
+  /* Write value to MEMS CTRL_REG5 register */
   GYRO_IO_Write(&tmpreg, L3GD20_CTRL_REG5_ADDR, 1);
 }
 
 /**
-  * @brief Set L3GD20 Interrupt INT1 configuration
-  * @param  L3GD20_InterruptConfig_TypeDef: pointer to a L3GD20_InterruptConfig_TypeDef 
-  *         structure that contains the configuration setting for the L3GD20 Interrupt.
+  * @brief  Set L3GD20 Interrupt INT1 configuration
+  * @param  Int1Config: the configuration setting for the L3GD20 Interrupt.
   * @retval None
   */
 void L3GD20_INT1InterruptConfig(uint16_t Int1Config)
@@ -189,14 +187,8 @@ void L3GD20_INT1InterruptConfig(uint16_t Int1Config)
   ctrl_cfr |= ((uint8_t) Int1Config >> 8);
   
   ctrl3 &= 0xDF;
-  ctrl3 |= ((uint8_t) Int1Config);
+  ctrl3 |= ((uint8_t) Int1Config);   
   
-  /* Configure latch Interrupt request and axe interrupts */                   
-/*  ctrl_cfr |= (uint8_t)(L3GD20_IntConfigStruct->Latch_Request| \
-                   L3GD20_IntConfigStruct->Interrupt_Axes);
-                   
-  ctrl3 |= (uint8_t)(L3GD20_IntConfigStruct->Interrupt_ActiveEdge);
-*/  
   /* Write value to MEMS INT1_CFG register */
   GYRO_IO_Write(&ctrl_cfr, L3GD20_INT1_CFG_ADDR, 1);
   
@@ -230,7 +222,7 @@ void L3GD20_EnableIT(uint8_t IntSel)
     tmpreg |= L3GD20_INT2INTERRUPT_ENABLE;
   }
   
-  /* Write value to MEMS CTRL_REG3 regsister */
+  /* Write value to MEMS CTRL_REG3 register */
   GYRO_IO_Write(&tmpreg, L3GD20_CTRL_REG3_ADDR, 1);
 }
 
@@ -260,7 +252,7 @@ void L3GD20_DisableIT(uint8_t IntSel)
     tmpreg |= L3GD20_INT2INTERRUPT_DISABLE;
   }
   
-  /* Write value to MEMS CTRL_REG3 regsister */
+  /* Write value to MEMS CTRL_REG3 register */
   GYRO_IO_Write(&tmpreg, L3GD20_CTRL_REG3_ADDR, 1);
 }
 
@@ -278,10 +270,10 @@ void L3GD20_FilterConfig(uint8_t FilterStruct)
   
   tmpreg &= 0xC0;
   
-  /* Configure MEMS: mode and cutoff frquency */
+  /* Configure MEMS: mode and cutoff frequency */
   tmpreg |= FilterStruct;
-
-  /* Write value to MEMS CTRL_REG2 regsister */
+  
+  /* Write value to MEMS CTRL_REG2 register */
   GYRO_IO_Write(&tmpreg, L3GD20_CTRL_REG2_ADDR, 1);
 }
 
@@ -304,7 +296,7 @@ void L3GD20_FilterCmd(uint8_t HighPassFilterState)
   
   tmpreg |= HighPassFilterState;
   
-  /* Write value to MEMS CTRL_REG5 regsister */
+  /* Write value to MEMS CTRL_REG5 register */
   GYRO_IO_Write(&tmpreg, L3GD20_CTRL_REG5_ADDR, 1);
 }
 
@@ -319,16 +311,16 @@ uint8_t L3GD20_GetDataStatus(void)
   
   /* Read STATUS_REG register */
   GYRO_IO_Read(&tmpreg, L3GD20_STATUS_REG_ADDR, 1);
-                  
+  
   return tmpreg;
 }
 
 /**
 * @brief  Calculate the L3GD20 angular data.
-* @param  pfData : Data out pointer
+* @param  pfData: Data out pointer
 * @retval None
 */
-void L3GD20_ReadXYZAngRate(float* pfData)
+void L3GD20_ReadXYZAngRate(float *pfData)
 {
   uint8_t tmpbuffer[6] ={0};
   int16_t RawData[3] = {0};
@@ -371,7 +363,7 @@ void L3GD20_ReadXYZAngRate(float* pfData)
     sensitivity=L3GD20_SENSITIVITY_2000DPS;
     break;
   }
-  /* divide by sensitivity */
+  /* Divide by sensitivity */
   for(i=0; i<3; i++)
   {
     pfData[i]=(float)(RawData[i] * sensitivity);
@@ -385,7 +377,7 @@ void L3GD20_ReadXYZAngRate(float* pfData)
 /**
   * @}
   */ 
-  
+
 /**
   * @}
   */ 
@@ -393,6 +385,5 @@ void L3GD20_ReadXYZAngRate(float* pfData)
 /**
   * @}
   */ 
-  
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/     

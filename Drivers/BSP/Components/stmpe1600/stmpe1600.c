@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stmpe1600.c
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V1.1.0
+  * @date    10-February-2015
   * @brief   This file provides a set of functions needed to manage the STMPE1600
   *          IO Expander devices.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -147,7 +147,7 @@ void stmpe1600_Init(uint16_t DeviceAddr)
   * @param  DeviceAddr: Device address on communication Bus.
   * @retval None.
   */
-void stmpe1600_Start(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_Start(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   /*Configuration already done during the initialization */ 
 }
@@ -270,7 +270,7 @@ void stmpe1600_DisableGlobalIT(uint16_t DeviceAddr)
   * @param  Direction: could be STMPE1600_DIRECTION_IN or STMPE1600_DIRECTION_OUT.      
   * @retval None
   */
-void stmpe1600_IO_InitPin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t Direction)
+void stmpe1600_IO_InitPin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t Direction)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -304,10 +304,11 @@ void stmpe1600_IO_InitPin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t Directio
   *   @arg  IO_MODE_OUTPUT
   *   @arg  IO_MODE_IT_RISING_EDGE
   *   @arg  IO_MODE_IT_FALLING_EDGE         
-  * @retval None
+  * @retval 0 if no error, IO_Mode if error
   */
-void stmpe1600_IO_Config(uint16_t DeviceAddr, uint16_t IO_Pin, IO_ModeTypedef IO_Mode)
+uint8_t stmpe1600_IO_Config(uint16_t DeviceAddr, uint32_t IO_Pin, IO_ModeTypedef IO_Mode)
 {
+  uint8_t error_code = 0;
     uint8_t buffer[2] = {0,0};  
     
   /* Configure IO pin according to selected IO mode */
@@ -347,8 +348,10 @@ void stmpe1600_IO_Config(uint16_t DeviceAddr, uint16_t IO_Pin, IO_ModeTypedef IO
     break;
 
   default:
+    error_code = (uint8_t) IO_Mode;
 	break;
   } 
+  return error_code;
 }
 
 /**
@@ -359,7 +362,7 @@ void stmpe1600_IO_Config(uint16_t DeviceAddr, uint16_t IO_Pin, IO_ModeTypedef IO
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15. 
   * @retval None
   */ 
-void stmpe1600_IO_PolarityInv_Enable(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_IO_PolarityInv_Enable(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -383,7 +386,7 @@ void stmpe1600_IO_PolarityInv_Enable(uint16_t DeviceAddr, uint16_t IO_Pin)
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15.
   * @retval None
   */ 
-void stmpe1600_IO_PolarityInv_Disable(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_IO_PolarityInv_Disable(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -408,7 +411,7 @@ void stmpe1600_IO_PolarityInv_Disable(uint16_t DeviceAddr, uint16_t IO_Pin)
   * @param  PinState: The value to be set. 
   * @retval None
   */
-void stmpe1600_IO_WritePin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t PinState)
+void stmpe1600_IO_WritePin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t PinState)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -439,7 +442,7 @@ void stmpe1600_IO_WritePin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t PinStat
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15.
   * @retval State of the selected IO pin(s).
   */
-uint16_t stmpe1600_IO_ReadPin(uint16_t DeviceAddr, uint16_t IO_Pin)
+uint32_t stmpe1600_IO_ReadPin(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -460,7 +463,7 @@ uint16_t stmpe1600_IO_ReadPin(uint16_t DeviceAddr, uint16_t IO_Pin)
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15. 
   * @retval None
   */
-void stmpe1600_IO_EnablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_IO_EnablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
     
@@ -487,7 +490,7 @@ void stmpe1600_IO_EnablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin)
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15. 
   * @retval None
   */
-void stmpe1600_IO_DisablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_IO_DisablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -512,7 +515,7 @@ void stmpe1600_IO_DisablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin)
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15.           
   * @retval IT Status of the selected IO pin(s).
   */
-uint8_t stmpe1600_IO_ITStatus(uint16_t DeviceAddr, uint16_t IO_Pin)
+uint32_t stmpe1600_IO_ITStatus(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -534,7 +537,7 @@ uint8_t stmpe1600_IO_ITStatus(uint16_t DeviceAddr, uint16_t IO_Pin)
   *   @arg  STMPE1600_PIN_x: where x can be from 0 to 15.           
   * @retval IT pending bit detection status.
   */
-uint8_t stmpe1600_IO_ReadIT(uint16_t DeviceAddr, uint16_t IO_Pin)
+uint8_t stmpe1600_IO_ReadIT(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
   
@@ -552,7 +555,7 @@ uint8_t stmpe1600_IO_ReadIT(uint16_t DeviceAddr, uint16_t IO_Pin)
   * @param  DeviceAddr: Device address on communication Bus.            
   * @retval None
   */
-void stmpe1600_IO_ClearIT(uint16_t DeviceAddr, uint16_t IO_Pin)
+void stmpe1600_IO_ClearIT(uint16_t DeviceAddr, uint32_t IO_Pin)
 {
   uint8_t tmpData[2] = {0 , 0};
     

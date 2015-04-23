@@ -1,10 +1,8 @@
 BSPOUTDIR = BSPLib
 
 BSPSRCDIR = Drivers/BSP/STM32F429I-Discovery \
-			Utilities/Fonts
 
 BSPINCDIR = Drivers/BSP/STM32F429I-Discovery \
-			Utilities/Fonts
 
 BSPSRC += $(wildcard $(addsuffix /*.c,$(BSPSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(BSPSRCDIR)))

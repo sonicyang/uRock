@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stmpe811.h
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V2.0.0
+  * @date    15-December-2014
   * @brief   This file contains all the functions prototypes for the
   *          stmpe811.c IO expander driver.
   ******************************************************************************
@@ -52,7 +52,7 @@
   * @{
   */ 
 
-/** @addtogroup Component
+/** @addtogroup Components
   * @{
   */
     
@@ -60,19 +60,18 @@
   * @{
   */    
 
-/* Exported types ------------------------------------------------------------*/
-
 /** @defgroup STMPE811_Exported_Types
   * @{
   */ 
-
-/* Exported constants --------------------------------------------------------*/
-  
+/**
+  * @}
+  */ 
+   
 /** @defgroup STMPE811_Exported_Constants
   * @{
   */ 
 
-/* chip IDs */   
+/* Chip IDs */   
 #define STMPE811_ID                     0x0811
     
 /* Identification registers & System Control */ 
@@ -106,7 +105,7 @@
 #define STMPE811_REG_SYS_CTRL2          0x04
 #define STMPE811_REG_SPI_CFG            0x08 
 
-/* Interrupt system registers */ 
+/* Interrupt system Registers */ 
 #define STMPE811_REG_INT_CTRL           0x09
 #define STMPE811_REG_INT_EN             0x0A
 #define STMPE811_REG_INT_STA            0x0B
@@ -159,11 +158,11 @@
 #define STMPE811_REG_TSC_SHIELD         0x59
 
 /* Touch Screen Pins definition */ 
-#define STMPE811_TOUCH_YD               IO_PIN_1 
-#define STMPE811_TOUCH_XD               IO_PIN_2 
-#define STMPE811_TOUCH_YU               IO_PIN_3 
-#define STMPE811_TOUCH_XU               IO_PIN_4 
-#define STMPE811_TOUCH_IO_ALL           (uint32_t)(STMPE811_PIN_1 | STMPE811_PIN_2 | STMPE811_PIN_3 | STMPE811_PIN_4)
+#define STMPE811_TOUCH_YD               STMPE811_PIN_7 
+#define STMPE811_TOUCH_XD               STMPE811_PIN_6
+#define STMPE811_TOUCH_YU               STMPE811_PIN_5
+#define STMPE811_TOUCH_XU               STMPE811_PIN_4
+#define STMPE811_TOUCH_IO_ALL           (uint32_t)(STMPE811_TOUCH_YD | STMPE811_TOUCH_XD | STMPE811_TOUCH_YU | STMPE811_TOUCH_XU)
 
 /* IO Pins definition */ 
 #define STMPE811_PIN_0                  0x01
@@ -195,19 +194,17 @@
 /* TS registers masks */
 #define STMPE811_TS_CTRL_ENABLE         0x01  
 #define STMPE811_TS_CTRL_STATUS         0x80
-
 /**
   * @}
   */ 
-  
-/* Exported macro ------------------------------------------------------------*/
    
 /** @defgroup STMPE811_Exported_Macros
   * @{
   */ 
-
-/* Exported functions --------------------------------------------------------*/
-  
+/**
+  * @}
+  */ 
+   
 /** @defgroup STMPE811_Exported_Functions
   * @{
   */
@@ -228,25 +225,23 @@ uint8_t  stmpe811_GlobalITStatus(uint16_t DeviceAddr, uint8_t Source);
 uint8_t  stmpe811_ReadGITStatus(uint16_t DeviceAddr, uint8_t Source);
 void     stmpe811_ClearGlobalIT(uint16_t DeviceAddr, uint8_t Source);
 
-
 /** 
   * @brief STMPE811 IO functionalities functions
   */
-void     stmpe811_IO_Start(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe811_IO_Config(uint16_t DeviceAddr, uint16_t IO_Pin, IO_ModeTypedef IO_Mode);
-void     stmpe811_IO_InitPin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t Direction);
-void     stmpe811_IO_EnableAF(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe811_IO_DisableAF(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe811_IO_SetEdgeMode(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t Edge);
-void     stmpe811_IO_WritePin(uint16_t DeviceAddr, uint16_t IO_Pin, uint8_t PinState);
-uint16_t stmpe811_IO_ReadPin(uint16_t DeviceAddr, uint16_t IO_Pin);
+void     stmpe811_IO_Start(uint16_t DeviceAddr, uint32_t IO_Pin);
+uint8_t  stmpe811_IO_Config(uint16_t DeviceAddr, uint32_t IO_Pin, IO_ModeTypedef IO_Mode);
+void     stmpe811_IO_InitPin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t Direction);
+void     stmpe811_IO_EnableAF(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe811_IO_DisableAF(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe811_IO_SetEdgeMode(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t Edge);
+void     stmpe811_IO_WritePin(uint16_t DeviceAddr, uint32_t IO_Pin, uint8_t PinState);
+uint32_t stmpe811_IO_ReadPin(uint16_t DeviceAddr, uint32_t IO_Pin);
 void     stmpe811_IO_EnableIT(uint16_t DeviceAddr);
 void     stmpe811_IO_DisableIT(uint16_t DeviceAddr);
-void     stmpe811_IO_EnablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe811_IO_DisablePinIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-uint8_t  stmpe811_IO_ITStatus(uint16_t DeviceAddr, uint16_t IO_Pin);
-void     stmpe811_IO_ClearIT(uint16_t DeviceAddr, uint16_t IO_Pin);
-
+void     stmpe811_IO_EnablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe811_IO_DisablePinIT(uint16_t DeviceAddr, uint32_t IO_Pin);
+uint32_t stmpe811_IO_ITStatus(uint16_t DeviceAddr, uint32_t IO_Pin);
+void     stmpe811_IO_ClearIT(uint16_t DeviceAddr, uint32_t IO_Pin);
 
 /** 
   * @brief STMPE811 Touch screen functionalities functions
@@ -258,7 +253,6 @@ void     stmpe811_TS_EnableIT(uint16_t DeviceAddr);
 void     stmpe811_TS_DisableIT(uint16_t DeviceAddr);
 uint8_t  stmpe811_TS_ITStatus (uint16_t DeviceAddr);
 void     stmpe811_TS_ClearIT (uint16_t DeviceAddr);
-
 
 void     IOE_Init(void);
 void     IOE_ITConfig (void);
@@ -278,7 +272,6 @@ extern IO_DrvTypeDef stmpe811_io_drv;
 #endif
 #endif /* __STMPE811_H */
 
-
 /**
   * @}
   */ 
@@ -293,5 +286,6 @@ extern IO_DrvTypeDef stmpe811_io_drv;
 
 /**
   * @}
-  */       
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

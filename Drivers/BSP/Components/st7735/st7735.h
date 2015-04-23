@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    st7735.h
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    22-April-2014
+  * @version V1.1.1
+  * @date    24-November-2014
   * @brief   This file contains all the functions prototypes for the st7735.c
   *          driver.
   ******************************************************************************
@@ -45,7 +45,7 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\Common\lcd.h"
+#include "../Common/lcd.h"
 
 /** @addtogroup BSP
   * @{
@@ -169,22 +169,24 @@ uint16_t st7735_ReadID(void);
 void     st7735_DisplayOn(void);
 void     st7735_DisplayOff(void);
 void     st7735_SetCursor(uint16_t Xpos, uint16_t Ypos);
-void     st7735_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGB_Code);
+void     st7735_WritePixel(uint16_t Xpos, uint16_t Ypos, uint16_t RGBCode);
 void     st7735_WriteReg(uint8_t LCDReg, uint8_t LCDRegValue);
 uint8_t  st7735_ReadReg(uint8_t LCDReg);
 
-void     st7735_DrawHLine(uint16_t RGB_Code, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
-void     st7735_DrawVLine(uint16_t RGB_Code, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
+void     st7735_SetDisplayWindow(uint16_t Xpos, uint16_t Ypos, uint16_t Width, uint16_t Height);
+void     st7735_DrawHLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
+void     st7735_DrawVLine(uint16_t RGBCode, uint16_t Xpos, uint16_t Ypos, uint16_t Length);
 
 uint16_t st7735_GetLcdPixelWidth(void);
 uint16_t st7735_GetLcdPixelHeight(void);
+void     st7735_DrawBitmap(uint16_t Xpos, uint16_t Ypos, uint8_t *pbmp);
 
 /* LCD driver structure */
 extern LCD_DrvTypeDef   st7735_drv;
 
 /* LCD IO functions */
 void     LCD_IO_Init(void);
-void     LCD_IO_WriteData(uint8_t Data);
+void     LCD_IO_WriteMultipleData(uint8_t *pData, uint32_t Size);
 void     LCD_IO_WriteReg(uint8_t Reg);
 void     LCD_Delay(uint32_t delay);
 /**

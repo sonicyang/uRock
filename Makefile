@@ -78,7 +78,7 @@ $(BIN_IMAGE): $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJS) $(HALOBJS) $(BSPOBJS) $(RTOSOBJS) $(DSPOBJS) $(FATOBJS) $(USBOBJS) $(UGFXOBJS)
 	@echo "   ALL   |   LD    "$@	
-	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lnosys -lm -o $@ $^
+	@$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS) -lc -lgcc -lm -o $@ $^
 
 $(OUTDIR)/%.o: %.c
 	@echo "   MAIN  |   CC    "$@	

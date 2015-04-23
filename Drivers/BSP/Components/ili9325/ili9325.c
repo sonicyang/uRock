@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    ili9325.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    19-June-2014
+  * @version V1.0.2
+  * @date    02-December-2014
   * @brief   This file includes the LCD driver for ILI9325 LCD.
   ******************************************************************************
   * @attention

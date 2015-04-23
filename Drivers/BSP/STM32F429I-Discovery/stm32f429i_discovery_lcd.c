@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f429i_discovery_lcd.c
   * @author  MCD Application Team
-  * @version V2.1.0
-  * @date    19-June-2014
+  * @version V2.1.2
+  * @date    02-March-2015
   * @brief   This file includes the LCD driver for ILI9341 Liquid Crystal 
   *          Display Modules of STM32F429I-Discovery kit (MB1075).
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -68,7 +68,7 @@
         function or a complete string line using LCD_DisplayStringAtLine() function.
       o Display a string line on the specified position (x,y in pixel) and align mode
         using LCD_DisplayStringAtLine() function.          
-      o Draw and fill a basic shapes (dot, line, rectangle, cercle, ellipse, .. bitmap) 
+      o Draw and fill a basic shapes (dot, line, rectangle, circle, ellipse, .. bitmap) 
         on LCD using the available set of functions     
  
 ------------------------------------------------------------------------------*/
@@ -76,6 +76,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f429i_discovery_lcd.h"
 #include "../../../Utilities/Fonts/fonts.h"
+#include "../../../Utilities/Fonts/font24.c"
+#include "../../../Utilities/Fonts/font20.c"
+#include "../../../Utilities/Fonts/font16.c"
+#include "../../../Utilities/Fonts/font12.c"
+#include "../../../Utilities/Fonts/font8.c"
 
 /** @addtogroup BSP
   * @{
@@ -278,7 +283,7 @@ void BSP_LCD_LayerDefaultInit(uint16_t LayerIndex, uint32_t FB_Address)
   HAL_LTDC_ConfigLayer(&LtdcHandler, &Layercfg, LayerIndex); 
 
   DrawProp[LayerIndex].BackColor = LCD_COLOR_WHITE;
-  DrawProp[LayerIndex].pFont     = &LCD_DEFAULT_FONT;
+  DrawProp[LayerIndex].pFont     = &Font24;
   DrawProp[LayerIndex].TextColor = LCD_COLOR_BLACK; 
 
   /* Dithering activation */
@@ -513,7 +518,8 @@ void BSP_LCD_ClearStringLine(uint32_t Line)
   */
 void BSP_LCD_DisplayChar(uint16_t Xpos, uint16_t Ypos, uint8_t Ascii)
 {
-  DrawChar(Xpos, Ypos, (const uint8_t*) &DrawProp[ActiveLayer].pFont->table[(Ascii-' ') * DrawProp[ActiveLayer].pFont->Height * ((DrawProp[ActiveLayer].pFont->Width + 7) / 8)]);
+  DrawChar(Xpos, Ypos, &DrawProp[ActiveLayer].pFont->table[(Ascii-' ') *\
+              DrawProp[ActiveLayer].pFont->Height * ((DrawProp[ActiveLayer].pFont->Width + 7) / 8)]);
 }
 
 /**
@@ -583,10 +589,10 @@ void BSP_LCD_DisplayStringAt(uint16_t X, uint16_t Y, uint8_t *pText, Text_AlignM
   * @param  ptr: pointer to string to display on LCD
   * @retval None
   */
-/*void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr)
+void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr)
 {
   BSP_LCD_DisplayStringAt(0, LINE(Line), ptr, LEFT_MODE);
-}*/
+}
 
 /**
   * @brief  Displays an horizontal line.

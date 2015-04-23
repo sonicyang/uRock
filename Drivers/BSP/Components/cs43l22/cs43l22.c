@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    cs43l22.c
   * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @version V1.0.1
+  * @date    02-December-2014
   * @brief   This file provides the CS43L22 Audio Codec driver.   
   ******************************************************************************
   * @attention

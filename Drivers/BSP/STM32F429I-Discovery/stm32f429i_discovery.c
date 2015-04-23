@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f429i_discovery.c
   * @author  MCD Application Team
-  * @version V2.1.0
-  * @date    19-June-2014
+  * @version V2.1.2
+  * @date    02-March-2015
   * @brief   This file provides set of firmware functions to manage Leds and
   *          push-button available on STM32F429I-Discovery Kit from STMicroelectronics.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -69,7 +69,7 @@
   */
 #define __STM32F429I_DISCO_BSP_VERSION_MAIN   (0x02) /*!< [31:24] main version */
 #define __STM32F429I_DISCO_BSP_VERSION_SUB1   (0x01) /*!< [23:16] sub1 version */
-#define __STM32F429I_DISCO_BSP_VERSION_SUB2   (0x00) /*!< [15:8]  sub2 version */
+#define __STM32F429I_DISCO_BSP_VERSION_SUB2   (0x02) /*!< [15:8]  sub2 version */
 #define __STM32F429I_DISCO_BSP_VERSION_RC     (0x00) /*!< [7:0]  release candidate */ 
 #define __STM32F429I_DISCO_BSP_VERSION        ((__STM32F429I_DISCO_BSP_VERSION_MAIN << 24)\
                                              |(__STM32F429I_DISCO_BSP_VERSION_SUB1 << 16)\
@@ -347,10 +347,10 @@ static void I2Cx_MspInit(I2C_HandleTypeDef *hi2c)
     /* Enable I2C3 clock */
     DISCOVERY_I2Cx_CLOCK_ENABLE();
     
-    /* Force the I2C Periheral Clock Reset */  
+    /* Force the I2C Peripheral Clock Reset */  
     DISCOVERY_I2Cx_FORCE_RESET();
       
-    /* Release the I2C Periheral Clock Reset */  
+    /* Release the I2C Peripheral Clock Reset */  
     DISCOVERY_I2Cx_RELEASE_RESET(); 
     
     /* Enable and set Discovery I2Cx Interrupt to the highest priority */
@@ -433,7 +433,7 @@ static void I2Cx_Init(void)
   if(HAL_I2C_GetState(&I2cHandle) == HAL_I2C_STATE_RESET)
   {
     I2cHandle.Instance              = DISCOVERY_I2Cx;
-    I2cHandle.Init.ClockSpeed       = I2C_SPEED;
+    I2cHandle.Init.ClockSpeed       = BSP_I2C_SPEED;
     I2cHandle.Init.DutyCycle        = I2C_DUTYCYCLE_2;
     I2cHandle.Init.OwnAddress1      = 0;
     I2cHandle.Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
@@ -487,13 +487,13 @@ static void I2Cx_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value)
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
   }        
 }
 
 /**
-  * @brief  Writed a value in a register of the device through BUS.
+  * @brief  Writes a value in a register of the device through BUS.
   * @param  Addr: Device address on BUS Bus.  
   * @param  Reg: The target register address to write
   * @param  pBuffer: The target register value to be written 
@@ -509,7 +509,7 @@ static void I2Cx_WriteBuffer(uint8_t Addr, uint8_t Reg,  uint8_t *pBuffer, uint1
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
   }        
 }
@@ -530,7 +530,7 @@ static uint8_t I2Cx_ReadData(uint8_t Addr, uint8_t Reg)
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
   
   }
@@ -558,7 +558,7 @@ static uint8_t I2Cx_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint
   }
   else
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
 
     return 1;
@@ -583,7 +583,7 @@ static HAL_StatusTypeDef I2Cx_WriteBufferDMA(uint8_t Addr, uint16_t Reg,  uint8_
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
   }
 
@@ -607,7 +607,7 @@ static HAL_StatusTypeDef I2Cx_ReadBufferDMA(uint8_t Addr, uint16_t Reg, uint8_t 
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     I2Cx_Error();
   }
   
@@ -634,10 +634,10 @@ static HAL_StatusTypeDef I2Cx_IsDeviceReady(uint16_t DevAddress, uint32_t Trials
   */
 static void I2Cx_Error(void)
 {
-  /* De-initialize the SPI comunication BUS */
+  /* De-initialize the SPI communication BUS */
   HAL_I2C_DeInit(&I2cHandle);
   
-  /* Re-Initiaize the SPI comunication BUS */
+  /* Re-Initialize the SPI communication BUS */
   I2Cx_Init();
 }
 
@@ -696,7 +696,7 @@ static uint32_t SPIx_Read(uint8_t ReadSize)
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     SPIx_Error();
   }
   
@@ -717,7 +717,7 @@ static void SPIx_Write(uint16_t Value)
   /* Check the communication status */
   if(status != HAL_OK)
   {
-    /* Re-Initiaize the BUS */
+    /* Re-Initialize the BUS */
     SPIx_Error();
   }
 }
@@ -749,10 +749,10 @@ static uint8_t SPIx_WriteRead(uint8_t Byte)
   */
 static void SPIx_Error(void)
 {
-  /* De-initialize the SPI comunication BUS */
+  /* De-initialize the SPI communication BUS */
   HAL_SPI_DeInit(&SpiHandle);
   
-  /* Re- Initiaize the SPI comunication BUS */
+  /* Re- Initialize the SPI communication BUS */
   SPIx_Init();
 }
 
