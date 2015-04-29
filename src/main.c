@@ -1,31 +1,3 @@
-/**
- ******************************************************************************
- * @file    FreeRTOS/FreeRTOS_ThreadCreation/Src/main.c
- * @author  MCD Application Team
- * @version V1.1.0
- * @date    26-June-2014
- * @brief   Main program body
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
- *
- * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *        http://www.st.com/software_license_agreement_liberty_v2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- ******************************************************************************
- */
-
-/* Includes ------------------------------------------------------------------*/
 #include "string.h"
 
 #include "stm32f4xx_hal.h"
@@ -43,9 +15,10 @@
 #include "queue.h"
 #include "semphr.h"
 
-#include "MspInit.h"
+#include "stm32f4xx_msp_init.h"
 #include "ui.h"
 #include "spu.h"
+#include "setting.h"
 
 //static void Error_Handler(void);
 static void SystemClock_Config(void);
@@ -55,6 +28,11 @@ SD_HandleTypeDef hsd;
 HAL_SD_CardInfoTypedef SDCardInfo;
 DMA_HandleTypeDef hdma_sdiorx;
 DMA_HandleTypeDef hdma_sdiotx;
+
+extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
+extern DAC_HandleTypeDef hdac;
+extern TIM_HandleTypeDef htim2;
 
 uint8_t SD_DriverNum;      /* FatFS SD part */
 char SD_Path[4];           /* SD card logical drive path */
@@ -172,4 +150,190 @@ static void SystemClock_Config(void){
     __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
     __HAL_FLASH_DATA_CACHE_ENABLE();
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+/* SDIO init function */
+void MX_SDIO_SD_Init(void)
+{
+
+    hsd.Instance = SDIO;
+    hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+    hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+    hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+    hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+    hsd.Init.ClockDiv = 5;
+    HAL_SD_Init(&hsd, &SDCardInfo);
+
+    /* SDIO IRQ */
+    HAL_NVIC_SetPriority(SDIO_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(SDIO_IRQn);
+
+}
+
+void MX_ADC1_Init(void)
+{
+  ADC_ChannelConfTypeDef sConfig;
+  ADC_MultiModeTypeDef multimode;
+ 
+  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+  hadc1.Init.Resolution = ADC_RESOLUTION12b;
+  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.NbrOfDiscConversion = 1;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.EOCSelection = EOC_SINGLE_CONV;
+  HAL_ADC_Init(&hadc1);
+ 
+  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+ 
+  /**Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
+  HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode);
+ 
+}
+ 
+void MX_ADC2_Init(void)
+{
+  ADC_ChannelConfTypeDef sConfig;
+  ADC_MultiModeTypeDef multimode;
+ 
+  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+  hadc2.Init.Resolution = ADC_RESOLUTION8b;
+  hadc2.Init.ScanConvMode = ENABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.NbrOfDiscConversion = 1;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 3;
+  hadc2.Init.ContinuousConvMode = ENABLE;
+  hadc2.Init.DMAContinuousRequests = ENABLE;
+  hadc2.Init.EOCSelection = EOC_SINGLE_CONV;
+  HAL_ADC_Init(&hadc2);
+ 
+  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_13;
+  sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_14;
+  sConfig.Rank = 3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+ 
+  /**Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
+  HAL_ADCEx_MultiModeConfigChannel(&hadc2, &multimode);
+ 
+}
+/* DAC init function */
+void MX_DAC_Init(void)
+{
+  DAC_ChannelConfTypeDef sConfig;
+ 
+  /**DAC Initialization
+  */
+  hdac.Instance = DAC;
+  HAL_DAC_Init(&hdac);
+ 
+  /**DAC channel OUT2 config
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_DISABLE;
+  HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2);
+ 
+}
+ 
+/* TIM2 init function */
+void MX_TIM2_Init(void)
+{
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+ 
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = (48000 / SAMPLING_RATE) - 1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim2);
+ 
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
+ 
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
+ 
+}
+ 
+/**
+  * Enable DMA controller clock
+  */
+void MX_DMA_Init(void) {
+  /* DMA controller clock enable */
+  __DMA2_CLK_ENABLE();
+  __DMA1_CLK_ENABLE();
+
+    /* ADC1 DMA IRQ */
+    HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+
+    /* DAC DMA IRQ */
+    HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+
+    /* SDIO RX DMA IRQ */
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 7, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+
+    /* SDIO TX DMA IRQ */
+    HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 8, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+}
+ 
+/** Configure pins as
+        * Analog
+        * Input
+        * Output
+        * EVENT_OUT
+        * EXTI
+*/
+void MX_GPIO_Init(void) {
+  GPIO_InitTypeDef GPIO_InitStruct;
+
+  /* GPIO Ports Clock Enable */
+  __GPIOH_CLK_ENABLE();
+  __GPIOA_CLK_ENABLE();
+  __GPIOE_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+}
