@@ -39,7 +39,7 @@ CFLAGS += -DSTM32F429xx -DARM_MATH_CM4 -D__FPU_PRESENT
 
 # to run from FLASH
 CFLAGS += -DVECT_TAB_FLASH
-LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI_FLASH.ld
+LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -Ttool/STM32F429ZI_FLASH.ld
 
 #files
 SRCDIR = src \
