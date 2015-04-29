@@ -72,7 +72,6 @@ int main(void){
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_DAC_Init();
-    NVIC_Init();
     MX_GPIO_Init();
 
     SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
