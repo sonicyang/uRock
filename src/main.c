@@ -60,7 +60,11 @@ void StartDefaultTask(void const * argument);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint16_t data[256] = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+uint16_t data[256] = {0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768 };
+
+
+//uint16_t data[256] = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -98,7 +102,7 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
   for(unsigned int i = 0; i < 0xFFFFFFFFFF; i++)
-      HAL_SAI_Transmit(&hsai_BlockA1, (uint8_t*)data, 256, 0xFFFFFFFF);
+      HAL_SAI_Transmit(&hsai_BlockA1, (uint8_t*)data, 4, 0xFFFFFFFF);
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
@@ -166,7 +170,7 @@ void SystemClock_Config(void)
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SAI_PLLSAI;
-  PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
+  PeriphClkInitStruct.PLLSAI.PLLSAIN = 197;
   PeriphClkInitStruct.PLLSAI.PLLSAIQ = 4;
   PeriphClkInitStruct.PLLSAIDivQ = 1;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
@@ -182,13 +186,13 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
   hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
   hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
-  hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
+  hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_RISINGEDGE;
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
   hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLED;
   hsai_BlockA1.Init.NoDivider = SAI_MASTERDIVIDER_ENABLED;
   hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
   hsai_BlockA1.Init.ClockSource = SAI_CLKSOURCE_PLLSAI;
-  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_48K;
+  hsai_BlockA1.Init.AudioFrequency = SAI_AUDIO_FREQUENCY_96K;
   hsai_BlockA1.FrameInit.FrameLength = 32;
   hsai_BlockA1.FrameInit.ActiveFrameLength = 16;
   hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_CHANNEL_IDENTIFICATION;
