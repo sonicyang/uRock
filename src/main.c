@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 23/04/2015 22:19:43
+  * Date               : 29/04/2015 21:52:52
   * Description        : Main program body
   ******************************************************************************
   *
@@ -42,6 +42,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 SAI_HandleTypeDef hsai_BlockA1;
+SAI_HandleTypeDef hsai_BlockB1;
+DMA_HandleTypeDef hdma_sai1_a;
+DMA_HandleTypeDef hdma_sai1_b;
 
 osThreadId defaultTaskHandle;
 
@@ -52,6 +55,7 @@ osThreadId defaultTaskHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SAI1_Init(void);
 void StartDefaultTask(void const * argument);
 
@@ -60,10 +64,6 @@ void StartDefaultTask(void const * argument);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint16_t data[256] = {0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768, 0, 32768 };
-
-
-//uint16_t data[256] = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
 
 /* USER CODE END 0 */
 
@@ -84,6 +84,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SAI1_Init();
 
   /* USER CODE BEGIN 2 */
@@ -101,8 +102,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
-  for(unsigned int i = 0; i < 0xFFFFFFFFFF; i++)
-      HAL_SAI_Transmit(&hsai_BlockA1, (uint8_t*)data, 4, 0xFFFFFFFF);
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
@@ -203,6 +202,42 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.SlotInit.SlotNumber = 2;
   hsai_BlockA1.SlotInit.SlotActive = 0xFFFF0000;
   HAL_SAI_Init(&hsai_BlockA1);
+
+  hsai_BlockB1.Instance = SAI1_Block_B;
+  hsai_BlockB1.Init.Protocol = SAI_FREE_PROTOCOL;
+  hsai_BlockB1.Init.AudioMode = SAI_MODESLAVE_RX;
+  hsai_BlockB1.Init.DataSize = SAI_DATASIZE_24;
+  hsai_BlockB1.Init.FirstBit = SAI_FIRSTBIT_MSB;
+  hsai_BlockB1.Init.ClockStrobing = SAI_CLOCKSTROBING_RISINGEDGE;
+  hsai_BlockB1.Init.Synchro = SAI_SYNCHRONOUS;
+  hsai_BlockB1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLED;
+  hsai_BlockB1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+  hsai_BlockB1.FrameInit.FrameLength = 64;
+  hsai_BlockB1.FrameInit.ActiveFrameLength = 32;
+  hsai_BlockB1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
+  hsai_BlockB1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
+  hsai_BlockB1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
+  hsai_BlockB1.SlotInit.FirstBitOffset = 0;
+  hsai_BlockB1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
+  hsai_BlockB1.SlotInit.SlotNumber = 1;
+  hsai_BlockB1.SlotInit.SlotActive = 0x00010000;
+  HAL_SAI_Init(&hsai_BlockB1);
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  HAL_NVIC_SetPriority(DMA2_Stream4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream4_IRQn);
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
 }
 
