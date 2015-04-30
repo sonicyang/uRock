@@ -98,7 +98,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
-    if(!pipeUsage)
+    if(pipeUsage <= 8)
         return;
 
     for(i = 0; i < 256; i++){
@@ -116,7 +116,7 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
-    if(!pipeUsage)
+    if(pipeUsage <= 8)
         return;
 
     for(i = 0; i < 256; i++){
