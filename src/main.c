@@ -101,8 +101,10 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     if(!pipeUsage)
         return;
 
-    for(i = 0; i < 256; i++)
-        outputBuffer[0][i] = signalPipe[transmitPipeHead++][i];
+    for(i = 0; i < 256; i++){
+        outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
+        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead++][i];
+    }
 
     if(transmitPipeHead == 16)
         transmitPipeHead = 0;
@@ -117,8 +119,10 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
     if(!pipeUsage)
         return;
 
-    for(i = 0; i < 256; i++)
-        outputBuffer[1][i] = signalPipe[transmitPipeHead++][i];
+    for(i = 0; i < 256; i++){
+        outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
+        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead++][i];
+    }
 
     if(transmitPipeHead == 16)
         transmitPipeHead = 0;
