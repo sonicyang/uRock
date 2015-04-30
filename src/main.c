@@ -179,6 +179,7 @@ uint16_t sineTable[1024] = {0x8000,0x80c9,0x8192,0x825b,0x8324,0x83ed,0x84b6,0x8
 0x79b8,0x7a81,0x7b49,0x7c12,0x7cdb,0x7da4,0x7e6d,0x7f36};
 
 uint16_t sineTable2[2048] = { 0 };
+uint32_t data[2048] = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -220,7 +221,8 @@ int main(void)
   for(int i = 0; i < 1024; i++){
       sineTable2[i * 2] = sineTable[i];
   } 
-  HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)sineTable, 1024);
+  HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)sineTable2, 2048);
+  HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)data, 2048);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
