@@ -80,7 +80,7 @@ void StartDefaultTask(void const * argument);
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = inputBuffer[0][i] << 4;
+        signalPipe[receivePipeHead][i] = (inputBuffer[0][i] << 4) - 32768;
 
     receivePipeHead++;
     if(receivePipeHead == 16)
@@ -93,7 +93,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = inputBuffer[1][i] << 4;
+        signalPipe[receivePipeHead][i] = (inputBuffer[1][i] << 4) - 32768;
 
     receivePipeHead++;
     if(receivePipeHead == 16)
@@ -129,8 +129,8 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < 256; i++){
-        outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
-        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
+        outputBuffer[1][(i << 1)] = signalPipe[transmitPipeHead][i];
+        outputBuffer[1][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
     }
 
     transmitPipeHead++;
@@ -389,13 +389,28 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
-    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc1.Init.Priority = DMA_PRIORITY_VERY_HIGH;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     HAL_DMA_Init(&hdma_adc1);
+
+    /* ADC1 DMA IRQ */
+    HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
  
     __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
  
   }
+}
+
+void DMA2_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream4_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream4_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA2_Stream4_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream4_IRQn 1 */
 }
  
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc){
