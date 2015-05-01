@@ -101,8 +101,8 @@ int main(void)
   MX_SAI1_Init();
 
   for(int i = 0; i < 96; i++){
-    outputBuffer[(i << 1)] = sineTable[i];
-    outputBuffer[(i << 1) + 1] = sineTable[i];
+    outputBuffer[(i << 1)] = sineTable[i] - 32768;
+    outputBuffer[(i << 1) + 1] = sineTable[i] - 32768;
   }
 
   /* USER CODE BEGIN 2 */
