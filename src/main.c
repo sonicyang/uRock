@@ -80,7 +80,7 @@ void StartDefaultTask(void const * argument);
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = inputBuffer[0][i];
+        signalPipe[receivePipeHead][i] = inputBuffer[0][i] << 4;
 
     receivePipeHead++;
     if(receivePipeHead == 16)
@@ -93,7 +93,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = inputBuffer[1][i];
+        signalPipe[receivePipeHead][i] = inputBuffer[1][i] << 4;
 
     receivePipeHead++;
     if(receivePipeHead == 16)
