@@ -49,10 +49,10 @@ DMA_HandleTypeDef hdma_sai1_b;
 osThreadId defaultTaskHandle;
 
 /* USER CODE BEGIN PV */
-uint16_t outputBuffer[2][512];
+uint16_t outputBuffer[2][512] = {{255}};
 uint32_t inputBuffer[2][256];
 
-uint32_t signalPipe[16][256] __attribute__ ((section (".ccmram")));
+uint32_t signalPipe[16][256] /*__attribute__ ((section (".ccmram")))*/ = {{255, 255, 255}};
 
 uint8_t receivePipeHead = 0;
 uint8_t transmitPipeHead = 0;
@@ -74,8 +74,9 @@ void StartDefaultTask(void const * argument);
 void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead++][i] = inputBuffer[0][i];
+        signalPipe[receivePipeHead][i] = inputBuffer[0][i];
 
+    receivePipeHead++;
     if(receivePipeHead == 16)
         receivePipeHead = 0;
 
@@ -86,8 +87,9 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead++][i] = inputBuffer[1][i];
+        signalPipe[receivePipeHead][i] = inputBuffer[1][i];
 
+    receivePipeHead++;
     if(receivePipeHead == 16)
         receivePipeHead = 0;
 
@@ -103,9 +105,10 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 
     for(i = 0; i < 256; i++){
         outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
-        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead++][i];
+        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
     }
 
+    transmitPipeHead++;
     if(transmitPipeHead == 16)
         transmitPipeHead = 0;
 
@@ -121,9 +124,10 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
 
     for(i = 0; i < 256; i++){
         outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
-        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead++][i];
+        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
     }
 
+    transmitPipeHead++;
     if(transmitPipeHead == 16)
         transmitPipeHead = 0;
 
@@ -272,7 +276,7 @@ void MX_SAI1_Init(void)
   hsai_BlockB1.Instance = SAI1_Block_B;
   hsai_BlockB1.Init.Protocol = SAI_FREE_PROTOCOL;
   hsai_BlockB1.Init.AudioMode = SAI_MODESLAVE_RX;
-  hsai_BlockB1.Init.DataSize = SAI_DATASIZE_24;
+  hsai_BlockB1.Init.DataSize = SAI_DATASIZE_16;
   hsai_BlockB1.Init.FirstBit = SAI_FIRSTBIT_MSB;
   hsai_BlockB1.Init.ClockStrobing = SAI_CLOCKSTROBING_RISINGEDGE;
   hsai_BlockB1.Init.Synchro = SAI_SYNCHRONOUS;
@@ -281,12 +285,12 @@ void MX_SAI1_Init(void)
   hsai_BlockB1.FrameInit.FrameLength = 64;
   hsai_BlockB1.FrameInit.ActiveFrameLength = 32;
   hsai_BlockB1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
-  hsai_BlockB1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
+  hsai_BlockB1.FrameInit.FSPolarity = SAI_FS_ACTIVE_HIGH;
   hsai_BlockB1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
-  hsai_BlockB1.SlotInit.FirstBitOffset = 0;
+  hsai_BlockB1.SlotInit.FirstBitOffset = 16;
   hsai_BlockB1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
   hsai_BlockB1.SlotInit.SlotNumber = 1;
-  hsai_BlockB1.SlotInit.SlotActive = 0x00010000;
+  hsai_BlockB1.SlotInit.SlotActive = 0xFFFF0000;
   HAL_SAI_Init(&hsai_BlockB1);
 
 }
