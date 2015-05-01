@@ -48,9 +48,13 @@ DMA_HandleTypeDef hdma_sai1_b;
 
 osThreadId defaultTaskHandle;
 
+DMA_HandleTypeDef hdma_adc1;
+ADC_HandleTypeDef hadc1;
+TIM_HandleTypeDef htim2;
+
 /* USER CODE BEGIN PV */
 uint16_t outputBuffer[2][512] = {{255}};
-uint32_t inputBuffer[2][256];
+uint16_t inputBuffer[2][256];
 
 uint32_t signalPipe[16][256] /*__attribute__ ((section (".ccmram")))*/ = {{255, 255, 255}};
 
@@ -71,7 +75,7 @@ void StartDefaultTask(void const * argument);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
         signalPipe[receivePipeHead][i] = inputBuffer[0][i];
@@ -84,7 +88,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     return;
 }
 
-void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc){
     uint16_t i;
     for(i = 0; i < 256; i++)
         signalPipe[receivePipeHead][i] = inputBuffer[1][i];
@@ -157,7 +161,8 @@ int main(void)
   MX_SAI1_Init();
 
   /* USER CODE BEGIN 2 */
-  HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], 512); //Salve goes before Master
+  HAL_TIM_Base_Start(&htim2);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)inputBuffer[0], 512);
   HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], 1024);
   /* USER CODE END 2 */
 
@@ -293,6 +298,133 @@ void MX_SAI1_Init(void)
   hsai_BlockB1.SlotInit.SlotActive = 0xFFFF0000;
   HAL_SAI_Init(&hsai_BlockB1);
 
+}
+
+/* TIM2 init function */
+void MX_TIM2_Init(void)
+{
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+ 
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = (45000 / 96) - 1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim2);
+ 
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
+ 
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
+ 
+}
+
+void MX_ADC1_Init(void)
+{
+  ADC_ChannelConfTypeDef sConfig;
+  ADC_MultiModeTypeDef multimode;
+ 
+  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+  hadc1.Init.Resolution = ADC_RESOLUTION12b;
+  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.NbrOfDiscConversion = 1;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.EOCSelection = EOC_SINGLE_CONV;
+  HAL_ADC_Init(&hadc1);
+ 
+  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+ 
+  /**Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
+  HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode);
+ 
+}
+
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
+  GPIO_InitTypeDef GPIO_InitStruct;
+  if(hadc->Instance==ADC1)
+  {
+    /* Peripheral clock enable */
+    __ADC1_CLK_ENABLE();
+ 
+  /**ADC1 GPIO Configuration  
+  PA0/WKUP   ------> ADC1_IN0
+  */
+    __GPIOA_CLK_ENABLE();
+    GPIO_InitStruct.Pin = GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+ 
+    /* Peripheral DMA init*/
+ 
+    hdma_adc1.Instance = DMA2_Stream0;
+    hdma_adc1.Init.Channel = DMA_CHANNEL_0;
+    hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc1.Init.Mode = DMA_CIRCULAR;
+    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    HAL_DMA_Init(&hdma_adc1);
+ 
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
+ 
+  }
+}
+ 
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc){
+  if(hadc->Instance==ADC1)
+  {
+    /* Peripheral clock disable */
+    __ADC1_CLK_DISABLE();
+ 
+  /**ADC1 GPIO Configuration  
+  PA0/WKUP   ------> ADC1_IN0
+  */
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
+ 
+    /* Peripheral DMA DeInit*/
+     HAL_DMA_DeInit(hadc->DMA_Handle);
+  }
+}
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base){
+  if(htim_base->Instance==TIM2)
+  {
+    /* Peripheral clock enable */
+    __TIM2_CLK_ENABLE();
+  }
+}
+ 
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base){
+  if(htim_base->Instance==TIM2)
+  {
+    /* Peripheral clock disable */
+    __TIM2_CLK_DISABLE();
+ 
+  }
 }
 
 /** 
