@@ -123,8 +123,8 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < 256; i++){
-        outputBuffer[0][(i << 1)] = signalPipe[transmitPipeHead][i];
-        outputBuffer[0][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
+        outputBuffer[1][(i << 1)] = signalPipe[transmitPipeHead][i];
+        outputBuffer[1][(i << 1) + 1] = signalPipe[transmitPipeHead][i];
     }
 
     transmitPipeHead++;
