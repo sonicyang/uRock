@@ -4,7 +4,6 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 
 #include "setting.h"
 

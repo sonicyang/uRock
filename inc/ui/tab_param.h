@@ -7,7 +7,6 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 
 struct tab_param_t{
     struct tab_t parent;

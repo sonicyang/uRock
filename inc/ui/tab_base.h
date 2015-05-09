@@ -3,7 +3,6 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 
 typedef void(*ShowFunc)(void *opaque);
 typedef void(*HideFunc)(void *opaque);

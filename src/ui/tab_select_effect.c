@@ -4,7 +4,6 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 
 #include "setting.h"
 #include "ui.h"
@@ -62,7 +61,7 @@ void tab_select_effect_refresh(void* opaque){
 void tab_select_effect_eHandle(void* opaque, GEventGWinButton* event){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
 	uint32_t i;
-
+/*
 	for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
 		if ((event)->button == tmp->btn_effectTypes[i]){
 			StageEffectSelect(i);
@@ -73,7 +72,7 @@ void tab_select_effect_eHandle(void* opaque, GEventGWinButton* event){
 	if ((event)->button == tmp->btn_effectTypes[EFFECT_TYPE_NUM -1]){
 		SwitchTab(LIST_TAB);
 	}
-
+*/
 	return;
 }
 

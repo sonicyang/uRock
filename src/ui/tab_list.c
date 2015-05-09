@@ -4,10 +4,9 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 #include "cfgFunc.h"
-#include "wavplayer.h"
-#include "wavrecoder.h"
+//#include "wavplayer.h"
+//#include "wavrecoder.h"
 
 #include "setting.h"
 
@@ -40,7 +39,7 @@ void tab_list_refresh(void* opaque){
 void tab_list_eHandle(void* opaque, GEventGWinButton* event){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
-
+    /*
     for(i = 0; i < STAGE_NUM; i++){
         if ((event)->button == tmp->btn_effectIndicate[i]){
             controllingStage = i;
@@ -59,7 +58,7 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
             EffectList[3]->del(EffectList[3]);
 
         vTaskDelay(1500 / portTICK_RATE_MS);
-        EffectList[3] = new_WavPlayer();
+        //EffectList[3] = new_WavPlayer();
     }
 
     if ((event)->button == tmp->btn_recordWav){
@@ -67,9 +66,9 @@ void tab_list_eHandle(void* opaque, GEventGWinButton* event){
             EffectList[3]->del(EffectList[3]);
 
         vTaskDelay(1500 / portTICK_RATE_MS);
-        EffectList[3] = new_WavRecoder();
+        //EffectList[3] = new_WavRecoder();
     }
-
+*/
     return;
 }
 

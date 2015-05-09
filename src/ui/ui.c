@@ -21,7 +21,6 @@
 
 #include "gfxconf.h"
 #include "gfx.h"
-#include "src/gwin/sys_defs.h"
 
 #include "volume.h"
 #include "compressor.h"
@@ -37,22 +36,22 @@
 #include "phaser.h"
 #include "flanger.h"
 
-#include "wavplayer.h"
+//#include "wavplayer.h"
 
 #include "cfgFunc.h"
 
-#include "ff.h"
+//#include "ff.h"
 
 #define TAB_GROUP_1 0
 
-extern char SD_Path[4];
-extern FATFS FatFs;
-extern FIL fil;
+//extern char SD_Path[4];
+//extern FATFS FatFs;
+//extern FIL fil;
 
-DMA_HandleTypeDef hdma_adc2;
-ADC_HandleTypeDef hadc2;
+extern DMA_HandleTypeDef hdma_adc2;
+extern ADC_HandleTypeDef hadc2;
 
-extern struct Effect_t *EffectList[EFFECT_NUM];
+extern struct Effect_t *EffectList[STAGE_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 extern int8_t controllingStage;
 
@@ -145,7 +144,7 @@ void UserInterface(void *argument){
     buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
     buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
 
-	if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
+	//if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
 	gfxInit();
 	gdispClear(White);
@@ -154,7 +153,6 @@ void UserInterface(void *argument){
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
 	vTaskDelay(100);
 	// Attach the mouse input
-	gwinAttachMouse(0);
 
 	// create the widget
 	tabs[LIST_TAB] = tab_list_init(&listTab); 
