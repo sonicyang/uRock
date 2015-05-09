@@ -76,12 +76,9 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = (inputBuffer[0][i] << 8) - (32768 << 16);
+        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[0][i] << 8) - (32768 << 16);
 
     receivePipeHead++;
-    if(receivePipeHead == 16)
-        receivePipeHead = 0;
-    //TODO: Use Mask
 
     pipeUsage++;
 
@@ -92,11 +89,9 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = (inputBuffer[1][i] << 8) - (32768 << 16);
+        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[1][i] << 8) - (32768 << 16);
 
     receivePipeHead++;
-    if(receivePipeHead == 16)
-        receivePipeHead = 0;
 
     pipeUsage++;
 
@@ -111,8 +106,8 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < 256; i++){
-        outputBuffer[0][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16);
-        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16);
+        outputBuffer[0][(i << 1)] = (signalPipe[transmitPipeHead & 0xF][i] >> 16);
+        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead & 0xF][i] >> 16);
     }
 
     transmitPipeHead++;
@@ -130,13 +125,11 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < 256; i++){
-        outputBuffer[1][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16);
-        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16);
+        outputBuffer[1][(i << 1)] = (signalPipe[transmitPipeHead & 0xF][i] >> 16);
+        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead & 0xF][i] >> 16);
     }
 
     transmitPipeHead++;
-    if(transmitPipeHead == 16)
-        transmitPipeHead = 0;
 
     pipeUsage--;
     return;
