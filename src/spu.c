@@ -42,12 +42,16 @@ int8_t controllingStage = 0;
     
 int16_t wavData[4200];
 
+extern uint8_t potRawValues[4];
+
 void SignalProcessingUnit(void const * argument){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
         effectList[i] = NULL;
     }
+
+    effectList[0] = new_Volume(); 
 
     /* Semaphore Blocker setup*/ 
     osSemaphoreDef(SPUH);
@@ -67,6 +71,7 @@ void SignalProcessingUnit(void const * argument){
                 //TODO: Use empty function call;
             }
         }
+		effectList[controllingStage]->adj(effectList[controllingStage], potRawValues);
     }
 
     while(1);

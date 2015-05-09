@@ -45,8 +45,11 @@
 /* Private variables ---------------------------------------------------------*/
 SAI_HandleTypeDef hsai_BlockA1;
 SAI_HandleTypeDef hsai_BlockB1;
+ADC_HandleTypeDef hadc2;
+
 DMA_HandleTypeDef hdma_sai1_a;
 DMA_HandleTypeDef hdma_sai1_b;
+DMA_HandleTypeDef hdma_adc2;
 
 osThreadId SPU_TaskHandle;
 
@@ -59,13 +62,14 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SAI1_Init(void);
+static void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+uint8_t potRawValues[4];
 /* USER CODE END 0 */
 
 int main(void)
@@ -87,6 +91,9 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SAI1_Init();
+  MX_ADC2_Init();
+
+  HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potRawValues, 3); //TODO: Make 4
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -225,6 +232,52 @@ void MX_SAI1_Init(void)
 
 }
 
+void MX_ADC2_Init(void)
+{
+  ADC_ChannelConfTypeDef sConfig;
+  ADC_MultiModeTypeDef multimode;
+ 
+  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV2;
+  hadc2.Init.Resolution = ADC_RESOLUTION8b;
+  hadc2.Init.ScanConvMode = ENABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.NbrOfDiscConversion = 1;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 3;
+  hadc2.Init.ContinuousConvMode = ENABLE;
+  hadc2.Init.DMAContinuousRequests = ENABLE;
+  hadc2.Init.EOCSelection = EOC_SINGLE_CONV;
+  HAL_ADC_Init(&hadc2);
+ 
+  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_13;
+  sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_14;
+  sConfig.Rank = 3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  HAL_ADC_ConfigChannel(&hadc2, &sConfig);
+ 
+  /**Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
+  HAL_ADCEx_MultiModeConfigChannel(&hadc2, &multimode);
+ 
+}
+
 /** 
   * Enable DMA controller clock
   */
@@ -252,6 +305,7 @@ void MX_GPIO_Init(void)
 {
 
   /* GPIO Ports Clock Enable */
+  __GPIOC_CLK_ENABLE();
   __GPIOE_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
 
