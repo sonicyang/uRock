@@ -63,10 +63,10 @@ void SignalProcessingUnit(void const * argument){
 
     /* Process */
     while(1){
-        if(osSemaphoreWait(SPUH_id, 0)){
+        if(osSemaphoreWait(SPUH_id, osWaitForever) == osOK){
             for(i = 0; i < STAGE_NUM; i++){
                 if(effectList[i] != NULL){
-                    effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & 0x7], effectList[i]); //Hack, modulating 8 -> using mask
+                    effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & 0xF], effectList[i]); //Hack, modulating 16 -> using mask
                 }
                 //TODO: Use empty function call;
             }
@@ -81,7 +81,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[0][i] << 8) - (32768 << 16);
+        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[0][i] << 8) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -94,7 +94,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
     for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[1][i] << 8) - (32768 << 16);
+        signalPipe[receivePipeHead & 0xF][i] = (inputBuffer[1][i] << 8) - (NORM_VALUE);
 
     receivePipeHead++;
 

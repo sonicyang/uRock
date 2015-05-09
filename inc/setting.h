@@ -5,6 +5,8 @@
 
 #define MAX_EFFECT_PARAM 4
 
+#define NORM_VALUE 0x65000000 
+
 #define BUFFER_NUM 2
 #define STAGE_NUM 8
 #define SAMPLE_NUM 256
@@ -13,11 +15,11 @@
 
 #define MAX_CONFIG_NUM 4
 
-#define SAMPLING_RATE 44.1 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLING_RATE 96 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD (1.0f / SAMPLING_RATE)
 
-#define Q_1 1048576
-#define Q_MULT_SHIFT 11
+#define Q_1 65536 // 2 ^ (32 - resolution) = 2 ^ 16
+#define Q_MULT_SHIFT 15 // resolution - 1 = 15
 
 #define BLOCK_PERIOD ((float)SAMPLE_NUM / SAMPLING_RATE)
 
