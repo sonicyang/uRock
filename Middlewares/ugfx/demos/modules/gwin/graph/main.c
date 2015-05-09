@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -41,7 +41,7 @@ static const point data[5] = {
 static GGraphObject	g;
 
 static GGraphStyle GraphStyle1 = {
-	{ GGRAPH_POINT_DOT, 0, Blue },			// point
+	{ GGRAPH_POINT_DOT, 0, uBlue },			// point
 	{ GGRAPH_LINE_NONE, 2, Gray },			// line
 	{ GGRAPH_LINE_SOLID, 0, White },		// x axis
 	{ GGRAPH_LINE_SOLID, 0, White },		// y axis
@@ -51,7 +51,7 @@ static GGraphStyle GraphStyle1 = {
 };
 
 static const GGraphStyle GraphStyle2 = {
-	{ GGRAPH_POINT_SQUARE, 5, Red },		// point
+	{ GGRAPH_POINT_SQUARE, 5, uRed },		// point
 	{ GGRAPH_LINE_DOT, 2, Pink },			// line
 	{ GGRAPH_LINE_SOLID, 0, White },		// x axis
 	{ GGRAPH_LINE_SOLID, 0, White },		// y axis
@@ -85,7 +85,7 @@ int main(void) {
 		gwinGraphDrawPoint(gh, i-gwinGetWidth(gh)/2, 80*fsin(2*i/5));	//sin(2*0.2*M_PI*i/180));
 
 	gwinGraphStartSet(gh);
-	GraphStyle1.point.color = Green;
+	GraphStyle1.point.color = uGreen;
 	gwinGraphSetStyle(gh, &GraphStyle1);
 	
 	for(i = 0; i < gwinGetWidth(gh)*5; i++)

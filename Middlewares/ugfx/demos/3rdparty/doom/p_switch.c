@@ -324,13 +324,13 @@ P_UseSpecialLine
     {
 	// MANUALS
       case 1:		// Vertical Door
-      case 26:		// Blue Door/Locked
+      case 26:		// uBlue Door/Locked
       case 27:		// Yellow Door /Locked
-      case 28:		// Red Door /Locked
+      case 28:		// uRed Door /Locked
 
       case 31:		// Manual door open
-      case 32:		// Blue locked door open
-      case 33:		// Red locked door open
+      case 32:		// uBlue locked door open
+      case 33:		// uRed locked door open
       case 34:		// Yellow locked door open
 
       case 117:		// Blazing door raise

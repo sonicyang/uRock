@@ -5,15 +5,18 @@
  *              http://ugfx.org/license.html
  */
 
+/**
+ * @file	src/gwin/gwin_gwin.c
+ * @brief	GWIN sub-system code
+ */
+
 #include "gfx.h"
 
 #if GFX_USE_GWIN
 
-#include "src/gwin/class_gwin.h"
+#include "gwin_class.h"
 
-// Needed if there is no window manager
-#define MIN_WIN_WIDTH	1
-#define MIN_WIN_HEIGHT	1
+#include <string.h>
 
 /*-----------------------------------------------
  * Data
@@ -37,79 +40,43 @@ static color_t	defaultBgColor = Black;
  * Helper Routines
  *-----------------------------------------------*/
 
-#if GWIN_NEED_WINDOWMANAGER
-	#define _gwm_redraw(gh, flags)		_GWINwm->vmt->Redraw(gh, flags)
-	#define _gwm_redim(gh,x,y,w,h)		_GWINwm->vmt->Redim(gh,x,y,w,h);
-#else
-	static void _gwm_redraw(GHandle gh, int flags) {
-		if ((gh->flags & GWIN_FLG_VISIBLE)) {
-			if (gh->vmt->Redraw) {
-				#if GDISP_NEED_CLIP
-					gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-				#endif
-				gh->vmt->Redraw(gh);
-			} else if (!(flags & GWIN_WMFLG_PRESERVE)) {
-				#if GDISP_NEED_CLIP
-					gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-				#endif
-				gdispGFillArea(gh->display, gh->x, gh->y, gh->width, gh->height, gh->bgcolor);
-				if (gh->vmt->AfterClear)
-					gh->vmt->AfterClear(gh);
-			}
-		} else if (!(flags & GWIN_WMFLG_NOBGCLEAR)) {
-			#if GDISP_NEED_CLIP
-				gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-			#endif
-			gdispGFillArea(gh->display, gh->x, gh->y, gh->width, gh->height, defaultBgColor);
-		}
-	}
-	static void _gwm_redim(GHandle gh, coord_t x, coord_t y, coord_t width, coord_t height) {
-		gh->x = x; gh->y = y;
-		gh->width = width; gh->height = height;
-		if (gh->x < 0) { gh->width += gh->x; gh->x = 0; }
-		if (gh->y < 0) { gh->height += gh->y; gh->y = 0; }
-		if (gh->x > gdispGetWidth()-MIN_WIN_WIDTH)		gh->x = gdispGetWidth()-MIN_WIN_WIDTH;
-		if (gh->y > gdispGetHeight()-MIN_WIN_HEIGHT)	gh->y = gdispGetHeight()-MIN_WIN_HEIGHT;
-		if (gh->width < MIN_WIN_WIDTH) { gh->width = MIN_WIN_WIDTH; }
-		if (gh->height < MIN_WIN_HEIGHT) { gh->height = MIN_WIN_HEIGHT; }
-		if (gh->x+gh->width > gdispGetWidth()) gh->width = gdispGetWidth() - gh->x;
-		if (gh->y+gh->height > gdispGetHeight()) gh->height = gdispGetHeight() - gh->y;
-
-		// Redraw the window
-		_gwm_redraw(gh, GWIN_WMFLG_PRESERVE|GWIN_WMFLG_NOBGCLEAR);
-	}
-#endif
-
 /*-----------------------------------------------
  * Class Routines
  *-----------------------------------------------*/
 
 void _gwinInit(void)
 {
+	extern void _gwmInit(void);
+
+	_gwmInit();
 	#if GWIN_NEED_WIDGET
 		extern void _gwidgetInit(void);
 
 		_gwidgetInit();
 	#endif
-	#if GWIN_NEED_WINDOWMANAGER
-		extern void _gwmInit(void);
+	#if GWIN_NEED_CONTAINERS
+		extern void _gcontainerInit(void);
 
-		_gwmInit();
+		_gcontainerInit();
 	#endif
 }
 
 void _gwinDeinit(void)
 {
+	extern void _gwmDeinit(void);
+
+	#if GWIN_NEED_CONTAINERS
+		extern void _gcontainerDeinit(void);
+
+		_gcontainerDeinit();
+	#endif
 	#if GWIN_NEED_WIDGET
 		extern void _gwidgetDeinit(void);
 
 		_gwidgetDeinit();
 	#endif
-	#if GWIN_NEED_WINDOWMANAGER
-		extern void _gwmDeinit(void);
 
-		_gwmDeinit();
-	#endif
+	_gwmDeinit();
 }
 
 // Internal routine for use by GWIN components only
@@ -132,17 +99,51 @@ GHandle _gwindowCreate(GDisplay *g, GWindowObject *pgw, const GWindowInit *pInit
 		pgw->font = defaultFont;
 	#endif
 
-	#if GWIN_NEED_WINDOWMANAGER
-		if (!_GWINwm->vmt->Add(pgw, pInit)) {
-			if ((pgw->flags & GWIN_FLG_DYNAMIC))
-				gfxFree(pgw);
-			return 0;
-		}
-	#else
-		_gwm_redim(pgw, pInit->x, pInit->y, pInit->width, pInit->height);
-	#endif
+	// Make sure we don't create nasty problems for ourselves
+	if (vmt->size > sizeof(GWindowObject))
+		memset(pgw+1, 0, vmt->size - sizeof(GWindowObject));
+
+	if (!_gwinWMAdd(pgw, pInit)) {
+		if ((pgw->flags & GWIN_FLG_DYNAMIC))
+			gfxFree(pgw);
+		return 0;
+	}
 
 	return (GHandle)pgw;
+}
+
+// Internal routine for use by GWIN components only
+void _gwinDestroy(GHandle gh, GuRedrawMethod how) {
+	if (!gh)
+		return;
+
+	// Make the window invisible
+	gwinSetVisible(gh, FALSE);
+
+	// Make sure it is flushed first - must be REDRAW_WAIT or REDRAW_INSESSION
+	_gwinFlushuRedraws(how);
+
+	#if GWIN_NEED_CONTAINERS
+		// Notify the parent it is about to be deleted
+		if (gh->parent && ((gcontainerVMT *)gh->parent->vmt)->NotifyDelete)
+			((gcontainerVMT *)gh->parent->vmt)->NotifyDelete(gh->parent, gh);
+	#endif
+
+	// Remove from the window manager
+	#if GWIN_NEED_WINDOWMANAGER
+		_GWINwm->vmt->Delete(gh);
+	#endif
+
+	// Class destroy routine
+	if (gh->vmt->Destroy)
+		gh->vmt->Destroy(gh);
+
+	// Clean up the structure
+	if (gh->flags & GWIN_FLG_DYNAMIC) {
+		gh->flags = 0;							// To be sure, to be sure
+		gfxFree((void *)gh);
+	} else
+		gh->flags = 0;							// To be sure, to be sure
 }
 
 /*-----------------------------------------------
@@ -197,79 +198,19 @@ GHandle gwinGWindowCreate(GDisplay *g, GWindowObject *pgw, const GWindowInit *pI
 }
 
 void gwinDestroy(GHandle gh) {
-	if (!gh)
-		return;
-
-	// Make the window invisible
-	gwinSetVisible(gh, FALSE);
-
-	// Remove from the window manager
-	#if GWIN_NEED_WINDOWMANAGER
-		_GWINwm->vmt->Delete(gh);
-	#endif
-
-	// Class destroy routine
-	if (gh->vmt->Destroy)
-		gh->vmt->Destroy(gh);
-
-	// Clean up the structure
-	if (gh->flags & GWIN_FLG_DYNAMIC) {
-		gh->flags = 0;							// To be sure, to be sure
-		gfxFree((void *)gh);
-	} else
-		gh->flags = 0;							// To be sure, to be sure
+	_gwinDestroy(gh, REDRAW_WAIT);
 }
 
 const char *gwinGetClassName(GHandle gh) {
 	return gh->vmt->classname;
 }
 
-void gwinSetVisible(GHandle gh, bool_t visible) {
-	if (visible) {
-		if (!(gh->flags & GWIN_FLG_VISIBLE)) {
-			gh->flags |= GWIN_FLG_VISIBLE;
-			_gwm_redraw(gh, 0);
-		}
-	} else {
-		if ((gh->flags & GWIN_FLG_VISIBLE)) {
-			gh->flags &= ~GWIN_FLG_VISIBLE;
-			_gwm_redraw(gh, 0);
-		}
-	}
-}
-
 bool_t gwinGetVisible(GHandle gh) {
-	return (gh->flags & GWIN_FLG_VISIBLE) ? TRUE : FALSE;
-}
-
-void gwinSetEnabled(GHandle gh, bool_t enabled) {
-	if (enabled) {
-		if (!(gh->flags & GWIN_FLG_ENABLED)) {
-			gh->flags |= GWIN_FLG_ENABLED;
-			_gwm_redraw(gh, GWIN_WMFLG_PRESERVE|GWIN_WMFLG_NOBGCLEAR);
-		}
-	} else {
-		if ((gh->flags & GWIN_FLG_ENABLED)) {
-			gh->flags &= ~GWIN_FLG_ENABLED;
-			_gwm_redraw(gh, GWIN_WMFLG_PRESERVE|GWIN_WMFLG_NOBGCLEAR);
-		}
-	}
+	return (gh->flags & GWIN_FLG_SYSVISIBLE) ? TRUE : FALSE;
 }
 
 bool_t gwinGetEnabled(GHandle gh) {
-	return (gh->flags & GWIN_FLG_ENABLED) ? TRUE : FALSE;
-}
-
-void gwinMove(GHandle gh, coord_t x, coord_t y) {
-	_gwm_redim(gh, x, y, gh->width, gh->height);
-}
-
-void gwinResize(GHandle gh, coord_t width, coord_t height) {
-	_gwm_redim(gh, gh->x, gh->y, width, height);
-}
-
-void gwinRedraw(GHandle gh) {
-	_gwm_redraw(gh, GWIN_WMFLG_PRESERVE|GWIN_WMFLG_NOBGCLEAR);
+	return (gh->flags & GWIN_FLG_SYSENABLED) ? TRUE : FALSE;
 }
 
 #if GDISP_NEED_TEXT
@@ -284,242 +225,173 @@ void gwinClear(GHandle gh) {
 	 * still call the AfterClear() routine as some widgets will
 	 * need this to clear internal buffers or similar
 	 */
-	if (!((gh->flags & GWIN_FLG_VISIBLE))) {
-		if (gh->vmt->AfterClear)
-			gh->vmt->AfterClear(gh);
-	} else {
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
-
-	gdispGFillArea(gh->display, gh->x, gh->y, gh->width, gh->height, gh->bgcolor);
+	if (_gwinDrawStart(gh)) {
+		gdispGFillArea(gh->display, gh->x, gh->y, gh->width, gh->height, gh->bgcolor);
+		_gwinDrawEnd(gh);
+	}
 	if (gh->vmt->AfterClear)
 		gh->vmt->AfterClear(gh);
-	}
 }
 
 void gwinDrawPixel(GHandle gh, coord_t x, coord_t y) {
-	if (!((gh->flags & GWIN_FLG_VISIBLE)))
-		return;
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
+	if (!_gwinDrawStart(gh)) return;
 	gdispGDrawPixel(gh->display, gh->x+x, gh->y+y, gh->color);
+	_gwinDrawEnd(gh);
 }
 
 void gwinDrawLine(GHandle gh, coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
-	if (!((gh->flags & GWIN_FLG_VISIBLE)))
-		return;
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
+	if (!_gwinDrawStart(gh)) return;
 	gdispGDrawLine(gh->display, gh->x+x0, gh->y+y0, gh->x+x1, gh->y+y1, gh->color);
+	_gwinDrawEnd(gh);
 }
 
 void gwinDrawBox(GHandle gh, coord_t x, coord_t y, coord_t cx, coord_t cy) {
-	if (!((gh->flags & GWIN_FLG_VISIBLE)))
-		return;
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
+	if (!_gwinDrawStart(gh)) return;
 	gdispGDrawBox(gh->display, gh->x+x, gh->y+y, cx, cy, gh->color);
+	_gwinDrawEnd(gh);
 }
 
 void gwinFillArea(GHandle gh, coord_t x, coord_t y, coord_t cx, coord_t cy) {
-	if (!((gh->flags & GWIN_FLG_VISIBLE)))
-		return;
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
+	if (!_gwinDrawStart(gh)) return;
 	gdispGFillArea(gh->display, gh->x+x, gh->y+y, cx, cy, gh->color);
+	_gwinDrawEnd(gh);
 }
 
 void gwinBlitArea(GHandle gh, coord_t x, coord_t y, coord_t cx, coord_t cy, coord_t srcx, coord_t srcy, coord_t srccx, const pixel_t *buffer) {
-	if (!((gh->flags & GWIN_FLG_VISIBLE)))
-		return;
-
-	#if GDISP_NEED_CLIP
-		gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-	#endif
+	if (!_gwinDrawStart(gh)) return;
 	gdispGBlitArea(gh->display, gh->x+x, gh->y+y, cx, cy, srcx, srcy, srccx, buffer);
+	_gwinDrawEnd(gh);
 }
 
 #if GDISP_NEED_CIRCLE
 	void gwinDrawCircle(GHandle gh, coord_t x, coord_t y, coord_t radius) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGDrawCircle(gh->display, gh->x+x, gh->y+y, radius, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillCircle(GHandle gh, coord_t x, coord_t y, coord_t radius) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGFillCircle(gh->display, gh->x+x, gh->y+y, radius, gh->color);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_ELLIPSE
 	void gwinDrawEllipse(GHandle gh, coord_t x, coord_t y, coord_t a, coord_t b) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGDrawEllipse(gh->display, gh->x+x, gh->y+y, a, b, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillEllipse(GHandle gh, coord_t x, coord_t y, coord_t a, coord_t b) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGFillEllipse(gh->display, gh->x+x, gh->y+y, a, b, gh->color);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_ARC
 	void gwinDrawArc(GHandle gh, coord_t x, coord_t y, coord_t radius, coord_t startangle, coord_t endangle) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGDrawArc(gh->display, gh->x+x, gh->y+y, radius, startangle, endangle, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillArc(GHandle gh, coord_t x, coord_t y, coord_t radius, coord_t startangle, coord_t endangle) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGFillArc(gh->display, gh->x+x, gh->y+y, radius, startangle, endangle, gh->color);
+		_gwinDrawEnd(gh);
+	}
+#endif
+
+#if GDISP_NEED_ARCSECTORS
+	void gwinDrawArcSectors(GHandle gh, coord_t x, coord_t y, coord_t radius, uint8_t sectors) {
+		if (!_gwinDrawStart(gh)) return;
+		gdispGDrawArcSectors(gh->display, gh->x+x, gh->y+y, radius, sectors, gh->color);
+		_gwinDrawEnd(gh);
+	}
+
+	void gwinFillArcSectors(GHandle gh, coord_t x, coord_t y, coord_t radius, uint8_t sectors) {
+		if (!_gwinDrawStart(gh)) return;
+		gdispGFillArcSectors(gh->display, gh->x+x, gh->y+y, radius, sectors, gh->color);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_PIXELREAD
 	color_t gwinGetPixelColor(GHandle gh, coord_t x, coord_t y) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return defaultBgColor;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return (color_t)0;
 		return gdispGGetPixelColor(gh->display, gh->x+x, gh->y+y);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_TEXT
 	void gwinDrawChar(GHandle gh, coord_t x, coord_t y, char c) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGDrawChar(gh->display, gh->x+x, gh->y+y, c, gh->font, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillChar(GHandle gh, coord_t x, coord_t y, char c) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGFillChar(gh->display, gh->x+x, gh->y+y, c, gh->font, gh->color, gh->bgcolor);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinDrawString(GHandle gh, coord_t x, coord_t y, const char *str) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGDrawString(gh->display, gh->x+x, gh->y+y, str, gh->font, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillString(GHandle gh, coord_t x, coord_t y, const char *str) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGFillString(gh->display, gh->x+x, gh->y+y, str, gh->font, gh->color, gh->bgcolor);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinDrawStringBox(GHandle gh, coord_t x, coord_t y, coord_t cx, coord_t cy, const char* str, justify_t justify) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGDrawStringBox(gh->display, gh->x+x, gh->y+y, cx, cy, str, gh->font, gh->color, justify);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillStringBox(GHandle gh, coord_t x, coord_t y, coord_t cx, coord_t cy, const char* str, justify_t justify) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)) || !gh->font)
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!gh->font || !_gwinDrawStart(gh)) return;
 		gdispGFillStringBox(gh->display, gh->x+x, gh->y+y, cx, cy, str, gh->font, gh->color, gh->bgcolor, justify);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_CONVEX_POLYGON
 	void gwinDrawPoly(GHandle gh, coord_t tx, coord_t ty, const point *pntarray, unsigned cnt) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGDrawPoly(gh->display, tx+gh->x, ty+gh->y, pntarray, cnt, gh->color);
+		_gwinDrawEnd(gh);
 	}
 
 	void gwinFillConvexPoly(GHandle gh, coord_t tx, coord_t ty, const point *pntarray, unsigned cnt) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return;
-
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
+		if (!_gwinDrawStart(gh)) return;
 		gdispGFillConvexPoly(gh->display, tx+gh->x, ty+gh->y, pntarray, cnt, gh->color);
+		_gwinDrawEnd(gh);
+	}
+	void gwinDrawThickLine(GHandle gh, coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t width, bool_t round) {
+		if (!_gwinDrawStart(gh)) return;
+		gdispGDrawThickLine(gh->display, gh->x+x0, gh->y+y0, gh->x+x1, gh->y+y1, gh->color, width, round);
+		_gwinDrawEnd(gh);
 	}
 #endif
 
 #if GDISP_NEED_IMAGE
 	gdispImageError gwinDrawImage(GHandle gh, gdispImage *img, coord_t x, coord_t y, coord_t cx, coord_t cy, coord_t sx, coord_t sy) {
-		if (!((gh->flags & GWIN_FLG_VISIBLE)))
-			return GDISP_IMAGE_ERR_OK;
+		gdispImageError		ret;
 
-		#if GDISP_NEED_CLIP
-			gdispGSetClip(gh->display, gh->x, gh->y, gh->width, gh->height);
-		#endif
-		return gdispGImageDraw(gh->display, img, gh->x+x, gh->y+y, cx, cy, sx, sy);
+		if (!_gwinDrawStart(gh)) return GDISP_IMAGE_ERR_OK;
+		ret = gdispGImageDraw(gh->display, img, gh->x+x, gh->y+y, cx, cy, sx, sy);
+		_gwinDrawEnd(gh);
+		return ret;
 	}
 #endif
 

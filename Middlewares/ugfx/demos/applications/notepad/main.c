@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -54,10 +54,10 @@ void drawScreen(void) {
 	
 	/* colors */
 	gdispFillArea(0 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Black);	/* Black */
-	gdispFillArea(1 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Red);		/* Red */
+	gdispFillArea(1 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uRed);		/* uRed */
 	gdispFillArea(2 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Yellow);	/* Yellow */
-	gdispFillArea(3 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Green);	/* Green */
-	gdispFillArea(4 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Blue);		/* Blue */
+	gdispFillArea(3 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uGreen);	/* uGreen */
+	gdispFillArea(4 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, uBlue);		/* uBlue */
 	gdispDrawBox (5 * COLOR_SIZE + 3, 3, COLOR_SIZE, COLOR_SIZE, Black);	/* White */
 
 	/* pens */	
@@ -90,10 +90,10 @@ int main(void) {
 		/* inside color box ? */
 		if(ev.y >= OFFSET && ev.y <= COLOR_SIZE) {
 			     if(GET_COLOR(0)) 	color = Black;
-			else if(GET_COLOR(1))	color = Red;
+			else if(GET_COLOR(1))	color = uRed;
 			else if(GET_COLOR(2))	color = Yellow;
-			else if(GET_COLOR(3))	color = Green;
-			else if(GET_COLOR(4))	color = Blue;
+			else if(GET_COLOR(3))	color = uGreen;
+			else if(GET_COLOR(4))	color = uBlue;
 			else if(GET_COLOR(5))	color = White;
 		
 		/* inside pen box ? */

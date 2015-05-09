@@ -5,12 +5,12 @@
  * Copyright © 2013, Kumar Abhishek [abhishek.kakkar@edaboard.com].
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *  * Redistributions of source code must retain the above copyright
+ *  * uRedistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- *	* Redistributions in binary form must reproduce the above copyright
+ *	* uRedistributions in binary form must reproduce the above copyright
  * 	  notice, this list of conditions and the following disclaimer in the
  * 	  documentation and/or other materials provided with the distribution.
  *	* The name of 'Kumar Abhishek' may not be used to endorse or promote

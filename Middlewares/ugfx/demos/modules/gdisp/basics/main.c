@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -42,8 +42,8 @@ int main(void) {
 
     // Code Here
 	gdispDrawBox(10, 10, width/2, height/2, Yellow);
-    gdispFillArea(width/2, height/2, width/2-10, height/2-10, Blue);
-    gdispDrawLine(5, 30, width-50, height-40, Red);
+    gdispFillArea(width/2, height/2, width/2-10, height/2-10, uBlue);
+    gdispDrawLine(5, 30, width-50, height-40, uRed);
     
 	for(i = 5, j = 0; i < width && j < height; i += 7, j += i/20)
     	gdispDrawPixel(i, j, White);

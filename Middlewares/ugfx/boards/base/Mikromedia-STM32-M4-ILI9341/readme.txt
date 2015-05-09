@@ -12,4 +12,4 @@ Note there are two variants of this board - one with the ILI9341 display
 As this is not a standard ChibiOS supported board the necessary board files have also
 been provided in the ChibiOS_Board directory.
 
-There is an example Makefile and project in the examples directory.
+There are two examples, one for ChibiOS/RT 2.x and one for ChibiOS/RT 3.x available.

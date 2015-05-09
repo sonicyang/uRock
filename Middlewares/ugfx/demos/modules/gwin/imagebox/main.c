@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -35,13 +35,14 @@ GHandle ghImage1;
  
 static void createWidgets(void) {
 	GWidgetInit	wi;
- 
+
 	// Apply some default values for GWIN
+	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
  
 	// create the first image widget
 	wi.g.x = 10; wi.g.y = 10; wi.g.width = 200; wi.g.height = 100;
-	ghImage1 = gwinImageCreate(NULL, &wi.g);
+	ghImage1 = gwinImageCreate(0, &wi.g);
 	gwinImageOpenFile(ghImage1, "ugfx_logo_banner.bmp");
  }
  

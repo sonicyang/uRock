@@ -9,8 +9,17 @@
   </configuration_settings>
   <board_name>mikromedia STM32-M4</board_name>
   <board_id>MIKROE_MIKROMEDIA_M4</board_id>
-  <board_functions></board_functions>
-  <clocks HSEFrequency="16000000" HSEBypass="false" LSEFrequency="32768" VDD="330" />
+  <board_functions>
+    <mmc_lld_is_card_inserted><![CDATA[
+  (void)mmcp;
+  return !palReadPad(GPIOD, GPIOD_SD_CD);]]></mmc_lld_is_card_inserted>
+      <mmc_lld_is_write_protected><![CDATA[
+  (void)mmcp;
+  /* Board has no write protection detection */
+  return FALSE;]]></mmc_lld_is_write_protected>
+    </board_functions>
+  <clocks HSEFrequency="16000000" HSEBypass="false" LSEFrequency="32768" LSEBypass="false" VDD="330" />
+  <subtype>STM32F40_41xxx</subtype>
   <ports>
     <GPIOA>
       <pin0

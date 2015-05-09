@@ -218,7 +218,7 @@ EV_DoLockedDoor
 		
     switch(line->special)
     {
-      case 99:	// Blue Lock
+      case 99:	// uBlue Lock
       case 133:
 	if ( !p )
 	    return 0;
@@ -230,7 +230,7 @@ EV_DoLockedDoor
 	}
 	break;
 	
-      case 134: // Red Lock
+      case 134: // uRed Lock
       case 135:
 	if ( !p )
 	    return 0;
@@ -368,7 +368,7 @@ EV_VerticalDoor
 		
     switch(line->special)
     {
-      case 26: // Blue Lock
+      case 26: // uBlue Lock
       case 32:
 	if ( !player )
 	    return;
@@ -395,7 +395,7 @@ EV_VerticalDoor
 	}
 	break;
 	
-      case 28: // Red Lock
+      case 28: // uRed Lock
       case 33:
 	if ( !player )
 	    return;

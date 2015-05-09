@@ -2,7 +2,7 @@ This folder contains a few demos which explain how to use the library.
 
 Only the main files are contained. No compile-able projects
 
-All demos and examples stand under the BSD license as declared below and
+Most demos and examples stand under the BSD license as declared below and
 within each file:
 
 /*
@@ -10,11 +10,11 @@ within each file:
  * Copyright (c) 2012, 2013, Andrew Hannam aka inmarket
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -34,3 +34,5 @@ within each file:
  */
 
 Files under the 3rdparty directory are licensed as per the original contributor.
+Files under the tools directory are licensed with either the uGFX license or the BSD
+license - see each tool demo source code for its specific license.

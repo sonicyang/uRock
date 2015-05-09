@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -42,12 +42,14 @@
 #define GFX_USE_GINPUT			TRUE
 #define GFX_USE_GEVENT			TRUE
 #define GFX_USE_GTIMER			TRUE
+#define GFX_USE_GQUEUE			TRUE
 
 /* Features for the GDISP sub-system. */
 #define GDISP_NEED_VALIDATION	TRUE
 #define GDISP_NEED_CLIP			TRUE
 #define GDISP_NEED_CIRCLE		TRUE
 #define GDISP_NEED_TEXT			TRUE
+#define GDISP_NEED_MULTITHREAD	TRUE
 
 /* GDISP fonts to include */
 #define GDISP_INCLUDE_FONT_UI2	TRUE
@@ -56,9 +58,13 @@
 #define GWIN_NEED_WINDOWMANAGER	TRUE
 #define GWIN_NEED_WIDGET		TRUE
 #define GWIN_NEED_SLIDER		TRUE
+#define GWIN_NEED_CONSOLE		TRUE
 
 /* Features for the GINPUT subsystem. */
 #define GINPUT_NEED_MOUSE		TRUE
+
+/* Features for the GQUEUE subsystem. */
+#define GQUEUE_NEED_ASYNC		TRUE
 
 #endif /* _GFXCONF_H */
 

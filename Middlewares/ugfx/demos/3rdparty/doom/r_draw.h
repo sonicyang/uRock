@@ -52,7 +52,7 @@ void 	R_DrawFuzzColumnLow (void);
 
 // Draw with color translation tables,
 //  for player sprite rendering,
-//  Green/Red/Blue/Indigo shirts.
+//  uGreen/uRed/uBlue/Indigo shirts.
 void	R_DrawTranslatedColumn (void);
 void	R_DrawTranslatedColumnLow (void);
 

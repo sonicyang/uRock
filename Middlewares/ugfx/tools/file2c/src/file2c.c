@@ -168,7 +168,7 @@ size_t		i;
 		if (opt_inputfile)
 			opt_arrayname = basenameof(strcpy(tname, opt_inputfile));
 		if (!opt_arrayname || !opt_arrayname[0]) {
-			srand(time(NULL));
+			srand(time(0));
 			sprintf(tname, "filearray%u", rand());
 			opt_arrayname = tname;
 		}

@@ -9,7 +9,7 @@ static void _createWidget(void) {
 	wi.g.show = TRUE;
  
 	wi.g.y = 10; wi.g.x = 10; wi.g.width = 200; wi.g.height = 20; wi.text = "Progress 1";
-	ghProgressbar = gwinProgressbarCreate(NULL, &wi);
+	ghProgressbar = gwinProgressbarCreate(0, &wi);
 }
 
 int main(void) {

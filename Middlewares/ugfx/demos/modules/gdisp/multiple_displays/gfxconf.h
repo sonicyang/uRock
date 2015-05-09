@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -46,16 +46,20 @@
 
 #define GDISP_INCLUDE_FONT_UI2	TRUE
 
-#define GDISP_TOTAL_DISPLAYS	2
-
-/* Uncomment the following lines if you want to use multiple displays on
- * different controllers.
+/* You must either define GDISP_TOTAL_DISPLAYS or GDISP_DRIVER_LIST for multiple displays.
+ * You cannot define both!
  *
- * Change the definitions to suit your hardware.
- * Currently all controllers must use the same pixel format.
+ * Defining GDISP_TOTAL_DISPLAYS will create multiple instances of the one default driver.
+ * Defining GDISP_DRIVER_LIST allows you to specify multiple different drivers.
  *
- * Remember that GDISP_TOTAL_DISPLAYS above must match the **Total**
- * number of displays in your system across all controllers.
+ * Extra Notes for GDISP_DRIVER_LIST:
+ *-----------------------------------
+ *
+ * The same controller can appear more than once in the list.
+ *
+ * You must specify a GDISP_PIXELFORMAT that the application will work in. This
+ *   is translated into each drivers internal pixel format by the driver. You the
+ *   pixel format that is most common across your drivers (for efficiency).
  *
  * Optionally, you can also specify hardware characteristics that are common to
  * all your controllers. This significantly improves code and speed efficiency
@@ -72,9 +76,22 @@
  * 		#define GDISP_HARDWARE_DRAWPIXEL	TRUE
  * 		#define GDISP_HARDWARE_FILLS		TRUE
  */
-//#define GDISP_TOTAL_CONTROLLERS			2
-//#define GDISP_CONTROLLER_LIST				GDISPVMT_Win32, GDISPVMT_Win32
-//#define GDISP_CONTROLLER_DISPLAYS			1, 1
-//#define GDISP_PIXELFORMAT					GDISP_PIXELFORMAT_RGB888
+#if GFX_USE_OS_WIN32 || GFX_USE_OS_LINUX || GFX_USE_OS_OSX
+	// Emulator
+	#define GDISP_TOTAL_DISPLAYS    2
+
+	//#define GDISP_DRIVER_LIST     GDISPVMT_Win32, GDISPVMT_Win32
+	//#define GDISP_PIXELFORMAT     GDISP_PIXELFORMAT_RGB888
+
+#elif !defined(GDISP_TOTAL_DISPLAYS) && (!defined(GDISP_PIXELFORMAT) || !defined(GDISP_DRIVER_LIST))
+	#error "gfxconf.h: You have not defined multiple displays properly. Try defining GDISP_TOTAL_DISPLAY or, GDISP_PIXELFORMAT and GDISP_DRIVER_LIST in your makefile"
+#endif
+
+/*
+ * The following are needed only for the sprintg() call
+ */
+#define GFX_USE_GFILE						TRUE
+#define GFILE_NEED_PRINTG					TRUE
+#define GFILE_NEED_STRINGS					TRUE
 
 #endif /* _GFXCONF_H */

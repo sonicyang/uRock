@@ -1,198 +1,53 @@
-#
-#       !!!! Do NOT edit this makefile with an editor which replace tabs by spaces !!!!
-#
-##############################################################################################
-#
-# On command line:
-#
-# make all = Create project
-#
-# make clean = Clean project files.
-#
-# To rebuild project do "make clean" and "make all".
-#
+# Possible Targets:	all clean Debug cleanDebug Release cleanRelease
 
 ##############################################################################################
-# Start of default section
+# Settings
 #
 
-CC   = i686-pc-mingw32-gcc -g
+# General settings
+	# See $(GFXLIB)/tools/gmake_scripts/readme.txt for the list of variables
+	# For Win32 this variable can be set to "win32" (native win32 api) or "win32.chibios" (ChibiOS simulator). 
+	OPT_OS					= win32
+	OPT_LINK_OPTIMIZE		= yes
 
-# Turn ChibiOS simimulator on or off - uGFX doesn't need it but you might for other purposes.
-USE_CHIBIOS=no
+# uGFX settings
+	# See $(GFXLIB)/tools/gmake_scripts/library_ugfx.mk for the list of variables
+	GFXLIB					= ../uGFX
+	GFXBOARD				= Win32
+	GFXDEMO					= modules/gdisp/basics
 
-# List all default C defines here, like -D_DEBUG=1
-DDEFS =
+# ChibiOS settings
+ifeq ($(OPT_OS),win32.chibios)
+	# See $(GFXLIB)/tools/gmake_scripts/os_win32.chibios.mk for the list of variables
+	CHIBIOS					= ../ChibiOS
+endif
 
-# List all default directories to look for include files here
-DINCDIR =
-
-# List the default directory to look for the libraries here
-DLIBDIR =
-
-# List all default libraries here
-DLIBS = -lws2_32 -lgdi32 -lwinmm
-
-# Make sure this empty for now
-SRC = 
-
-#
-# End of default section
-##############################################################################################
+# Win32 settings
+	# See $(GFXLIB)/tools/gmake_scripts/os_win32.mk for the list of variables
 
 ##############################################################################################
-# Start of user section
+# Set these for your project
 #
 
-# Define project name here
-PROJECT = uGFX
+ARCH     = i686-pc-mingw32-
+SRCFLAGS = -ggdb -O0
+CFLAGS   =
+CXXFLAGS =
+ASFLAGS  =
+LDFLAGS  =
 
-# Imported source files and paths for uGFX
-GFXLIB = ../uGFX
-include $(GFXLIB)/gfx.mk
-include $(GFXLIB)/boards/base/Win32/board.mk
+SRC      =
+OBJS     =
+DEFS     =
+LIBS     =
+INCPATH  =
+LIBPATH  =
 
-# Imported source files and paths for ChibiOS
-ifeq ($(USE_CHIBIOS),yes)
-	CHIBIOS = ../ChibiOS
-	include $(CHIBIOS)/boards/simulator/board.mk
-	include ${CHIBIOS}/os/hal/hal.mk
-	include ${CHIBIOS}/os/hal/platforms/Win32/platform.mk
-	include ${CHIBIOS}/os/ports/GCC/SIMIA32/port.mk
-	include ${CHIBIOS}/os/kernel/kernel.mk
-	DDEFS += -DSIMULATOR -DSHELL_USE_IPRINTF=FALSE
-	UINCDIR += $(PORTINC) $(KERNINC) $(TESTINC) \
-	          $(HALINC) $(PLATFORMINC) $(BOARDINC)
-	#          ${CHIBIOS}/os/various
-	SRC  += ${PORTSRC} \
-	       ${KERNSRC} \
-	       ${TESTSRC} \
-	       ${HALSRC} \
-	       ${PLATFORMSRC} \
-	       $(BOARDSRC)
-	GFXDEFS += -DGFX_USE_OS_CHIBIOS=TRUE
-else
-	GFXDEFS += -DGFX_USE_OS_WIN32=TRUE
-endif
-
-# Where is our source code - alter these for your project.
-# Either just include the demo makefile or add your own definitions
-include $(GFXLIB)/demos/modules/gdisp/basics/demo.mk
-#MYFILES = my-project-directory
-#MYCSRC  = $(MYFILES)/main.c
-#MYDEFS  =
-
-# List C source files here
-SRC  += ${GFXSRC} \
-	   ${MYCSRC}
-
-# List all user C define here, like -D_DEBUG=1
-UDEFS = ${GFXDEFS}
-
-# List all user directories here
-UINCDIR = ${GFXINC} \
-		  ${MYFILES}
-
-# List the user directory to look for the libraries here
-ULIBDIR =
-
-# List all user libraries here
-ULIBS =
-
-# Define optimisation level here
-#OPT = -ggdb -O2 -fomit-frame-pointer
-OPT = -ggdb -O0 -fomit-frame-pointer
-
-#
-# End of user defines
 ##############################################################################################
-
-
-# Output directory and files
-ifeq ($(BUILDDIR),)
-  BUILDDIR = .build
-endif
-ifeq ($(BUILDDIR),.)
-  BUILDDIR = .build
-endif
-
-OBJDIR    = $(BUILDDIR)/obj
-LSTDIR    = $(BUILDDIR)/lst
-MAPDIR    = $(BUILDDIR)/map
-
-INCDIR  = $(patsubst %,-I%,$(DINCDIR) $(UINCDIR))
-LIBDIR  = $(patsubst %,-L%,$(DLIBDIR) $(ULIBDIR))
-DEFS    = $(DDEFS) $(UDEFS)
-ADEFS   = $(DADEFS) $(UADEFS)
-COBJ	= $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
-AOBJ	= $(addprefix $(OBJDIR)/, $(ASRC:.s=.o))
-OBJS    = $(AOBJ) $(COBJ)
-LIBS    = $(DLIBS) $(ULIBS)
-
-LDFLAGS = -Wl,-Map=$(MAPDIR)/$(PROJECT).map,--cref,--no-warn-mismatch $(LIBDIR)
-CPFLAGS = $(OPT) -Wall -Wextra -Wstrict-prototypes -fverbose-asm -Wa,-alms=$(LSTDIR)/$(<:.c=.lst) $(DEFS)
-
-# Generate dependency information
-CPFLAGS += -MD -MP -MF .dep/$(@F).d
-
-#
-# makefile rules
+# These should be at the end
 #
 
-all: $(BUILDDIR) $(OBJS) $(BUILDDIR)/$(PROJECT).exe MAKE_ALL_RULE_HOOK
-
-MAKE_ALL_RULE_HOOK:
-
-$(BUILDDIR) $(OBJDIR) $(LSTDIR):
-	mkdir -p $(OBJDIR)
-	mkdir -p $(LSTDIR)
-	mkdir -p $(MAPDIR)
-ifneq ($(USE_VERBOSE_COMPILE),yes)
-	@echo Compiler Options - $(CC) -c $(CPFLAGS) -I. $(INCDIR) main.c -o $(OBJDIR)/main.o
-	@echo
-endif
-
-$(OBJDIR)/%.o : %.c
-	@mkdir -p $(dir $@)
-ifeq ($(USE_VERBOSE_COMPILE),yes)
-	@echo
-	$(CC) -c $(CPFLAGS) -I. $(INCDIR) $< -o $@
-else
-	@echo Compiling $<
-	@$(CC) -c $(CPFLAGS) -I. $(INCDIR) $< -o $@
-endif
-
-$(OBJDIR)/%.o : %.s
-	@mkdir -p $(dir $@)
-ifeq ($(USE_VERBOSE_COMPILE),yes)
-	@echo
-	$(AS) -c $(ASFLAGS) -I. $(INCDIR) $< -o $@
-else
-	@echo Compiling $<
-	@$(AS) -c $(ASFLAGS) -I. $(INCDIR) $< -o $@
-endif
-
-%.exe: $(OBJS)
-ifeq ($(USE_VERBOSE_COMPILE),yes)
-	@echo
-	$(CC) $(OBJS) $(LDFLAGS) $(LIBS) -o $@
-else
-	@echo Linking $@
-	@$(CC) $(OBJS) $(LDFLAGS) $(LIBS) -o $@
-endif
-
-gcov:
-	-mkdir gcov
-	$(COV) -u $(subst /,\,$(SRC))
-	-mv *.gcov ./gcov
-
-clean:
-	-rm -fR .build
-	-rm -fR .dep
-
-#
-# Include the dependency files, should be the last of the makefile
-#
--include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
-
+include $(GFXLIB)/tools/gmake_scripts/library_ugfx.mk
+include $(GFXLIB)/tools/gmake_scripts/os_$(OPT_OS).mk
+include $(GFXLIB)/tools/gmake_scripts/compiler_gcc.mk
 # *** EOF ***

@@ -37,7 +37,6 @@ static volatile AT91PS_PIO pPIOA = AT91C_BASE_PIOA;
 static volatile AT91PS_PIO pPIOB = AT91C_BASE_PIOB;
 static volatile AT91PS_SPI pSPI = AT91C_BASE_SPI0;
 static volatile AT91PS_PMC pPMC = AT91C_BASE_PMC;
-static volatile AT91PS_PDC pPDC = AT91C_BASE_PDC_SPI0;
 
 /* The PWM backlight control is non-linear on this board.
  * We pick values here that make it look a bit more linear.
@@ -100,9 +99,7 @@ static inline void init_board(GDisplay *g) {
 		pPIOA->PIO_SODR   = PIOA_LCD_RESET_MASK;     // Set PA2 to HIGH
 		pPIOA->PIO_OER    = PIOA_LCD_RESET_MASK;     // Configure PA2 as output
 
-		// CS pin - this seems to be ignored
-		// pPIOA->PIO_SODR   = 1<<12;     // Set PA2 to HIGH
-		// pPIOA->PIO_OER    = 1<<12;     // Configure PA2 as output
+		// CS pin - this is driven automatically by the SPI hardware itself
 
 		// Init SPI0
 		// Disable the following pins from PIO control (will be used instead by the SPI0 peripheral)
@@ -112,16 +109,16 @@ static inline void init_board(GDisplay *g) {
 		// BIT18 = PA18 -> SPI0_SPCK Serial Clock (to LCD slave)
 		pPIOA->PIO_PDR = (1<<12) | (1<<16) | (1<<17) | (1<<18);
 		pPIOA->PIO_ASR = (1<<12) | (1<<16) | (1<<17) | (1<<18);
-		pPIOA->PIO_BSR = 0;
 
 		//enable the clock of SPI
 		pPMC->PMC_PCER = 1 << AT91C_ID_SPI0;
 
 		// Fixed mode
 		pSPI->SPI_CR      = 0x81;               //SPI Enable, Software reset
+		pSPI->SPI_CR      = 0x81;               //SPI Enable, Software reset - 2nd write as per errata
 		pSPI->SPI_CR      = 0x01;               //SPI Enable
-		pSPI->SPI_MR      = 0xE0011;			//Master mode, fixed select, disable decoder, PCS=1110
-		pSPI->SPI_CSR[0]  = 0x01010311;			//9bit, CPOL=1, ClockPhase=0, SCLK = 48Mhz/3 = 16MHz
+		pSPI->SPI_MR      = 0x000E0011;			//Master mode, fixed select, disable decoder, PCS=1110
+		pSPI->SPI_CSR[0]  = 0x00000311;			//9bit, CPOL=1, ClockPhase=0, SCLK = 48Mhz/3 = 16MHz
 
 		/* Display backlight control at 100% */
 		pwmRunning = FALSE;
@@ -178,16 +175,16 @@ static inline void release_bus(GDisplay *g) {
 
 static inline void write_index(GDisplay *g, uint16_t index) {
 	(void) g;
-	// wait for the previous transfer to complete
-	while((pSPI->SPI_SR & AT91C_SPI_TXEMPTY) == 0);
+	// wait for the previous transfer to start
+	while(!(pSPI->SPI_SR & AT91C_SPI_TDRE));
 	// send the command
 	pSPI->SPI_TDR = index & 0xFF;
 }
 
 static inline void write_data(GDisplay *g, uint16_t data) {
 	(void) g;
-	// wait for the previous transfer to complete
-	while((pSPI->SPI_SR & AT91C_SPI_TXEMPTY) == 0);
+	// wait for the previous transfer to start
+	while(!(pSPI->SPI_SR & AT91C_SPI_TDRE));
 	// send the data
 	pSPI->SPI_TDR = data | 0x0100;
 }

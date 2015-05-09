@@ -5,11 +5,6 @@
  *              http://ugfx.org/license.html
  */
 
-/**
- * @file    boards/base/Mikromedia-STM32-M4-ILI9341/board_ILI9341.h
- * @brief   GDISP Graphics Driver subsystem low level driver source for the ILI9341 display.
- */
-
 #ifndef _GDISP_LLD_BOARD_H
 #define _GDISP_LLD_BOARD_H
 

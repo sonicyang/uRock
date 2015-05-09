@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -41,10 +41,10 @@ int main(void) {
 
     // Code Here
 	gdispFillArc(width/2, height/2, width/4, -10, -45, White);
-	gdispDrawCircle(width/2+width/8, height/2-height/8, 13, Green);
-	gdispFillCircle (width/2+width/8, height/2-height/8, 10, Red);
+	gdispDrawCircle(width/2+width/8, height/2-height/8, 13, uGreen);
+	gdispFillCircle (width/2+width/8, height/2-height/8, 10, uRed);
 	gdispDrawArc(width/2+width/8, height/2-height/8, 20, 25, 115, Gray);
-	gdispFillEllipse (width-width/6, height-height/6, width/8, height/16, Blue);
+	gdispFillEllipse (width-width/6, height-height/6, width/8, height/16, uBlue);
 	gdispDrawEllipse (width-width/6, height-height/6, width/16, height/8, Yellow);
 
     while(TRUE) {

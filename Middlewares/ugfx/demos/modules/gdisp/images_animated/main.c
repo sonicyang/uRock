@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -48,8 +48,8 @@ static gdispImage myImage;
  * file encoded in flash.
  * To show the various stages of encoding it displays a colored bar down the
  * right hand side of the display to indicate what is happenning.
- * Green	- Image has completed and is displayed correctly
- * Red		- A really bad image fault. We couldn't open the image
+ * uGreen	- Image has completed and is displayed correctly
+ * uRed		- A really bad image fault. We couldn't open the image
  * Yellow	- Waiting to decode the next animation frame
  * Orange	- Decoding a frame has produced an error.
  */
@@ -90,7 +90,7 @@ int main(void) {
 			}
 			delay = gdispImageNext(&myImage);
 			if (delay == TIME_INFINITE) {
-				SHOW_ERROR(Green);
+				SHOW_ERROR(uGreen);
 				break;
 			}
 			SHOW_ERROR(Yellow);
@@ -99,7 +99,7 @@ int main(void) {
 		}
 		gdispImageClose(&myImage);
 	} else
-		SHOW_ERROR(Red);
+		SHOW_ERROR(uRed);
 
 	while(1) {
 		gfxSleepMilliseconds(1000);

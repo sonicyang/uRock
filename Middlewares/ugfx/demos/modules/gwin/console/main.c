@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -62,12 +62,12 @@ int main(void) {
 	gwinSetFont(GW1, font2);
 
 	/* Set the fore- and background colors for each console */
-	gwinSetColor(GW1, Green);
+	gwinSetColor(GW1, uGreen);
 	gwinSetBgColor(GW1, Black);
 	gwinSetColor(GW2, White);
-	gwinSetBgColor(GW2, Blue);
+	gwinSetBgColor(GW2, uBlue);
 	gwinSetColor(GW3, Black);
-	gwinSetBgColor(GW3, Red);
+	gwinSetBgColor(GW3, uRed);
 
 	/* clear all console windows - to set background */
 	gwinClear(GW1);

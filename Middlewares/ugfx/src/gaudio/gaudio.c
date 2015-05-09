@@ -5,19 +5,12 @@
  *              http://ugfx.org/license.html
  */
 
-/**
- * @file    src/gaudio/gaudio.c
- * @brief   GAUDIO sub-system code.
- *
- * @addtogroup GAUDIO
- * @{
- */
 #include "gfx.h"
 
 #if GFX_USE_GAUDIO
 
 #if GAUDIO_NEED_PLAY
-	#include "src/gaudio/driver_play.h"
+	#include "gaudio_driver_play.h"
 
 	static gfxQueueASync	playList;
 	static gfxSem			playComplete;
@@ -32,7 +25,7 @@
 #endif
 
 #if GAUDIO_NEED_RECORD
-	#include "src/gaudio/driver_record.h"
+	#include "gaudio_driver_record.h"
 
 	static gfxQueueGSync	recordList;
 	static uint16_t			recordFlags;
@@ -280,4 +273,3 @@ void _gaudioDeinit(void)
 #endif
 
 #endif /* GFX_USE_GAUDIO */
-/** @} */

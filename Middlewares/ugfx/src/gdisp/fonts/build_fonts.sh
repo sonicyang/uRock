@@ -50,10 +50,12 @@ rm -f *.c
 build DejaVuSans.ttf DejaVuSans10 bwfont 10 bw
 build DejaVuSans.ttf DejaVuSans12 bwfont 12 bw
 build DejaVuSans.ttf DejaVuSans16 rlefont 16 bw
+build DejaVuSans.ttf DejaVuSans20 rlefont 20 bw
 build DejaVuSans.ttf DejaVuSans24 rlefont 24 bw
 build DejaVuSans.ttf DejaVuSans32 rlefont 32 bw
 build DejaVuSans.ttf DejaVuSans12_aa rlefont 12
 build DejaVuSans.ttf DejaVuSans16_aa rlefont 16
+build DejaVuSans.ttf DejaVuSans20_aa rlefont 20
 build DejaVuSans.ttf DejaVuSans24_aa rlefont 24
 build DejaVuSans.ttf DejaVuSans32_aa rlefont 32
 build DejaVuSans-Bold.ttf DejaVuSansBold12 bwfont 12 bw
@@ -63,8 +65,7 @@ build fixed_10x20.bdf fixed_10x20 bwfont
 build fixed_7x14.bdf fixed_7x14 bwfont
 build fixed_5x8.bdf fixed_5x8 bwfont
 
-echo > fonts.h
-echo '#include <gfx.h>' >> fonts.h
+echo '#include "gfx.h"' > fonts.h
 for file in *.c; do
 	echo >> fonts.h
 	noext="${file%.*}"
@@ -72,7 +73,7 @@ for file in *.c; do
 	defname='GDISP_INCLUDE_FONT_'$upper
 	echo '#if defined('$defname') && '$defname >> fonts.h
 	echo '#define GDISP_FONT_FOUND' >> fonts.h
-	echo '#include "src/gdisp/fonts/'$file'"' >> fonts.h
+	echo '#include "'$file'"' >> fonts.h
 	echo '#endif' >> fonts.h
 done
 

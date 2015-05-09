@@ -100,9 +100,7 @@ static inline void init_board(GDisplay *g) {
 		pPIOA->PIO_SODR   = PIOA_LCD_RESET_MASK;     // Set PA2 to HIGH
 		pPIOA->PIO_OER    = PIOA_LCD_RESET_MASK;     // Configure PA2 as output
 
-		// CS pin - this seems to be ignored
-		// pPIOA->PIO_SODR   = 1<<12;     // Set PA2 to HIGH
-		// pPIOA->PIO_OER    = 1<<12;     // Configure PA2 as output
+		// CS pin - this is driven automatically by the SPI hardware itself
 
 		// Init SPI0
 		// Disable the following pins from PIO control (will be used instead by the SPI0 peripheral)
@@ -119,6 +117,7 @@ static inline void init_board(GDisplay *g) {
 
 		// Fixed mode
 		pSPI->SPI_CR      = 0x81;               //SPI Enable, Software reset
+		pSPI->SPI_CR      = 0x81;               //SPI Enable, Software reset - 2nd write as per errata
 		pSPI->SPI_CR      = 0x01;               //SPI Enable
 		pSPI->SPI_MR      = 0xE0011;			//Master mode, fixed select, disable decoder, PCS=1110
 		pSPI->SPI_CSR[0]  = 0x01010311;			//9bit, CPOL=1, ClockPhase=0, SCLK = 48Mhz/3 = 16MHz
@@ -179,7 +178,7 @@ static inline void release_bus(GDisplay *g) {
 static inline void write_index(GDisplay *g, uint16_t index) {
 	(void) g;
 	// wait for the previous transfer to complete
-	while((pSPI->SPI_SR & AT91C_SPI_TXEMPTY) == 0);
+	while(!(pSPI->SPI_SR & AT91C_SPI_TDRE));
 	// send the command
 	pSPI->SPI_TDR = index & 0xFF;
 }
@@ -187,7 +186,7 @@ static inline void write_index(GDisplay *g, uint16_t index) {
 static inline void write_data(GDisplay *g, uint16_t data) {
 	(void) g;
 	// wait for the previous transfer to complete
-	while((pSPI->SPI_SR & AT91C_SPI_TXEMPTY) == 0);
+	while(!(pSPI->SPI_SR & AT91C_SPI_TDRE));
 	// send the data
 	pSPI->SPI_TDR = data | 0x0100;
 }

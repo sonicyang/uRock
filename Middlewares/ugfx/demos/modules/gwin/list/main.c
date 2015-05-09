@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -43,12 +43,12 @@ static void createWidgets(void) {
 	// Create the label for the first list
 	wi.g.width = 150; wi.g.height = 20; wi.g.x = 10, wi.g.y = 80;
 	wi.text = "List 1: Default";
-	ghLabel1 = gwinLabelCreate(NULL, &wi);
+	ghLabel1 = gwinLabelCreate(0, &wi);
 
 	// Create the label for the second list
 	wi.g.width = 150; wi.g.height = 20; wi.g.x = 165, wi.g.y = 80;
 	wi.text = "List 2: Smooth scrolling";
-	ghLabel1 = gwinLabelCreate(NULL, &wi);
+	ghLabel1 = gwinLabelCreate(0, &wi);
 
 	// The first list widget
 	wi.g.width = 150;
@@ -78,9 +78,6 @@ int main(void) {
 	gwinSetDefaultFont(gdispOpenFont("UI2"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
 	gdispClear(White);
-
-	// Attach the mouse input
-	gwinAttachMouse(0);
 
 	// create the widget
 	createWidgets();

@@ -113,6 +113,8 @@ static inline void setwritemode(GDisplay *g)
 }
 
 static inline uint16_t read_data(GDisplay *g) {
+	(void) g;
+
 	return palReadPort(GPIOE);
 }
 

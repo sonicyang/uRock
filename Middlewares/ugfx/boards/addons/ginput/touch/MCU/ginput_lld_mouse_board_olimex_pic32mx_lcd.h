@@ -16,6 +16,24 @@
 #ifndef _GINPUT_LLD_MOUSE_BOARD_H
 #define _GINPUT_LLD_MOUSE_BOARD_H
 
+#define ADC_MAX 1023
+
+// Resolution and Accuracy Settings
+#define GMOUSE_MCU_PEN_CALIBRATE_ERROR		8
+#define GMOUSE_MCU_PEN_CLICK_ERROR			6
+#define GMOUSE_MCU_PEN_MOVE_ERROR			4
+#define GMOUSE_MCU_FINGER_CALIBRATE_ERROR	14
+#define GMOUSE_MCU_FINGER_CLICK_ERROR		18
+#define GMOUSE_MCU_FINGER_MOVE_ERROR		14
+
+#define GMOUSE_MCU_Z_MIN					0			// The minimum Z reading
+#define GMOUSE_MCU_Z_MAX					ADC_MAX		// The maximum Z reading
+#define GMOUSE_MCU_Z_TOUCHON				60			// Values between this and Z_MAX are definitely pressed
+#define GMOUSE_MCU_Z_TOUCHOFF				30			// Values between this and Z_MIN are definitely not pressed
+
+// How much extra data to allocate at the end of the GMouse structure for the board's use
+#define GMOUSE_MCU_BOARD_DATA_SIZE			0
+
 static const ADCConfig ADCC = {
   .vref = ADC_VREF_CFG_AVDD_AVSS,
   .stime = 15,
@@ -29,10 +47,6 @@ static struct ADCDriver ADCD;
 #define XPOS 12 // L
 #define YPOS 11 // D
 
-#define ADC_MAX 1023
-
-#define TOUCH_THRESHOULD 50
-
 static const ADCConversionGroup ADC_X_CG = {
   .circular = FALSE,
   .num_channels = 1,
@@ -45,104 +59,59 @@ static const ADCConversionGroup ADC_Y_CG = {
   .channels = 1 << YPOS,
 };
 
-/**
- * @brief   Initialise the board for the touch.
- *
- * @notapi
- */
-static inline void init_board(void) {
-  adcObjectInit(&ADCD);
-  adcStart(&ADCD, &ADCC);
+static bool_t init_board(GMouse *m, unsigned driverinstance) {
+	(void)	m;
+
+	if (driverinstance)
+		return FALSE;
+
+	adcObjectInit(&ADCD);
+	adcStart(&ADCD, &ADCC);
+	return TRUE;
 }
 
-/**
- * @brief   Check whether the surface is currently touched
- * @return	TRUE if the surface is currently touched
- *
- * @notapi
- */
-static inline bool_t getpin_pressed(void) {
-  adcsample_t samples[2] = {0, };
+static bool_t read_xyz(GMouse *m, GMouseReading *prd) {
+	adcsample_t samples[2];
 
-  // Set X+ to ground
-  palSetPadMode(IOPORTB, XPOS, PAL_MODE_OUTPUT);
-  palClearPad(IOPORTB, XPOS);
+	prd->buttons = 0;
 
-  // Set Y- to VCC
-  palSetPadMode(IOPORTB, YNEG, PAL_MODE_OUTPUT);
-  palSetPad(IOPORTB, YNEG);
+	// Read the z value first.
+	// Set X+ to ground and Y- to VCC
+	palSetPadMode(IOPORTB, XPOS, PAL_MODE_OUTPUT);
+	palClearPad(IOPORTB, XPOS);
+	palSetPadMode(IOPORTB, YNEG, PAL_MODE_OUTPUT);
+	palSetPad(IOPORTB, YNEG);
+	palSetPadMode(IOPORTB, XNEG, PAL_MODE_INPUT_ANALOG);
+	palSetPadMode(IOPORTB, YPOS, PAL_MODE_INPUT_ANALOG);
+	adcConvert(&ADCD, &ADC_X_CG, &samples[0], 1);
+	adcConvert(&ADCD, &ADC_Y_CG, &samples[1], 1);
+	pdr->z = ADC_MAX - (samples[1] - samples[0]);
 
-  palSetPadMode(IOPORTB, XNEG, PAL_MODE_INPUT_ANALOG);
-  palSetPadMode(IOPORTB, YPOS, PAL_MODE_INPUT_ANALOG);
+	// Shortcut - no need to read X or Y if the touch is off.
+	if (pdr->z < GMOUSE_MCU_Z_TOUCHON)
+		return TRUE;
 
-  adcConvert(&ADCD, &ADC_X_CG, &samples[0], 1);
-  adcConvert(&ADCD, &ADC_Y_CG, &samples[1], 1);
+	// Read X
+	palSetPadMode(IOPORTB, XPOS, PAL_MODE_OUTPUT);
+	palSetPad(IOPORTB, XPOS);
+	palSetPadMode(IOPORTB, XNEG, PAL_MODE_OUTPUT);
+	palClearPad(IOPORTB, XNEG);
+	palSetPadMode(IOPORTB, YNEG, PAL_MODE_INPUT);
+	palSetPadMode(IOPORTB, YPOS, PAL_MODE_INPUT_ANALOG);
+	adcConvert(&ADCD, &ADC_Y_CG, &samples[0], 1);
+	pdr->x = ADC_MAX - samples[0];
 
-  return (ADC_MAX - (samples[1] - samples[0])) > TOUCH_THRESHOULD;
-}
+	// Read Y
+	palSetPadMode(IOPORTB, YNEG, PAL_MODE_OUTPUT);
+	palClearPad(IOPORTB, YNEG);
+	palSetPadMode(IOPORTB, YPOS, PAL_MODE_OUTPUT);
+	palSetPad(IOPORTB, YPOS);
+	palSetPadMode(IOPORTB, XPOS, PAL_MODE_INPUT);
+	palSetPadMode(IOPORTB, XNEG, PAL_MODE_INPUT_ANALOG);
+	adcConvert(&ADCD, &ADC_X_CG, &samples[0], 1);
+	pdr->y = ADC_MAX - samples[0];
 
-/**
- * @brief   Aquire the bus ready for readings
- *
- * @notapi
- */
-static inline void aquire_bus(void) {
-}
-
-/**
- * @brief   Release the bus after readings
- *
- * @notapi
- */
-static inline void release_bus(void) {
-}
-
-/**
- * @brief   Read an x value from touch controller
- * @return	The value read from the controller
- *
- * @notapi
- */
-static inline uint16_t read_x_value(void) {
-  adcsample_t sample;
-
-  palSetPadMode(IOPORTB, XPOS, PAL_MODE_OUTPUT);
-  palSetPad(IOPORTB, XPOS);
-
-  palSetPadMode(IOPORTB, XNEG, PAL_MODE_OUTPUT);
-  palClearPad(IOPORTB, XNEG);
-
-  palSetPadMode(IOPORTB, YNEG, PAL_MODE_INPUT);
-
-  palSetPadMode(IOPORTB, YPOS, PAL_MODE_INPUT_ANALOG);
-
-  adcConvert(&ADCD, &ADC_Y_CG, &sample, 1);
-
-  return ADC_MAX - sample;
-}
-
-/**
- * @brief   Read an y value from touch controller
- * @return	The value read from the controller
- *
- * @notapi
- */
-static inline uint16_t read_y_value(void) {
-  adcsample_t sample;
-
-  palSetPadMode(IOPORTB, YNEG, PAL_MODE_OUTPUT);
-  palClearPad(IOPORTB, YNEG);
-
-  palSetPadMode(IOPORTB, YPOS, PAL_MODE_OUTPUT);
-  palSetPad(IOPORTB, YPOS);
-
-  palSetPadMode(IOPORTB, XPOS, PAL_MODE_INPUT);
-
-  palSetPadMode(IOPORTB, XNEG, PAL_MODE_INPUT_ANALOG);
-
-  adcConvert(&ADCD, &ADC_X_CG, &sample, 1);
-
-  return ADC_MAX - sample;
+	return TRUE;
 }
 
 #endif /* _GINPUT_LLD_MOUSE_BOARD_H */

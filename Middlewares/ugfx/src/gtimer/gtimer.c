@@ -5,13 +5,6 @@
  *              http://ugfx.org/license.html
  */
 
-/**
- * @file    src/gtimer/gtimer.c
- * @brief   GTIMER sub-system code.
- *
- * @addtogroup GTIMER
- * @{
- */
 #include "gfx.h"
 
 #if GFX_USE_GTIMER || defined(__DOXYGEN__)
@@ -115,7 +108,7 @@ static DECLARE_THREAD_FUNCTION(GTimerThreadHandler, arg) {
 		lastTime = tm;
 		gfxMutexExit(&mutex);
 	}
-	return ;
+	return 0;
 }
 
 void _gtimerInit(void)
@@ -196,7 +189,7 @@ void gtimerStop(GTimer *pt) {
 	gfxMutexEnter(&mutex);
 	if (pt->flags & GTIMER_FLG_SCHEDULED) {
 		// Cancel it!
-		if (pt->next == pt->prev)
+		if (pt->next == pt)
 			pTimerHead = 0;
 		else {
 			pt->next->prev = pt->prev;
@@ -234,5 +227,3 @@ void gtimerJabI(GTimer *pt) {
 }
 
 #endif /* GFX_USE_GTIMER */
-/** @} */
-

@@ -309,10 +309,10 @@
 // The following should NOT be changed unless it seems
 // just AWFULLY necessary
 
-#define HUSTR_PLRGREEN	"Green: "
+#define HUSTR_PLRGREEN	"uGreen: "
 #define HUSTR_PLRINDIGO	"Indigo: "
 #define HUSTR_PLRBROWN	"Brown: "
-#define HUSTR_PLRRED		"Red: "
+#define HUSTR_PLRRED		"uRed: "
 
 #define HUSTR_KEYGREEN	'g'
 #define HUSTR_KEYINDIGO	'i'

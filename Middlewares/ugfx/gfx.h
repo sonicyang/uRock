@@ -59,6 +59,14 @@
  * @{
  */
 	/**
+	 * @brief   GFX Driver API
+	 * @details	Defaults to TRUE
+	 * @note	Not much useful can be done without a driver
+	 */
+	#ifndef GFX_USE_GDRIVER
+		#define GFX_USE_GDRIVER	TRUE
+	#endif
+	/**
 	 * @brief   GFX Graphics Display Basic API
 	 * @details	Defaults to FALSE
 	 * @note	Also add the specific hardware driver to your makefile.
@@ -153,17 +161,18 @@
  * Get all the options for each sub-system.
  *
  */
-#include "src/gos/sys_options.h"
-#include "src/gfile/sys_options.h"
-#include "src/gmisc/sys_options.h"
-#include "src/gqueue/sys_options.h"
-#include "src/gevent/sys_options.h"
-#include "src/gtimer/sys_options.h"
-#include "src/gdisp/sys_options.h"
-#include "src/gwin/sys_options.h"
-#include "src/ginput/sys_options.h"
-#include "src/gadc/sys_options.h"
-#include "src/gaudio/sys_options.h"
+#include "src/gos/gos_options.h"
+#include "src/gdriver/gdriver_options.h"
+#include "src/gfile/gfile_options.h"
+#include "src/gmisc/gmisc_options.h"
+#include "src/gqueue/gqueue_options.h"
+#include "src/gevent/gevent_options.h"
+#include "src/gtimer/gtimer_options.h"
+#include "src/gdisp/gdisp_options.h"
+#include "src/gwin/gwin_options.h"
+#include "src/ginput/ginput_options.h"
+#include "src/gadc/gadc_options.h"
+#include "src/gaudio/gaudio_options.h"
 
 /**
  * Interdependency safety checks on the sub-systems.
@@ -173,32 +182,34 @@
 #ifndef GFX_DISPLAY_RULE_WARNINGS
 	#define GFX_DISPLAY_RULE_WARNINGS	FALSE
 #endif
-#include "src/gwin/sys_rules.h"
-#include "src/ginput/sys_rules.h"
-#include "src/gdisp/sys_rules.h"
-#include "src/gaudio/sys_rules.h"
-#include "src/gadc/sys_rules.h"
-#include "src/gevent/sys_rules.h"
-#include "src/gtimer/sys_rules.h"
-#include "src/gqueue/sys_rules.h"
-#include "src/gmisc/sys_rules.h"
-#include "src/gfile/sys_rules.h"
-#include "src/gos/sys_rules.h"
+#include "src/gwin/gwin_rules.h"
+#include "src/ginput/ginput_rules.h"
+#include "src/gdisp/gdisp_rules.h"
+#include "src/gaudio/gaudio_rules.h"
+#include "src/gadc/gadc_rules.h"
+#include "src/gevent/gevent_rules.h"
+#include "src/gtimer/gtimer_rules.h"
+#include "src/gqueue/gqueue_rules.h"
+#include "src/gmisc/gmisc_rules.h"
+#include "src/gfile/gfile_rules.h"
+#include "src/gdriver/gdriver_rules.h"
+#include "src/gos/gos_rules.h"
 
 /**
  *  Include the sub-system header files
  */
-#include "src/gos/sys_defs.h"
-#include "src/gfile/sys_defs.h"
-#include "src/gmisc/sys_defs.h"
-#include "src/gqueue/sys_defs.h"
-#include "src/gevent/sys_defs.h"
-#include "src/gtimer/sys_defs.h"
-#include "src/gdisp/sys_defs.h"
-#include "src/gwin/sys_defs.h"
-#include "src/ginput/sys_defs.h"
-#include "src/gadc/sys_defs.h"
-#include "src/gaudio/sys_defs.h"
+#include "src/gos/gos.h"
+//#include "src/gdriver/gdriver.h"			// This module is only included by source that needs it.
+#include "src/gfile/gfile.h"
+#include "src/gmisc/gmisc.h"
+#include "src/gqueue/gqueue.h"
+#include "src/gevent/gevent.h"
+#include "src/gtimer/gtimer.h"
+#include "src/gdisp/gdisp.h"
+#include "src/gwin/gwin.h"
+#include "src/ginput/ginput.h"
+#include "src/gadc/gadc.h"
+#include "src/gaudio/gaudio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -210,6 +221,14 @@ extern "C" {
 	 * @note	This will initialise each sub-system that has been turned on.
 	 * 			For example, if GFX_USE_GDISP is defined then display will be initialised
 	 * 			and cleared to black.
+	 * @note	If you define GFX_NO_OS_INIT as TRUE in your gfxconf.h file then ugfx doesn't try to
+	 * 			initialise the operating system for you when you call @p gfxInit().
+	 * @note	If you define GFX_OS_EXTRA_INIT_FUNCTION in your gfxconf.h file the macro is the
+	 * 			name of a void function with no parameters that is called immediately after
+	 * 			operating system initialisation (whether or not GFX_NO_OS_INIT is set).
+	 * @note	If you define GFX_OS_EXTRA_DEINIT_FUNCTION in your gfxconf.h file the macro is the
+	 * 			name of a void function with no parameters that is called immediately before
+	 * 			operating system de-initialisation (as ugfx is exiting).
 	 *
 	 * @api
 	 */

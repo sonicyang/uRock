@@ -25,16 +25,17 @@
 
 /* PWM configuration structure. We use timer 3 channel 3 */
 static const PWMConfig pwmcfg = {
-  100000,       /* 100 kHz PWM clock frequency. */
-  100,          /* PWM period is 100 cycles. */
-  0,
-  {
-   {PWM_OUTPUT_DISABLED, 0},
-   {PWM_OUTPUT_DISABLED, 0},
-   {PWM_OUTPUT_ACTIVE_HIGH, 0},
-   {PWM_OUTPUT_DISABLED, 0}
-  },
-  0
+	100000,       /* 100 kHz PWM clock frequency. */
+	100,          /* PWM period is 100 cycles. */
+	0,
+	{
+		{PWM_OUTPUT_DISABLED, 0},
+		{PWM_OUTPUT_DISABLED, 0},
+		{PWM_OUTPUT_ACTIVE_HIGH, 0},
+		{PWM_OUTPUT_DISABLED, 0}
+	},
+	0,
+	0
 };
 
 static inline void init_board(GDisplay *g) {

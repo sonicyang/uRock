@@ -16,6 +16,14 @@
 #ifndef _GINPUT_LLD_MOUSE_BOARD_H
 #define _GINPUT_LLD_MOUSE_BOARD_H
 
+// Resolution and Accuracy Settings
+#define GMOUSE_ADS7843_PEN_CALIBRATE_ERROR		8
+#define GMOUSE_ADS7843_PEN_CLICK_ERROR			6
+#define GMOUSE_ADS7843_PEN_MOVE_ERROR			4
+#define GMOUSE_ADS7843_FINGER_CALIBRATE_ERROR	14
+#define GMOUSE_ADS7843_FINGER_CLICK_ERROR		18
+#define GMOUSE_ADS7843_FINGER_MOVE_ERROR		14
+
 static const SPIConfig spicfg = { 
     0,
 	GPIOG, 
@@ -23,67 +31,49 @@ static const SPIConfig spicfg = {
     /* SPI_CR1_BR_2 |*/ SPI_CR1_BR_1 | SPI_CR1_BR_0,
 };
 
-/**
- * @brief   Initialise the board for the touch.
- *
- * @notapi
- */
-static inline void init_board(void) {
+// How much extra data to allocate at the end of the GMouse structure for the board's use
+#define GMOUSE_ADS7843_BOARD_DATA_SIZE			0
+
+static bool_t init_board(GMouse* m, unsigned driverinstance) {
+	(void)		m;
+
+	if (driverinstance)
+		return FALSE;
+
 	spiStart(&SPID2, &spicfg);
+	return TRUE;
 }
 
-/**
- * @brief   Check whether the surface is currently touched
- * @return	TRUE if the surface is currently touched
- *
- * @notapi
- */
-static inline bool_t getpin_pressed(void) {
+static inline bool_t getpin_pressed(GMouse* m) {
+	(void)		m;
+
 	return (!palReadPad(GPIOG, 0));
 }
-/**
- * @brief   Aquire the bus ready for readings
- *
- * @notapi
- */
-static inline void aquire_bus(void) {
+
+static inline void aquire_bus(GMouse* m) {
+	(void)		m;
+
 	spiAcquireBus(&SPID2);
     //TOUCHSCREEN_SPI_PROLOGUE();
     palClearPad(GPIOG, 10);
 }
 
-/**
- * @brief   Release the bus after readings
- *
- * @notapi
- */
-static inline void release_bus(void) {
+static inline void release_bus(GMouse* m) {
+	(void)		m;
+
 	palSetPad(GPIOG, 10);
 	spiReleaseBus(&SPID2);
     //TOUCHSCREEN_SPI_EPILOGUE();
 }
 
-/**
- * @brief   Read a value from touch controller
- * @return	The value read from the controller
- *
- * params[in] port	The controller port to read.
- *
- * @notapi
- */
-static inline uint16_t read_value(uint16_t port) {
+static inline uint16_t read_value(GMouse* m, uint16_t port) {
     static uint8_t txbuf[3] = {0};
     static uint8_t rxbuf[3] = {0};
-    uint16_t ret;
+	(void)		m;
 
     txbuf[0] = port;
-
     spiExchange(&SPID2, 3, txbuf, rxbuf);
-
-    ret = (rxbuf[1] << 5) | (rxbuf[2] >> 3); 
-    
-	return ret;
+    return ((uint16_t)rxbuf[1] << 5) | (rxbuf[2] >> 3);
 }
 
 #endif /* _GINPUT_LLD_MOUSE_BOARD_H */
-

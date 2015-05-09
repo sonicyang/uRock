@@ -29,8 +29,8 @@
  * the PWM frequency should be somewhere between 200 Hz to 200 kHz.
  */
 static const PWMConfig pwmcfg = {
-	1000000,       /* 1 MHz PWM clock frequency. */
-	100,           /* PWM period is 100 cycles. */
+	20000,			/* 20 KHz PWM clock frequency. */
+	100,			/* PWM period is 100 cycles. */
 	0,
 	{
 		{PWM_OUTPUT_ACTIVE_HIGH, 0},
@@ -38,6 +38,7 @@ static const PWMConfig pwmcfg = {
 		{PWM_OUTPUT_ACTIVE_HIGH, 0},
 		{PWM_OUTPUT_ACTIVE_HIGH, 0}
 	},
+	0,
 	0
 };
 
@@ -74,8 +75,11 @@ static inline void init_board(GDisplay *g) {
 		palSetBusMode(&busE, PAL_MODE_ALTERNATE(12));
 
 		/* FSMC timing register configuration */
-		FSMC_Bank1->BTCR[0 + 1] = (FSMC_BTR1_ADDSET_2 | FSMC_BTR1_ADDSET_1) \
-				| (FSMC_BTR1_DATAST_2 | FSMC_BTR1_DATAST_1) \
+//		FSMC_Bank1->BTCR[0 + 1] = (FSMC_BTR1_ADDSET_2 | FSMC_BTR1_ADDSET_1) \
+//				| (FSMC_BTR1_DATAST_2 | FSMC_BTR1_DATAST_1) \
+//				| FSMC_BTR1_BUSTURN_0;
+		FSMC_Bank1->BTCR[0 + 1] = (FSMC_BTR1_ADDSET_3 | FSMC_BTR1_ADDSET_0) \
+				| (FSMC_BTR1_DATAST_3 | FSMC_BTR1_DATAST_0) \
 				| FSMC_BTR1_BUSTURN_0;
 
 		/* Bank1 NOR/PSRAM control register configuration

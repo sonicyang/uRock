@@ -4,11 +4,11 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * uRedistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
+ *    * uRedistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
+ *    * uRedistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of the <organization> nor the
@@ -36,21 +36,19 @@ static void createWidgets(void) {
 	GWidgetInit	wi;
 
 	// Apply some default values for GWIN
-	wi.customDraw = 0;
-	wi.customParam = 0;
-	wi.customStyle = 0;
+	gwinWidgetClearInit(&wi);
 	wi.g.show = TRUE;
 
 	// Create the IP label
 	wi.g.width = 200; wi.g.height = 20; wi.g.x = 10, wi.g.y = 80;
 	wi.text = "192.168.1.42";
-	ghLabel1 = gwinLabelCreate(NULL, &wi);
+	ghLabel1 = gwinLabelCreate(0, &wi);
 	gwinLabelSetAttribute(ghLabel1, 100, "Current IP:");
 
 	// Create the DHCP label
 	wi.g.width = 200; wi.g.height = 20; wi.g.x = 10, wi.g.y = 100;
 	wi.text = "Off";
-	ghLabel2 = gwinLabelCreate(NULL, &wi);
+	ghLabel2 = gwinLabelCreate(0, &wi);
 	gwinLabelSetAttribute(ghLabel2, 100, "DHCP:");
 }
 
@@ -64,9 +62,6 @@ int main(void) {
 	gwinSetDefaultFont(gdispOpenFont("*"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
 	gdispClear(White);
-
-	// Attach the mouse input
-	gwinAttachMouse(0);
 
 	// create the widget
 	createWidgets();
