@@ -33,7 +33,7 @@ uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM];
 uint8_t receivePipeHead = 0;
 uint8_t transmitPipeHead = 0;
 uint8_t pipeUsage = 0;
-q31_t signalPipe[STAGE_NUM * 2][SAMPLE_NUM] /*__attribute__ ((section (".ccmram")))*/ = {{255, 255, 255}};
+q31_t signalPipe[STAGE_NUM * 2][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
 
 struct Effect_t *effectList[STAGE_NUM];
