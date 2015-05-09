@@ -44,11 +44,11 @@ LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(MAP_FILE) -TSTM32F429I_DISCO/STM32F429ZI
 #files
 SRCDIR = src \
 		 src/audio-effects \
-		 src/ui
+#		 src/ui
 
 INCDIR = inc \
 		 inc/audio-effects \
-		 inc/ui \
+#		 inc/ui \
 		 ./
 
 SRC += $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
