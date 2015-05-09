@@ -10,7 +10,7 @@
 #if GFX_USE_GAUDIO && GAUDIO_NEED_PLAY
 
 /* Include the driver defines */
-#include "src/gaudio/driver_play.h"
+#include "src/gaudio/gaudio_driver_play.h"
 
 /* Include the vs1053 registers */
 #include "drivers/gaudio/vs1053/vs1053.h"
@@ -24,6 +24,9 @@
 #endif
 #ifndef VS1053_FIRMWARE_PATCH
 	#define VS1053_FIRMWARE_PATCH		FALSE
+#endif
+#ifndef VS1053_POLL_RATE
+	#define	VS1053_POLL_RATE	5
 #endif
 
 // Load the patch file if desired. New format patches only.
@@ -242,7 +245,7 @@ bool_t gaudio_play_lld_init(uint16_t channel, uint32_t frequency, ArrayDataForma
 			0xFF, 0xFF, 0xFF, 0xFF,
 	};
 
-	if (format != ARRAY_DATA_8BITUNSIGNED && format != ARRAY_DATA_16BITSIGNED)
+	if (format != ARRAY_DATA_8BITUNSIGNED && format != ARRAY_DATA_16BITSIGNED && format != ARRAY_DATA_UNKNOWN)
 		return FALSE;
 	if (frequency > VS1053_MAX_SAMPLE_RATE)
 		return FALSE;
@@ -254,30 +257,40 @@ bool_t gaudio_play_lld_init(uint16_t channel, uint32_t frequency, ArrayDataForma
 	}
 
 	// Setup
-	bps = (gfxSampleFormatBits(format)+7)/8;
-	if (channel == GAUDIO_PLAY_STEREO)
-		bps *= 2;
-	brate = frequency * bps;
+	if (format == ARRAY_DATA_8BITUNSIGNED || format == ARRAY_DATA_16BITSIGNED) {
+		bps = (gfxSampleFormatBits(format)+7)/8;
+		if (channel == GAUDIO_PLAY_STEREO)
+			bps *= 2;
+		brate = frequency * bps;
 
-	// Write the RIFF header
-	waitforready();
-	data_write(hdr1, sizeof(hdr1));
-	buf[0] = channel == GAUDIO_PLAY_STEREO ? 2 : 1;		buf[1] = 0;								data_write(buf, 2);
-	buf[0] = frequency;	buf[1] = frequency>>8;	buf[2] = frequency>>16; buf[3] = frequency>>24;	data_write(buf, 4);
-	buf[0] = brate;		buf[1] = brate>>8;		buf[2] = brate>>16;		buf[3] = brate>>24;		data_write(buf, 4);
-	waitforready();						// 32 bytes max before checking
-	buf[0] = bps; 										buf[1] = 0;								data_write(buf, 2);
-	buf[0] = gfxSampleFormatBits(format);				buf[1] = 0;								data_write(buf, 2);
-	data_write(hdr2, sizeof(hdr2));
+		// Write the RIFF header
+		waitforready();
+		data_write(hdr1, sizeof(hdr1));
+		buf[0] = channel == GAUDIO_PLAY_STEREO ? 2 : 1;		buf[1] = 0;								data_write(buf, 2);
+		buf[0] = frequency;	buf[1] = frequency>>8;	buf[2] = frequency>>16; buf[3] = frequency>>24;	data_write(buf, 4);
+		buf[0] = brate;		buf[1] = brate>>8;		buf[2] = brate>>16;		buf[3] = brate>>24;		data_write(buf, 4);
+		waitforready();						// 32 bytes max before checking
+		buf[0] = bps; 										buf[1] = 0;								data_write(buf, 2);
+		buf[0] = gfxSampleFormatBits(format);				buf[1] = 0;								data_write(buf, 2);
+		data_write(hdr2, sizeof(hdr2));
+	}
 	return TRUE;
 }
 
 bool_t gaudio_play_lld_set_volume(uint8_t vol) {
+	uint16_t tmp;
+
 	// Volume is 0xFE -> 0x00. Adjust vol to match
 	vol = ~vol;
-	if (vol == 0xFF) vol = 0xFE;
+	if (vol > 0xFE)
+		vol = 0xFE;
 
-	cmd_write(SCI_VOL, ((uint16_t)vol) << 8 | vol);
+	tmp  = 0;
+	tmp |= (( vol << VOL_LEFT_SHIFT ) & VOL_LEFT_MASK );
+	tmp |= (( vol << VOL_RIGHT_SHIFT ) & VOL_RIGHT_MASK );
+
+	cmd_write(SCI_VOL, tmp);
+
 	return TRUE;
 }
 
@@ -297,7 +310,7 @@ void gaudio_play_lld_start(void) {
 
 	// Start the playing by starting the timer and executing FeedData immediately just to get things started
 	// We really should set the timer to be equivalent to half the available data but that is just too hard to calculate.
-	gtimerStart(&playTimer, FeedData, 0, TRUE, 5);
+	gtimerStart(&playTimer, FeedData, 0, TRUE, VS1053_POLL_RATE);
 	FeedData(0);
 }
 

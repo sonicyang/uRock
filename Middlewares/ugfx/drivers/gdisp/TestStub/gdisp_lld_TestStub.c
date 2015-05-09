@@ -11,7 +11,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_TestStub
 #include "drivers/gdisp/TestStub/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #ifndef GDISP_SCREEN_HEIGHT
 	#define GDISP_SCREEN_HEIGHT		128

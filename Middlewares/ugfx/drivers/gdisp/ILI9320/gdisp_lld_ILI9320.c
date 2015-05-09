@@ -21,7 +21,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_ILI9320
 #include "drivers/gdisp/ILI9320/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #include "board_ILI9320.h"
 

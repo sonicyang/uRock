@@ -57,8 +57,13 @@ static inline uint16_t read_data(GDisplay *g) {
 	return 0;
 }
 
-#if defined(GDISP_USE_DMA) || defined(__DOXYGEN__)
-	//#error "GDISP - SSD1289: This interface does not support DMA"
+//Optional define if your board interface supports it
+//#define GDISP_USE_DMA			TRUE
+
+// Optional define - valid only when GDISP_USE_DMA is TRUE
+//#define GDISP_NO_DMA_FROM_STACK	FALSE
+
+#if defined(GDISP_USE_DMA) && GDISP_USE_DMA
 
 	static inline void dma_with_noinc(GDisplay *g, color_t *buffer, int area) {
 		(void) g;

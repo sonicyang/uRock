@@ -15,7 +15,7 @@
 /*===========================================================================*/
 
 #define GDISP_HARDWARE_STREAM_WRITE		TRUE
-//#define GDISP_HARDWARE_CONTROL			TRUE			// Not Yet.
+#define GDISP_HARDWARE_CONTROL			TRUE
 
 #define GDISP_LLD_PIXELFORMAT			GDISP_PIXELFORMAT_RGB565
 

@@ -5,16 +5,19 @@
  *              http://ugfx.org/license.html
  */
 
+// We need to include stdio.h below. Turn off GFILE_NEED_STDIO just for this file to prevent conflicts
+#define GFILE_NEED_STDIO_MUST_BE_OFF
+
 #include "gfx.h"
 
 #if GFX_USE_GAUDIO && GAUDIO_NEED_PLAY
 
 /* Include the driver defines */
-#include "src/gaudio/driver_play.h"
+#include "src/gaudio/gaudio_driver_play.h"
 
-#undef Red
-#undef Green
-#undef Blue
+#undef uRed
+#undef uGreen
+#undef uBlue
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <stdio.h>

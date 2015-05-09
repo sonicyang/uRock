@@ -11,7 +11,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_ST7565
 #include "drivers/gdisp/ST7565/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #include "board_ST7565.h"
 
@@ -155,6 +155,8 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 			write_data(g, RAM(g) + (p*GDISP_SCREEN_WIDTH), GDISP_SCREEN_WIDTH);
 		}
 		release_bus(g);
+
+		g->flags &= ~GDISP_FLG_NEEDFLUSH;
 	}
 #endif
 

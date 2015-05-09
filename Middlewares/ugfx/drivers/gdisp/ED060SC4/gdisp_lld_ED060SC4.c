@@ -11,7 +11,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_ED060SC4
 #include "drivers/gdisp/ED060SC4/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #include "board_ED060SC4.h"
 

@@ -16,7 +16,7 @@
 #endif
 
 /* Include the driver defines */
-#include "src/gaudio/driver_record.h"
+#include "src/gaudio/gaudio_driver_record.h"
 
 static void gadcCallbackI(void) {
 	GDataBuffer *pd;

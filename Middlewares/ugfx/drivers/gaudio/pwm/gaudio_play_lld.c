@@ -10,7 +10,7 @@
 #if GFX_USE_GAUDIO && GAUDIO_NEED_PLAY
 
 /* Include the driver defines */
-#include "src/gaudio/driver_play.h"
+#include "src/gaudio/gaudio_driver_play.h"
 
 /* Forward definition */
 static void gaudio_play_pwm_timer_callbackI(void);

@@ -20,7 +20,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_S6D1121
 #include "drivers/gdisp/S6D1121/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #include "board_S6D1121.h"
 

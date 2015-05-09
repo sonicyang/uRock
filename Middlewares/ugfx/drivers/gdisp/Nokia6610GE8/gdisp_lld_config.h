@@ -14,10 +14,10 @@
 /* Driver hardware support.                                                  */
 /*===========================================================================*/
 
-/* This driver has problems with other orientations and requires significantly
- * extra code to handle them. By default we turn this on (only if the GDISP_NEED_CONTROL
- * is turned on). If you are worried about code size and don't need orientation support
- * define GDISP_NOKIA_ORIENTATION as false.
+/* This driver has problems with other orientations and requires significant
+ * extra code to handle them. By default we turn this on only if the GDISP_NEED_CONTROL
+ * is turned on. If you are worried about code size and don't need orientation support
+ * define GDISP_NOKIA_ORIENTATION as false in your gfxconf.h.
  */
 #ifndef GDISP_NOKIA_ORIENTATION
 	#define GDISP_NOKIA_ORIENTATION			TRUE

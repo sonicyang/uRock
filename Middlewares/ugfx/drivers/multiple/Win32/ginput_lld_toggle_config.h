@@ -14,6 +14,7 @@
 
 // This driver is unique in that it can support 8 buttons per window across multiple windows.
 // GINPUT_TOGGLE_CONFIG_ENTRIES just must be less than the number of GDISP windows (GDISP_DRIVER_COUNT_WIN32).
+// DEPRECATED: Currently only supports a single window with buttons until toggles use GDriver
 #ifndef GINPUT_TOGGLE_CONFIG_ENTRIES
 	#define GINPUT_TOGGLE_CONFIG_ENTRIES	1			// The total number of GToggleConfig entries
 #endif

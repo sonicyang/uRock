@@ -11,7 +11,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_RA8875
 #include "drivers/gdisp/RA8875/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 /* include the users board interface */
 #include "board_RA8875.h"

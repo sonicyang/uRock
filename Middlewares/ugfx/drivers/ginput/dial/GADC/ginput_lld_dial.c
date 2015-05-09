@@ -9,7 +9,7 @@
 
 #if GFX_USE_GINPUT && GINPUT_NEED_DIAL
 
-#include "src/ginput/driver_dial.h"
+#include "src/ginput/ginput_driver_dial.h"
 
 #if GINPUT_DIAL_NUM_PORTS >= 5
 	#error "GINPUT: Dial - GADC driver currently only supports 4 devices"

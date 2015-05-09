@@ -5,14 +5,17 @@
  *              http://ugfx.org/license.html
  */
 
+// We need to include stdio.h below. Turn off GFILE_NEED_STDIO just for this file to prevent conflicts
+#define GFILE_NEED_STDIO_MUST_BE_OFF
+
 #include "gfx.h"
 
 #if GFX_USE_GDISP
 
 #define GDISP_DRIVER_VMT			GDISPVMT_uGFXnet
-#include "drivers/multiple/uGFXnet/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
-#include "drivers/multiple/uGFXnet/uGFXnetProtocol.h"
+#include "gdisp_lld_config.h"
+#include "src/gdisp/gdisp_driver.h"
+#include "uGFXnetProtocol.h"
 
 #ifndef GDISP_SCREEN_WIDTH
 	#define GDISP_SCREEN_WIDTH	640
@@ -33,6 +36,48 @@
 	#define GDISP_GFXNET_BROKEN_LWIP_ACCEPT		FALSE
 #endif
 
+#if GINPUT_NEED_MOUSE
+	// Include mouse support code
+	#define GMOUSE_DRIVER_VMT		GMOUSEVMT_uGFXnet
+	#include "src/ginput/ginput_driver_mouse.h"
+
+	// Forward definitions
+	static bool_t NMouseInit(GMouse *m, unsigned driverinstance);
+	static bool_t NMouseRead(GMouse *m, GMouseReading *prd);
+
+	const GMouseVMT const GMOUSE_DRIVER_VMT[1] = {{
+		{
+			GDRIVER_TYPE_MOUSE,
+			GMOUSE_VFLG_NOPOLL|GMOUSE_VFLG_DYNAMICONLY,
+				// Extra flags for testing only
+				//GMOUSE_VFLG_TOUCH|GMOUSE_VFLG_SELFROTATION|GMOUSE_VFLG_DEFAULTFINGER
+				//GMOUSE_VFLG_CALIBRATE|GMOUSE_VFLG_CAL_EXTREMES|GMOUSE_VFLG_CAL_TEST|GMOUSE_VFLG_CAL_LOADFREE
+				//GMOUSE_VFLG_ONLY_DOWN|GMOUSE_VFLG_POORUPDOWN
+			sizeof(GMouse),
+			_gmouseInitDriver, _gmousePostInitDriver, _gmouseDeInitDriver
+		},
+		1,				// z_max
+		0,				// z_min
+		1,				// z_touchon
+		0,				// z_touchoff
+		{				// pen_jitter
+			0,				// calibrate
+			0,				// click
+			0				// move
+		},
+		{				// finger_jitter
+			0,				// calibrate
+			2,				// click
+			2				// move
+		},
+		NMouseInit,		// init
+		0,				// deinit
+		NMouseRead,		// get
+		0,				// calsave
+		0				// calload
+	}};
+#endif
+
 #if GNETCODE_VERSION != GNETCODE_VERSION_1_0
 	#error "GDISP: uGFXnet - This driver only support protocol V1.0"
 #endif
@@ -47,6 +92,7 @@
 #if defined(WIN32) || GFX_USE_OS_WIN32
 	#include <winsock.h>
 	#define SOCKET_TYPE				SOCKET
+	#define socklen_t		int
 
 	static void StopSockets(void) {
 		WSACleanup();
@@ -97,14 +143,8 @@
 	#endif
 #endif
 
-#define GDISP_FLG_HASMOUSE			(GDISP_FLG_DRIVER<<0)
-#define GDISP_FLG_CONNECTED			(GDISP_FLG_DRIVER<<1)
-#define GDISP_FLG_HAVEDATA			(GDISP_FLG_DRIVER<<2)
-
-#if GINPUT_NEED_MOUSE
-	/* Include mouse support code */
-	#include "src/ginput/driver_mouse.h"
-#endif
+#define GDISP_FLG_CONNECTED			(GDISP_FLG_DRIVER<<0)
+#define GDISP_FLG_HAVEDATA			(GDISP_FLG_DRIVER<<1)
 
 /*===========================================================================*/
 /* Driver local routines    .                                                */
@@ -117,14 +157,11 @@ typedef struct netPriv {
 	#if GINPUT_NEED_MOUSE
 		coord_t		mousex, mousey;
 		uint16_t	mousebuttons;
+		GMouse *	mouse;
 	#endif
 } netPriv;
 
 static gfxThreadHandle	hThread;
-
-#if GINPUT_NEED_MOUSE
-	static GDisplay *		mouseDisplay;
-#endif
 
 #if GDISP_GFXNET_UNSAFE_SOCKETS
 	static gfxMutex	uGFXnetMutex;
@@ -155,16 +192,134 @@ static bool_t sendpkt(SOCKET_TYPE netfd, uint16_t *pkt, int len) {
 	return send(netfd, (const char *)pkt, len, 0) == len;
 }
 
+static bool_t newconnection(SOCKET_TYPE clientfd) {
+	GDisplay *	g;
+    netPriv *	priv;
+
+	// Look for a display that isn't connected
+	for(g = 0; (g = (GDisplay *)gdriverGetNext(GDRIVER_TYPE_DISPLAY, (GDriver *)g));) {
+		// Ignore displays for other controllers
+		#ifdef GDISP_DRIVER_LIST
+			if (gvmt(g) != &GDISPVMT_uGFXnet)
+				continue;
+		#endif
+		if (!(g->flags & GDISP_FLG_CONNECTED))
+			break;
+	}
+
+	// Was anything found?
+	if (!g)
+		return FALSE;
+
+	// Reset the priv area
+	priv = g->priv;
+	priv->netfd = clientfd;
+	priv->databytes = 0;
+	priv->mousebuttons = 0;
+
+	// Send the initialisation data (2 words at a time)
+	priv->data[0] = GNETCODE_INIT;
+	priv->data[1] = GNETCODE_VERSION;
+	sendpkt(priv->netfd, priv->data, 2);
+	priv->data[0] = GDISP_SCREEN_WIDTH;
+	priv->data[1] = GDISP_SCREEN_HEIGHT;
+	sendpkt(priv->netfd, priv->data, 2);
+	priv->data[0] = GDISP_LLD_PIXELFORMAT;
+	priv->data[1] = 1;							// We have a mouse
+	MUTEX_ENTER;
+	sendpkt(priv->netfd, priv->data, 2);
+	MUTEX_EXIT;
+
+	// The display is now working
+	g->flags |= GDISP_FLG_CONNECTED;
+
+	// Send a redraw all
+	#if GFX_USE_GWIN && GWIN_NEED_WINDOWMANAGER
+		gdispGClear(g, gwinGetDefaultBgColor());
+		gwinuRedrawDisplay(g, FALSE);
+	#endif
+
+	return TRUE;
+}
+
+static bool_t rxdata(SOCKET_TYPE fd) {
+	GDisplay *	g;
+    netPriv *	priv;
+    int			len;
+
+	// Look for a display that is connected and the socket descriptor matches
+	for(g = 0; (g = (GDisplay *)gdriverGetNext(GDRIVER_TYPE_DISPLAY, (GDriver *)g));) {
+		// Ignore displays for other controllers
+		#ifdef GDISP_DRIVER_LIST
+			if (gvmt(g) != &GDISPVMT_uGFXnet)
+				continue;
+		#endif
+		priv = g->priv;
+		if ((g->flags & GDISP_FLG_CONNECTED) && priv->netfd == fd)
+			break;
+	}
+	if (!g)
+		gfxHalt("GDISP: uGFXnet - Got data from unrecognized connection");
+
+	if ((g->flags & GDISP_FLG_HAVEDATA)) {
+		// The higher level is still processing the previous data.
+		//	Give it a chance to run by coming back to this data.
+		gfxSleepMilliseconds(1);
+		return TRUE;
+	}
+
+	/* handle data from a client */
+	MUTEX_ENTER;
+	if ((len = recv(fd, ((char *)priv->data)+priv->databytes, sizeof(priv->data)-priv->databytes, 0)) <= 0) {
+		// Socket closed or in error state
+		MUTEX_EXIT;
+		g->flags &= ~GDISP_FLG_CONNECTED;
+		return FALSE;
+	}
+	MUTEX_EXIT;
+
+	// Do we have a full reply yet
+	priv->databytes += len;
+	if (priv->databytes < sizeof(priv->data))
+		return TRUE;
+	priv->databytes = 0;
+
+	// Convert network byte or to host byte order
+	priv->data[0] = ntohs(priv->data[0]);
+	priv->data[1] = ntohs(priv->data[1]);
+
+	// Process the data received
+	switch(priv->data[0]) {
+	#if GINPUT_NEED_MOUSE
+		case GNETCODE_MOUSE_X:		priv->mousex = priv->data[1];		break;
+		case GNETCODE_MOUSE_Y:		priv->mousey = priv->data[1];		break;
+		case GNETCODE_MOUSE_B:
+			priv->mousebuttons = priv->data[1];
+			// Treat the button event as the sync signal
+			_gmouseWakeup(priv->mouse);
+			break;
+	#endif
+	case GNETCODE_CONTROL:
+	case GNETCODE_READ:
+		g->flags |= GDISP_FLG_HAVEDATA;
+		break;
+	case GNETCODE_KILL:
+		gfxHalt("GDISP: uGFXnet - Display sent KILL command");
+		break;
+
+	default:
+		// Just ignore unrecognised data
+		break;
+	}
+	return TRUE;
+}
+
 static DECLARE_THREAD_STACK(waNetThread, 512);
 static DECLARE_THREAD_FUNCTION(NetThread, param) {
 	SOCKET_TYPE			listenfd, fdmax, i, clientfd;
 	socklen_t			len;
-	int					leni;
-	unsigned			disp;
 	fd_set				master, read_fds;
     struct sockaddr_in	addr;
-    GDisplay *			g;
-    netPriv *			priv;
 	(void)param;
 
 	// Start the sockets layer
@@ -197,27 +352,13 @@ static DECLARE_THREAD_FUNCTION(NetThread, param) {
     fdmax = listenfd; /* so far, it's this one*/
 
 	#if GDISP_GFXNET_BROKEN_LWIP_ACCEPT
-    {
 		#warning "Using GDISP_GFXNET_BROKEN_LWIP_ACCEPT limits the number of displays and the use of GFXNET. Avoid if possible!"
 		len = sizeof(addr);
 		if((clientfd = accept(listenfd, (struct sockaddr *)&addr, &len)) == (SOCKET_TYPE)-1)
 			gfxHalt("GDISP: uGFXnet - Accept failed");
+		//printf("New connection from %s on socket %d\n", inet_ntoa(addr.sin_addr), clientfd);
 
-		// Look for a display that isn't connected
-		for(disp = 0; disp < GDISP_TOTAL_DISPLAYS; disp++) {
-			if (!(g = gdispGetDisplay(disp)))
-				continue;
-			#if GDISP_TOTAL_CONTROLLERS > 1
-				// Ignore displays for other controllers
-				if (g->vmt != &GDISPVMT_uGFXnet)
-					continue;
-			#endif
-			if (!(g->flags & GDISP_FLG_CONNECTED))
-				break;
-		}
-
-		// Was anything found?
-		if (disp >= GDISP_TOTAL_DISPLAYS) {
+		if (!newconnection(clientfd)) {
 			// No Just close the connection
 			closesocket(clientfd);
 			gfxHalt("GDISP: uGFXnet - Can't find display for connection");
@@ -227,33 +368,6 @@ static DECLARE_THREAD_FUNCTION(NetThread, param) {
 		// Save the descriptor
 		FD_SET(clientfd, &master);
 		if (clientfd > fdmax) fdmax = clientfd;
-		priv = g->priv;
-		memset(priv, 0, sizeof(netPriv));
-		priv->netfd = clientfd;
-		//printf(New connection from %s on socket %d allocated to display %u\n", inet_ntoa(addr.sin_addr), clientfd, disp+1);
-
-		// Send the initialisation data (2 words at a time)
-		priv->data[0] = GNETCODE_INIT;
-		priv->data[1] = GNETCODE_VERSION;
-		sendpkt(priv->netfd, priv->data, 2);
-		priv->data[0] = GDISP_SCREEN_WIDTH;
-		priv->data[1] = GDISP_SCREEN_HEIGHT;
-		sendpkt(priv->netfd, priv->data, 2);
-		priv->data[0] = GDISP_LLD_PIXELFORMAT;
-		priv->data[1] = (g->flags & GDISP_FLG_HASMOUSE) ? 1 : 0;
-		MUTEX_ENTER;
-		sendpkt(priv->netfd, priv->data, 2);
-		MUTEX_EXIT;
-
-		// The display is now working
-		g->flags |= GDISP_FLG_CONNECTED;
-
-		// Send a redraw all
-		#if GFX_USE_GWIN && GWIN_NEED_WINDOWMANAGER
-			gdispGClear(g, gwinGetDefaultBgColor());
-			gwinRedrawDisplay(g, FALSE);
-		#endif
-    }
 	#endif
 
     /* loop */
@@ -270,136 +384,33 @@ static DECLARE_THREAD_FUNCTION(NetThread, param) {
 
 			// Handle new connections
 			if(i == listenfd) {
+
+				// Accept the connection
 				len = sizeof(addr);
 				if((clientfd = accept(listenfd, (struct sockaddr *)&addr, &len)) == (SOCKET_TYPE)-1)
 					gfxHalt("GDISP: uGFXnet - Accept failed");
+				//printf("New connection from %s on socket %d\n", inet_ntoa(addr.sin_addr), clientfd);
 
-				// Look for a display that isn't connected
-				for(disp = 0; disp < GDISP_TOTAL_DISPLAYS; disp++) {
-					if (!(g = gdispGetDisplay(disp)))
-						continue;
-					#if GDISP_TOTAL_CONTROLLERS > 1
-						// Ignore displays for other controllers
-						if (g->vmt != &GDISPVMT_uGFXnet)
-							continue;
-					#endif
-					if (!(g->flags & GDISP_FLG_CONNECTED))
-						break;
-				}
+				// Can we handle it?
+				if (!newconnection(clientfd)) {
 
-				// Was anything found?
-				if (disp >= GDISP_TOTAL_DISPLAYS) {
-					// No Just close the connection
+					// No - Just close the connection
 					closesocket(clientfd);
-					//printf(New connection from %s on socket %d rejected as all displays are already connected\n", inet_ntoa(addr.sin_addr), clientfd);
+
+					//printf("Rejected connection as all displays are already connected\n");
 					continue;
 				}
 
 				// Save the descriptor
 				FD_SET(clientfd, &master);
 				if (clientfd > fdmax) fdmax = clientfd;
-				priv = g->priv;
-				memset(priv, 0, sizeof(netPriv));
-				priv->netfd = clientfd;
-				//printf(New connection from %s on socket %d allocated to display %u\n", inet_ntoa(addr.sin_addr), clientfd, disp+1);
-
-				// Send the initialisation data (2 words at a time)
-				priv->data[0] = GNETCODE_INIT;
-				priv->data[1] = GNETCODE_VERSION;
-				sendpkt(priv->netfd, priv->data, 2);
-				priv->data[0] = GDISP_SCREEN_WIDTH;
-				priv->data[1] = GDISP_SCREEN_HEIGHT;
-				sendpkt(priv->netfd, priv->data, 2);
-				priv->data[0] = GDISP_LLD_PIXELFORMAT;
-				priv->data[1] = (g->flags & GDISP_FLG_HASMOUSE) ? 1 : 0;
-				MUTEX_ENTER;
-				sendpkt(priv->netfd, priv->data, 2);
-				MUTEX_EXIT;
-
-				// The display is now working
-				g->flags |= GDISP_FLG_CONNECTED;
-
-				// Send a redraw all
-				#if GFX_USE_GWIN && GWIN_NEED_WINDOWMANAGER
-					gdispGClear(g, gwinGetDefaultBgColor());
-					gwinRedrawDisplay(g, FALSE);
-				#endif
-
 				continue;
 			}
 
 			// Handle data from a client
-
-			// Look for a display that is connected and the socket descriptor matches
-			for(disp = 0; disp < GDISP_TOTAL_DISPLAYS; disp++) {
-				if (!(g = gdispGetDisplay(disp)))
-					continue;
-				#if GDISP_TOTAL_CONTROLLERS > 1
-				// Ignore displays for other controllers
-					if (g->vmt != &GDISPVMT_uGFXnet)
-						continue;
-				#endif
-				priv = g->priv;
-				if ((g->flags & GDISP_FLG_CONNECTED) && priv->netfd == i)
-					break;
-			}
-			if (disp >= GDISP_TOTAL_DISPLAYS)
-				gfxHalt("GDISP: uGFXnet - Got data from unrecognized connection");
-
-			if ((g->flags & GDISP_FLG_HAVEDATA)) {
-				// The higher level is still processing the previous data.
-				//	Give it a chance to run by coming back to this data.
-				gfxSleepMilliseconds(1);
-				continue;
-			}
-
-			/* handle data from a client */
-			MUTEX_ENTER;
-			if ((leni = recv(i, ((char *)priv->data)+priv->databytes, sizeof(priv->data)-priv->databytes, 0)) <= 0) {
-				// Socket closed or in error state
-				MUTEX_EXIT;
-				g->flags &= ~GDISP_FLG_CONNECTED;
-				memset(priv, 0, sizeof(netPriv));
+			if (!rxdata(i)) {
 				closesocket(i);
-				FD_CLR(i, &master);
-				continue;
-			}
-			MUTEX_EXIT;
-
-			// Do we have a full reply yet
-			priv->databytes += leni;
-			if (priv->databytes < sizeof(priv->data))
-				continue;
-			priv->databytes = 0;
-
-			// Convert network byte or to host byte order
-			priv->data[0] = ntohs(priv->data[0]);
-			priv->data[1] = ntohs(priv->data[1]);
-
-			// Process the data received
-			switch(priv->data[0]) {
-			#if GINPUT_NEED_MOUSE
-				case GNETCODE_MOUSE_X:		priv->mousex = priv->data[1];		break;
-				case GNETCODE_MOUSE_Y:		priv->mousey = priv->data[1];		break;
-				case GNETCODE_MOUSE_B:
-					priv->mousebuttons = priv->data[1];
-					// Treat the button event as the sync signal
-					#if GINPUT_MOUSE_POLL_PERIOD == TIME_INFINITE
-						ginputMouseWakeup();
-					#endif
-					break;
-			#endif
-			case GNETCODE_CONTROL:
-			case GNETCODE_READ:
-				g->flags |= GDISP_FLG_HAVEDATA;
-				break;
-			case GNETCODE_KILL:
-				gfxHalt("GDISP: uGFXnet - Display sent KILL command");
-				break;
-
-			default:
-				// Just ignore unrecognised data
-				break;
+				FD_CLR(clientfd, &master);
 			}
 		}
 	}
@@ -420,20 +431,17 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 		gfxThreadClose(hThread);
 	}
 
-	// Only turn on mouse on the first window for now
-	#if GINPUT_NEED_MOUSE
-		if (!g->controllerdisplay) {
-			mouseDisplay = g;
-			g->flags |= GDISP_FLG_HASMOUSE;
-		}
-	#endif
-
 	// Create a private area for this window
 	if (!(priv = gfxAlloc(sizeof(netPriv))))
 		gfxHalt("GDISP: uGFXnet - Memory allocation failed");
 	memset(priv, 0, sizeof(netPriv));
 	g->priv = priv;
 	g->board = 0;			// no board interface for this controller
+
+	// Create the associated mouse
+	#if GINPUT_NEED_MOUSE
+		priv->mouse = (GMouse *)gdriverRegister((const GDriverVMT const *)GMOUSE_DRIVER_VMT, g);
+	#endif
 
 	// Initialise the GDISP structure
 	g->g.Orientation = GDISP_ROTATE_0;
@@ -537,7 +545,7 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 		// Make everything relative to the start of the line
 		buffer = g->p.ptr;
 		buffer += g->p.x2*g->p.y1;
-		
+
 		priv = g->priv;
 		buf[0] = GNETCODE_BLIT;
 		buf[1] = g->p.x;
@@ -582,7 +590,7 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 		// Now wait for a reply
 		while(!(g->flags & GDISP_FLG_HAVEDATA) || priv->data[0] != GNETCODE_READ)
 			gfxSleepMilliseconds(1);
-		
+
 		data = gdispNative2Color(priv->data[1]);
 		g->flags &= ~GDISP_FLG_HAVEDATA;
 
@@ -700,18 +708,23 @@ LLDSPEC bool_t gdisp_lld_init(GDisplay *g) {
 #endif
 
 #if GINPUT_NEED_MOUSE
-	void ginput_lld_mouse_init(void) {}
-	void ginput_lld_mouse_get_reading(MouseReading *pt) {
+	static bool_t NMouseInit(GMouse *m, unsigned driverinstance) {
+		(void)	m;
+		(void)	driverinstance;
+		return TRUE;
+	}
+	static bool_t NMouseRead(GMouse *m, GMouseReading *pt) {
 		GDisplay *	g;
 		netPriv	*	priv;
 
-		g = mouseDisplay;
+		g = m->display;
 		priv = g->priv;
 
 		pt->x = priv->mousex;
 		pt->y = priv->mousey;
-		pt->z = (priv->mousebuttons & GINPUT_MOUSE_BTN_LEFT) ? 100 : 0;
+		pt->z = (priv->mousebuttons & GINPUT_MOUSE_BTN_LEFT) ? 1 : 0;
 		pt->buttons = priv->mousebuttons;
+		return TRUE;
 	}
 #endif /* GINPUT_NEED_MOUSE */
 

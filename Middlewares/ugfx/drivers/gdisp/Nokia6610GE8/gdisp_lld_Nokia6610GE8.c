@@ -52,7 +52,7 @@
 
 #define GDISP_DRIVER_VMT			GDISPVMT_Nokia6610GE8
 #include "drivers/gdisp/Nokia6610GE8/gdisp_lld_config.h"
-#include "src/gdisp/driver.h"
+#include "src/gdisp/gdisp_driver.h"
 
 #include "board_Nokia6610GE8.h"
 

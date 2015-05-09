@@ -14,7 +14,7 @@
 
 #if GFX_USE_GADC
 
-#include "src/gadc/driver.h"
+#include "src/gadc/gadc_driver.h"
 
 static uint32_t		nextfreq;
 
