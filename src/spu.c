@@ -1,7 +1,4 @@
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "semphr.h"
+#include "cmsis_os.h"
 
 #include "setting.h"
 #include "base-effect.h"
@@ -22,131 +19,125 @@
 #include "phaser.h"
 #include "flanger.h"
 
-#include "wavplayer.h"
-#include "wavrecoder.h"
+//#include "wavplayer.h"
+//#include "wavrecoder.h"
 
-ADC_HandleTypeDef hadc1;
-DMA_HandleTypeDef hdma_adc1;
+extern SAI_HandleTypeDef hsai_BlockA1;
+extern SAI_HandleTypeDef hsai_BlockB1;
 
-DAC_HandleTypeDef hdac;
-DMA_HandleTypeDef hdma_dac2;
+osSemaphoreId SPUH_id; 
 
-TIM_HandleTypeDef htim2;
+uint16_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2];
+uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM];
 
-xSemaphoreHandle SPU_Hold;
-volatile uint16_t SignalBuffer[BUFFER_NUM][SAMPLE_NUM]; 
-q31_t SignalPipe[STAGE_NUM][SAMPLE_NUM];
+uint8_t receivePipeHead = 0;
+uint8_t transmitPipeHead = 0;
+uint8_t pipeUsage = 0;
+q31_t signalPipe[STAGE_NUM * 2][SAMPLE_NUM] /*__attribute__ ((section (".ccmram")))*/ = {{255, 255, 255}};
 
-struct Effect_t *EffectList[STAGE_NUM];
+
+struct Effect_t *effectList[STAGE_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 int8_t controllingStage = 0;
     
 int16_t wavData[4200];
 
 void SignalProcessingUnit(void *pvParameters){
-    uint32_t index = 0;
-    uint32_t pipeindex = 0;
     uint32_t i;
 
-    for(i = 0; i < EFFECT_NUM; i++){
-        EffectList[i] = NULL;
+    for(i = 0; i < STAGE_NUM; i++){
+        effectList[i] = NULL;
     }
 
-    /* Effect Stage Setting*/ 
-    SPU_Hold = xSemaphoreCreateBinary();
+    /* Semaphore Blocker setup*/ 
+    osSemaphoreDef(SPUH);
+    SPUH_id = osSemaphoreCreate(osSemaphore(SPUH), 1);
 
-    /* Init */
-    HAL_TIM_Base_Start(&htim2);
-    HAL_ADC_Start_DMA_DoubleBuffer(&hadc1, (uint32_t*)SignalBuffer[0], (uint32_t*)SignalBuffer[1], SAMPLE_NUM);
-    HAL_DAC_Start_DMA_DoubleBuffer(&hdac, DAC_CHANNEL_2, (uint32_t*) SignalBuffer[1], (uint32_t*) SignalBuffer[2], SAMPLE_NUM, DAC_ALIGN_12B_R);
+    /* Start Transmission and reception */
+    HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], 512); //Salve goes before Master
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], 1024);
 
     /* Process */
     while(1){
-        if(xSemaphoreTake(SPU_Hold, portMAX_DELAY)){
-
-            NormalizeData(SignalBuffer[index], SignalPipe[pipeindex]);
-
+        if(osSemaphoreWait(SPUH_id, 0)){
             for(i = 0; i < STAGE_NUM; i++){
-                if(EffectList[i] != NULL){
-                    EffectList[i]->func(SignalPipe[(pipeindex - i) % STAGE_NUM], EffectList[i]);
+                if(effectList[i] != NULL){
+                    effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & 0x7], effectList[i]); //Hack, modulating 8 -> using mask
                 }
+                //TODO: Use empty function call;
             }
-
-            DenormalizeData(SignalPipe[(pipeindex - STAGE_NUM + 1) % STAGE_NUM], SignalBuffer[(index - 1) % BUFFER_NUM]);
-
-            index+=1;
-            if(index >= BUFFER_NUM)
-                index = 0;
-            pipeindex+=1;
-            if(pipeindex >= STAGE_NUM)
-                pipeindex = 0;
         }
     }
 
     while(1);
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 0;
-    static signed portBASE_TYPE xHigherPriorityTaskWoken;
+void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
+    uint16_t i;
 
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 0;
+    for(i = 0; i < 256; i++)
+        signalPipe[receivePipeHead][i] = (inputBuffer[0][i] << 8) - (32768 << 16);
 
-        xHigherPriorityTaskWoken = pdFALSE;
+    receivePipeHead++;
+    if(receivePipeHead == 16)
+        receivePipeHead = 0;
+    //TODO: Use Mask
 
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY0);
+    pipeUsage++;
 
-        xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
-        if(xHigherPriorityTaskWoken != pdFALSE)
-            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    osSemaphoreRelease(SPUH_id);
+    return;
+}
+
+void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
+    uint16_t i;
+    for(i = 0; i < 256; i++)
+        signalPipe[receivePipeHead][i] = (inputBuffer[1][i] << 8) - (32768 << 16);
+
+    receivePipeHead++;
+    if(receivePipeHead == 16)
+        receivePipeHead = 0;
+
+    pipeUsage++;
+
+    osSemaphoreRelease(SPUH_id);
+    return;
+}
+
+void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
+    uint16_t i;
+
+    if(pipeUsage <= 8)
+        return;
+
+    for(i = 0; i < 256; i++){
+        outputBuffer[0][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16);
+        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16);
     }
 
-    return;  
+    transmitPipeHead++;
+    if(transmitPipeHead == 16)
+        transmitPipeHead = 0;
+
+    pipeUsage--;
+    return;
 }
 
-void HAL_ADC_ConvM1CpltCallback(ADC_HandleTypeDef* hadc){
-    static uint32_t index = 1;
-    static signed portBASE_TYPE xHigherPriorityTaskWoken;
+void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
+    uint16_t i;
 
-    if(hadc->Instance == ADC1){
-        index += 2;
-        if(index >= BUFFER_NUM)
-            index = 1;
-        
-        xHigherPriorityTaskWoken = pdFALSE;
+    if(pipeUsage <= 8)
+        return;
 
-        HAL_DMAEx_ChangeMemory(&hdma_adc1, (uint32_t)SignalBuffer[index], MEMORY1);
-
-        xSemaphoreGiveFromISR(SPU_Hold, &xHigherPriorityTaskWoken);
-        if(xHigherPriorityTaskWoken != pdFALSE)
-            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    for(i = 0; i < 256; i++){
+        outputBuffer[1][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16) - 32768;
+        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16) - 32768;
     }
-    return;  
-}
 
-void HAL_DACEx_ConvCpltCallbackCh2(DAC_HandleTypeDef* hdac){
-    static uint32_t index = 1;
+    transmitPipeHead++;
+    if(transmitPipeHead == 16)
+        transmitPipeHead = 0;
 
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 1;
-
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY0);
-
-    return;  
-}
-
-void HAL_DACEx_ConvM1CpltCallbackCh2(DAC_HandleTypeDef* hdac){
-    static uint32_t index = 2;
-
-    index += 2;
-    if(index >= BUFFER_NUM)
-        index = 0;
-
-    HAL_DMAEx_ChangeMemory(&hdma_dac2, (uint32_t)SignalBuffer[index], MEMORY1);
-
-    return;  
+    pipeUsage--;
+    return;
 }

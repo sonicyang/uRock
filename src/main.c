@@ -49,14 +49,7 @@ DMA_HandleTypeDef hdma_sai1_b;
 osThreadId defaultTaskHandle;
 
 /* USER CODE BEGIN PV */
-uint16_t outputBuffer[2][512] = {{255}};
-uint32_t inputBuffer[2][256];
 
-uint32_t signalPipe[16][256] /*__attribute__ ((section (".ccmram")))*/ = {{255, 255, 255}};
-
-uint8_t receivePipeHead = 0;
-uint8_t transmitPipeHead = 0;
-uint8_t pipeUsage = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,68 +64,7 @@ void StartDefaultTask(void const * argument);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
-    uint16_t i;
-    for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = (inputBuffer[0][i] << 8) - (32768 << 16);
-    receivePipeHead++;
-    if(receivePipeHead == 16)
-        receivePipeHead = 0;
 
-    pipeUsage++;
-    return;
-}
-
-void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
-    uint16_t i;
-    for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead][i] = (inputBuffer[1][i] << 8) - (32768 << 16);
-
-    receivePipeHead++;
-    if(receivePipeHead == 16)
-        receivePipeHead = 0;
-
-    pipeUsage++;
-    return;
-}
-
-void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
-    uint16_t i;
-
-    if(pipeUsage <= 8)
-        return;
-
-    for(i = 0; i < 256; i++){
-        outputBuffer[0][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16);
-        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16);
-    }
-
-    transmitPipeHead++;
-    if(transmitPipeHead == 16)
-        transmitPipeHead = 0;
-
-    pipeUsage--;
-    return;
-}
-
-void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
-    uint16_t i;
-
-    if(pipeUsage <= 8)
-        return;
-
-    for(i = 0; i < 256; i++){
-        outputBuffer[1][(i << 1)] = (signalPipe[transmitPipeHead][i] >> 16) - 32768;
-        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead][i] >> 16) - 32768;
-    }
-
-    transmitPipeHead++;
-    if(transmitPipeHead == 16)
-        transmitPipeHead = 0;
-
-    pipeUsage--;
-    return;
-}
 /* USER CODE END 0 */
 
 int main(void)
@@ -156,8 +88,6 @@ int main(void)
   MX_SAI1_Init();
 
   /* USER CODE BEGIN 2 */
-  HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], 512); //Salve goes before Master
-  HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], 1024);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */

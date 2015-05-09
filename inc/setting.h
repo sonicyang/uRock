@@ -5,8 +5,8 @@
 
 #define MAX_EFFECT_PARAM 4
 
-#define BUFFER_NUM 4
-#define STAGE_NUM 4
+#define BUFFER_NUM 2
+#define STAGE_NUM 8
 #define SAMPLE_NUM 256
 
 #define SAMPLE_MAX 2047
