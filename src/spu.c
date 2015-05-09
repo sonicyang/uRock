@@ -27,7 +27,7 @@ extern SAI_HandleTypeDef hsai_BlockB1;
 
 osSemaphoreId SPUH_id; 
 
-uint16_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2];
+uint16_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2]; //L-R channels -> 2x buffer length
 uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM];
 
 uint8_t receivePipeHead = 0;
