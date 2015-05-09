@@ -9,6 +9,7 @@
 
 #define BUFFER_NUM 2
 #define STAGE_NUM 8
+#define PIPE_LENGTH 2 * STAGE_NUM
 #define SAMPLE_NUM 256
 
 #define SAMPLE_MAX 2047
