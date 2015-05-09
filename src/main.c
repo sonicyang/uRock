@@ -36,6 +36,8 @@
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 
+#include "spu.h"
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -46,7 +48,7 @@ SAI_HandleTypeDef hsai_BlockB1;
 DMA_HandleTypeDef hdma_sai1_a;
 DMA_HandleTypeDef hdma_sai1_b;
 
-osThreadId defaultTaskHandle;
+osThreadId SPU_TaskHandle;
 
 /* USER CODE BEGIN PV */
 
@@ -57,7 +59,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SAI1_Init(void);
-void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -104,8 +105,8 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  osThreadDef(SPU_Task, SignalProcessingUnit, osPriorityRealtime, 1, 1024);
+  SPU_TaskHandle = osThreadCreate(osThread(SPU_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -259,19 +260,6 @@ void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* StartDefaultTask function */
-void StartDefaultTask(void const * argument)
-{
-
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */ 
-}
 
 #ifdef USE_FULL_ASSERT
 

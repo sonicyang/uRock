@@ -42,7 +42,7 @@ int8_t controllingStage = 0;
     
 int16_t wavData[4200];
 
-void SignalProcessingUnit(void *pvParameters){
+void SignalProcessingUnit(void const * argument){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
