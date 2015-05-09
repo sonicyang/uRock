@@ -35,6 +35,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "stm32f429i_discovery.h"
+#include "stm32f429i_discovery_lcd.h"
+#include "stm32f429i_discovery_ts.h"
 
 #include "spu.h"
 
@@ -179,6 +182,8 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 197;
   PeriphClkInitStruct.PLLSAI.PLLSAIQ = 4;
   PeriphClkInitStruct.PLLSAIDivQ = 1;
+  PeriphClkInitStruct.PLLSAI.PLLSAIR = 4;
+  PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_8;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
 }
