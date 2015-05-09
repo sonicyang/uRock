@@ -1,0 +1,195 @@
+*****************************************************************************
+*** Releases                                                              ***
+*****************************************************************************
+
+current release: 2.0
+FIX:		Significant improvements to the way the MCU touch driver works.
+FEATURE:	Add support for edge to edge touch calibration. 
+FEATURE:	Added progressbar widget
+FEATURE:	Added gdispGDrawThickLine() by user jpa-
+DEPRECATE:	TDISP module removed
+FIX:		Console does not execute gwinPrintf() anymore if not visible
+FEATURE:	Added gwinGetColor() and gwinGetBgColor()
+FEATURE:	Console now has an optional backing store buffer (GWIN_CONSOLE_USE_HISTORY)
+FEATURE:	Added smooth scrolling to list widget
+FEATURE:	Increased performance of gwinListAddItem()
+FEATURE:	Added FreeRTOS port
+FEATURE:	Added gfxDeinit()
+FEATURE:	Allow touch screen calibration in any display orientation
+FEATURE:	New GFILE module to abstract File IO.
+FEATURE:	Image file handling changed to use new GFILE module.
+DEPRECTATE:	Old image opening functions deprecated.
+FEATURE:	Restructure and simplify the include path for GFX
+FEATURE:	Added LGDP4532 driver by user shilow
+FIX:		Updated board files to support api changes in ChibiOS/RT 2.6.4
+FEATURE:	Support for ChibiOS/RT 3.x
+FEATURE:	Added gwinProgressbarStop() and gwinProgressbarReset()
+FEATURE:	Added generic ILI93xx driver by xlh1460
+FEATURE:	Added gwinListEnableRender()
+FEATURE:	Added gwinLabelSetAttribute()
+FEATURE:	Complete restructure of the GAUDIN and GAUDOUT into a common GAUDIO module
+FEATURE:	Added a PWM audio play driver
+FEATURE:	Update GADC audio recording driver to new GAUDIO format
+FEATURE:	Added vs1053 audio play driver
+FEATURE:	Added GAUDIO wave-play demo
+FEATURE:	Added many GWIN simple demo's and updated the combined widget demo
+FEATURE:	Added gwinEnable() and gwinDisable()
+FIX:		Progressbar widget bug fix that could gwinProgressbarStop() to crash
+FIX:		Imagebox widget bug fix that could cause gwinImageOpenFile() to crash
+
+
+*** changes after 1.9 ***
+FEATURE:	GDISP Streaming API and demos.
+DEPRECATE:	GDISP_NEED_ASYNC is now deprecated.
+DEPRECATE:	3rd party boing demo is now deprecated (replaced by GDISP Streaming demo)
+FIX:		Remove GOS definitions from demo conf files so that it can be supplied by a makefile.
+FEATURE:	Repair GDISP low level driver interfaces so they can now be included in the doxygen documentation. 
+FEATURE:	New driver interface for GDISP
+FEATURE:	Multiple display support
+FEATURE:	Multiple controller support
+FEATURE:	Application pixel format no longer has to match the low level driver pixel format.
+FEATURE:	Many more pixel formats are now supported.
+FEATURE:	Many performance optimisations
+FEATURE:	Vertical scrolling is now supported if the low level driver supports read_pixel.
+FEATURE:	Add gdispFlush() for those controllers that need it
+FEATURE:	Add GDISP_NEED_AUTOFLUSH and GDISP_NEED_TIMERFLUSH to automatically flush when required.
+FEATURE:	Add support for generic portrait and landscape orientation modes
+FEATURE:	Add macro GDISP_DEFAULT_ORIENTATION so an application can specify a default orientation.
+FEATURE:	Driver files renamed to allow compiles when all object files go in the same directory
+FEATURE:	New directory structure for board files. Predefined boards have all the hardware definitions predefined.
+FEATURE:	Board definotions, example projects and makefiles for Win32.
+FEATURE:	Board definitions, example projects and makefiles for X.
+FEATURE:	Board definitions, example projects and makefiles for the Olimex SAM7-EX256 board.
+Feature:	Board definitions, example projects and makefiles for the Olimex STM32-LCD board.
+FEATURE:	Board definitions, example projects and makefiles for the Mikromedia STM32-M4 board.
+FEATURE:	Board definitions, example projects and makefiles for the Marlin board.
+FEATURE:	New invsqrt() routine added to GMISC
+
+
+*** changes after 1.8 ***
+FEATURE:	GWIN list boxes.
+FIX:		POSIX port removed, now dedicated OS-X and Linux ports
+FIX:		Several bugfixes
+FEATURE:	mcufont integration
+FEATURE:	SSD1306 driver by user goeck
+FEATURE:	ST7565 driver by user sam0737
+FEATURE:	ED060SC4 driver by user jpa-
+FIX:		SSD1289 area filling bug fix by user samofab
+FEATURE:	Added gwinListGetSelectedText()
+FEATURE:	Added gwinListSetScroll()
+FEATURE:	Added gwinLabelSetBorder()
+
+
+*** changes after 1.7 ***
+FEATURE:	Rename of the project from ChibiOS/GFX to uGFX
+FEATURE:    Moved from github.com to bitbucket.org
+FEATURE:	New website with a lot more of documentation
+FEATURE:	Introduced dedicated discussion forum
+FEATURE:	Complete rework of the widget manager (GWIN)
+FEATURE:	Added a lot of new widgets
+FEATURE:	Added gfxRealloc() to the GOS module
+FIX:		gfxHalt() fix for the Win32 port
+FIX:		Cleaned up board file mess
+
+
+*** changes after 1.6 ***
+FEATURE:	Added RA8875 GDISP driver
+FEATURE:	Added FT5x06 GINPUT/touch driver
+FIX:		Several bugfixes
+
+
+*** changes after 1.5 ***
+FEATURE:	Added ILI9325 driver - Thanks to Chris van Dongen aka _Sjaak
+FEATURE:	Added TDISP module
+FIX:		tdispGotoXY() renamed to tdispSetCursor()
+FEATURE:	Addition of GADC, GMISC, GAUDIN, GAUDOUT subsystems
+FIX:		Removal of the GDISP_LLD() macro
+DEPRECATE:	Removal of the GDISP VMT
+FEATURE:	Added SSD2119 GDISP driver
+FEATURE:	Added GWIN_BUTTON_LAZY_RELEASE macro to disable cancel feature of buttons
+FEATURE:	Implemented all four orientation modes for the ILI9320 GDISP driver
+FIX:		Renamed every '__inline' macro to 'inline' for compiler compatibilities
+FEATURE:	Supporting all standard functions in GDISP Nokia6610GE8 driver
+FEATURE:	Added STMPE811 GINPUT driver
+FEATURE:	Added gdispDrawPoly() and gdispFillConvexPoly()
+FEATURE:	Added arrow button style to GWIN buttons
+FEATURE:	Added the ability to specify a custom button drawing routine
+FEATURE:	SSD1963 rework by username 'fred'
+FEATURE:	Added Picture converter tool
+FEATURE:	Added slider widget
+FEATURE:	First MIPS32 (PIC32) board files contributed by user 'Dmytro'
+FEATURE:	Added gwinDraw() routine
+FEATURE:	Added GINPUT Dial support and driver using GADC
+FEATURE:	Simplified assigning inputs to buttons and sliders
+FIX:		Some fixes for the HD44780 TDISP driver by the user 'Frysk'
+FEATURE:	Added ILI9481 by user 'Abhishek'
+FEATURE:	Added enable/disable functions for widgets (Buttons)
+FEATURE:	Added HX8347D driver by user 'Eddie'
+FEATURE:	Added enhanced notepad demo by user 'Abhishek'
+FEATURE:	Added GOS module (including sub modules such as GQUEUE)
+FEATURE:	Added some functionalities to the TDISP module by user 'Frysk'
+
+
+*** changes after 1.4 ***
+FEATURE:	GEVENT - for passing event structures from Sources to Listeners
+FEATURE:	GTIMER - thread context based once-off and periodic timers.
+FEATURE:	GINPUT - extensible, multiple device-type, input sub-system.
+FEATURE:	GWIN - full button, console and graph support
+FEATURE:	Numerous touch calibration improvements
+FEATURE:	Win32 driver - now support gdisp & ginput mouse/touch/toggle
+FEATURE:	Win32 driver - full gdisp orientation support
+FEATURE:	ILI9320 GDISP driver
+FEATURE:	Nokia6610 GDISP driver split in to GE8 and GE12 variants
+FEATURE:	Many GDISP drivers changed to use a board interface definition
+FEATURE:	GFX source restructure with new gfx.h include file.
+DEPRECATE:	console deprecated - replaced with gwin functionality
+DEPRECATE:	graph deprecated - replaced with gwin functionality
+DEPRECATE:	touchscreen deprecated - replaced with ginput functionality
+FEATURE:	Numerous documentation improvements
+FEATURE:	Added a number of module demo and test programs
+DEPRECATE:	Remove of XPT2046 since full compatibility with ADS7843
+
+
+*** changes after 1.3 ***
+FIX:		Nokia 6610 fix
+FEATURE:	New driver: Win32
+FEATURE:	implementation of gdispFillArc()
+FIX:		Hardware accelerate Arc routines
+FIX:		Fix axis orientation for Arc routines
+FEATURE:	new gdisp rounded box routines
+FEATURE:	new gdispDrawStringBox()
+FEATURE:	GWIN infrastructure
+FEATURE:	now we fully support doxygen
+
+
+*** changes after 1.2 ***
+FEATURE:	added FSMC for SSD1289 / F4
+FEATURE:	added calibration storage interface
+FIX:		bugfix in filling functions for SSD1289
+FEATURE:	added point_t struct in gdisp.h
+FEATURE:	added graph module
+
+
+*** changer after 1.1 ***
+FIX:		orientation macros changed
+FIX:		huge internal bugfix in orientation stuff (big thanks to Abhishek)
+FEATURE:	added TOUCHPAD_XY_INVERTED macro
+FIX:		struct cal   renamed to   struct cal_t
+FIX:		SCREEN_WIDTH and SCREEN_HEIGHT renamed to GDISP_SCREEN_WIDTH and GDISP_SCREEN_HEIGHT
+FIX:		struct TOUCHPAD_t   renamed to   struct TOUCHPADDriver_t
+FIX:		struct GConsole   renamed to   struct GConsole_t
+FIX:		lcdConsoleXXX()   functions have been renamed to   gfxConsoleXXX()
+FEATURE:	FSMC for SSD1289 F2/F4
+
+
+*** changes after 1.0 ***
+FIX:		removed gdisp and touchpad prefix of driver directories
+UPDATE:		added SSD1963 driver
+FIX:		fixed Validation, VMT driver, console and BitBlit
+FEATURE:	added clipping support
+FEATURE:	addad gdispDrawArc()
+FEATURE:	added SSD1963 DMA support
+FEATURE:	added touchpad interface for storing calibration values (#define TOUCHPAD_STORE_CALIBRATION)
+CHANGE:		replaced every  GDISP_XXX  macro with  GDISP_XXX
+CHANGE:		removed last digit of version number
+

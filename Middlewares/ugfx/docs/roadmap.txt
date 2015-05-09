@@ -1,0 +1,15 @@
+Things to include in 2.1   (Q2 2014)
+	- VS1053 audio driver
+	- FreeRTOS port (finalize)
+	- GWIN children support (finalize)
+	- Rreplace the console printf with the one from GFILE
+
+
+Things to include in 2.2	(unknown)
+	- Support Mikromedia STM32+ board
+	- Virtual keyboard widget
+	- LineEdit widget
+	- RAM file system for GFILE
+	- FatFS file system for GFILE
+	- Improve visual aspects of widgets (use gfxBlend())
+	- Linux frame buffer support
