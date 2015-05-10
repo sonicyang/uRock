@@ -178,7 +178,7 @@
     #define GWIN_NEED_RADIO                          TRUE
     #define GWIN_NEED_LIST                           TRUE
 //        #define GWIN_NEED_LIST_IMAGES                FALSE
-//    #define GWIN_NEED_PROGRESSBAR                    FALSE
+    #define GWIN_NEED_PROGRESSBAR                    TRUE
 //        #define GWIN_PROGRESSBAR_AUTO                FALSE
 //    #define GWIN_NEED_KEYBOARD                       FALSE
 //        #define GWIN_KEYBOARD_DEFAULT_LAYOUT         VirtualKeyboard_English1
