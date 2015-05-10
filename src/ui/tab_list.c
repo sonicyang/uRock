@@ -13,7 +13,6 @@
 
 #include "ui.h"
 
-extern struct Effect_t *effectList[STAGE_NUM];
 extern uint32_t selectedEffectStage;
 
 void tab_list_refresh(void* opaque){
@@ -21,12 +20,8 @@ void tab_list_refresh(void* opaque){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
-        if (effectList[i]){
-            gwinSetText(tmp->label_effectName[i], effectList[i]->name, 0);
+        gwinSetText(tmp->label_effectName[i], retriveEffectStageName(i), 0);
 
-        }else{
-            gwinSetText(tmp->label_effectName[i], "", 0);
-        }
         if(i == selectedEffectStage){
             gwinSetText(tmp->btn_effectIndicate[i], "->", 0);
         }else{
