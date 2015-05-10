@@ -18,6 +18,8 @@ void tab_select_effect_show(void* opaque){
 		gwinSetVisible(tmp->btn_effectTypes[i], TRUE);
 	}
 
+    gwinSetVisible(tmp->btn_back, TRUE);
+
 	return;
 }
 
@@ -28,6 +30,8 @@ void tab_select_effect_hide(void* opaque){
 	for(i = 0; i < EFFECT_TYPE_NUM; i++){
 		gwinSetVisible(tmp->btn_effectTypes[i], FALSE);
 	}
+
+    gwinSetVisible(tmp->btn_back, FALSE);
 
 	return;
 }
@@ -47,7 +51,7 @@ void tab_select_effect_bHandle(void* opaque, GEventGWinButton* event){
 		}
 	}
 
-	if ((event)->gwin == tmp->btn_effectTypes[EFFECT_TYPE_NUM -1]){
+	if ((event)->gwin == tmp->btn_back){
 		SwitchTab(LIST_TAB);
 	}
 
@@ -59,7 +63,7 @@ struct tab_t *tab_select_effect_init(struct tab_select_effect_t* opaque){
 	GWidgetInit wi;
 
 	/* SelectStageTab */
-	for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
+	for(i = 0; i < EFFECT_TYPE_NUM; i++){
 		gwinWidgetClearInit(&wi);
 		wi.g.show = FALSE;
 		wi.g.x = 5;
@@ -77,7 +81,7 @@ struct tab_t *tab_select_effect_init(struct tab_select_effect_t* opaque){
 	wi.g.width = 230;
 	wi.g.height = 20;
 	wi.text = "Back";
-	opaque->btn_effectTypes[EFFECT_TYPE_NUM - 1] = gwinButtonCreate(NULL, &wi);
+	opaque->btn_back = gwinButtonCreate(NULL, &wi);
 
 	opaque->parent.show = tab_select_effect_show;
 	opaque->parent.hide = tab_select_effect_hide;
