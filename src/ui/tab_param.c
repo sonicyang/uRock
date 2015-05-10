@@ -18,8 +18,8 @@ void tab_param_show(void* opaque){
 
     gwinSetVisible(tmp->label_effectTitle, TRUE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
-        gwinSetVisible(tmp->label_param[i], TRUE);
-        gwinSetVisible(tmp->vbar_param[i], TRUE);
+        gwinSetVisible(tmp->label_param[i], FALSE);
+        gwinSetVisible(tmp->vbar_param[i], FALSE); //Let Refresh do the job
     }
 
     gwinSetVisible(tmp->btn_back, TRUE);
@@ -47,17 +47,18 @@ void tab_param_refresh(void* opaque){
     struct parameter_t *parameterList[5];
     uint8_t paraNum;
     char buf[32];
-    uint32_t i;
+    uint32_t i = 0;
+
+    strcpy(buf, "Stage ");
+    itoa(selectedEffectStage + 1, buf + 6);
+    strcat(buf, " : ");
 
     if (retriveStagedEffect(selectedEffectStage)){
-        strcpy(buf, "Stage ");
-        itoa(selectedEffectStage + 1, buf + 6);
-        strcat(buf, " : ");
         strcat(buf, retriveStagedEffect(selectedEffectStage)->name);
         gwinSetText(tmp->label_effectTitle, buf, 1);
 
         retriveStagedEffect(selectedEffectStage)->getParam((void*)retriveStagedEffect(selectedEffectStage), parameterList, &paraNum);
-        for(i = 0; i < paraNum; i++){
+        for(;i < paraNum; i++){
             gwinSetVisible(tmp->label_param[i], TRUE);
             gwinSetText(tmp->label_param[i], parameterList[i]->name, 0);
 
@@ -68,8 +69,10 @@ void tab_param_refresh(void* opaque){
         }
         i = paraNum;
     }else{
-        gwinSetText(tmp->label_effectTitle, "", 0);
+        strcat(buf, "Empty");
+        gwinSetText(tmp->label_effectTitle, buf, 1);
     }
+
     for(; i < MAX_EFFECT_PARAM; i++){
         gwinSetVisible(tmp->vbar_param[i], FALSE);
         gwinSetVisible(tmp->label_param[i], FALSE);
