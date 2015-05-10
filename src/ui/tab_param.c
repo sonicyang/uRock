@@ -23,6 +23,7 @@ void tab_param_show(void* opaque){
     }
 
     gwinSetVisible(tmp->btn_back, TRUE);
+    gwinSetVisible(tmp->btn_change, TRUE);
 
     return;
 }
@@ -38,6 +39,7 @@ void tab_param_hide(void* opaque){
     }
     
     gwinSetVisible(tmp->btn_back, FALSE);
+    gwinSetVisible(tmp->btn_change, FALSE);
 
     return;
 }
@@ -86,6 +88,8 @@ void tab_param_bHandle(void* opaque, GEventGWinButton* event){
 
     if ((event)->gwin == tmp->btn_back){
         SwitchTab(LIST_TAB);
+    }else if ((event)->gwin == tmp->btn_change){
+        SwitchTab(SELECT_EFFECT_TAB);
     }
     return;
 }
@@ -97,8 +101,8 @@ struct tab_t *tab_param_init(struct tab_param_t* opaque){
     /* ParamTab */
 	gwinWidgetClearInit(&wi);
 	wi.g.show = FALSE;
-	wi.g.x = 15;
-	wi.g.y = 30;
+	wi.g.x = 5;
+	wi.g.y = 10;
 	wi.g.width = (240 - 20);
 	wi.g.height = 25;
 	wi.text = "";
@@ -108,7 +112,7 @@ struct tab_t *tab_param_init(struct tab_param_t* opaque){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
         wi.g.x = 5;
-        wi.g.y = 35 + i * 55;
+        wi.g.y = 50 + i * 55;
         wi.g.width = (240 - 10);
         wi.g.height = 20;
         wi.text = "";
@@ -126,6 +130,15 @@ struct tab_t *tab_param_init(struct tab_param_t* opaque){
     wi.g.height = 45;
     wi.text = "Back";
     opaque->btn_back = gwinButtonCreate(NULL, &wi);
+
+    gwinWidgetClearInit(&wi);
+    wi.g.show = FALSE;
+    wi.g.x = 10;
+    wi.g.y = 260;
+    wi.g.width = 100;
+    wi.g.height = 45;
+    wi.text = "Change";
+    opaque->btn_change = gwinButtonCreate(NULL, &wi);
 
     opaque->parent.show = tab_param_show;
     opaque->parent.hide = tab_param_hide;

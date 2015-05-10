@@ -47,12 +47,12 @@ void tab_select_effect_bHandle(void* opaque, GEventGWinButton* event){
 	for(i = 0; i < EFFECT_TYPE_NUM; i++){
 		if ((event)->gwin == tmp->btn_effectTypes[i]){
             attachEffect(selectedEffectStage, i);
-			SwitchTab(LIST_TAB);
+			SwitchTab(PARAM_TAB);
 		}
 	}
 
 	if ((event)->gwin == tmp->btn_back){
-		SwitchTab(LIST_TAB);
+        SwitchTab(PARAM_TAB);
 	}
 
 	return;

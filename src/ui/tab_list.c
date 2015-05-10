@@ -28,6 +28,7 @@ void tab_list_refresh(void* opaque){
         if(retriveStagedEffect(i)){
             strcat(buf, " ");
             strcat(buf, retriveStagedEffect(i)->name);
+            buf[8] = '\0';
         }else{
             strcat(buf, " Empty");
         }
