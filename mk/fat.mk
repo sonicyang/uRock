@@ -2,11 +2,9 @@ FATOUTDIR = FATLib
 
 FATSRCDIR = Middlewares/Third_Party/FatFs/src \
 			Middlewares/Third_Party/FatFs/src/drivers \
-			Middlewares/Third_Party/FatFs/src/option
 
 FATINCDIR = Middlewares/Third_Party/FatFs/src \
 			Middlewares/Third_Party/FatFs/src/drivers \
-			Middlewares/Third_Party/FatFs/src/option
 
 FATSRC += $(wildcard $(addsuffix /*.c,$(FATSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(FATSRCDIR)))
