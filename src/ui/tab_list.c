@@ -20,12 +20,19 @@ extern uint32_t selectedEffectStage;
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
+    char buf[32];
 
     for(i = 0; i < STAGE_NUM; i++){
-        if(retriveStagedEffect(i))
-            gwinSetText(tmp->btn_effectIndicate[i], retriveStagedEffect(i)->name, 0);
-        else
-            gwinSetText(tmp->btn_effectIndicate[i], "", 0);
+        itoa(i + 1, buf);
+
+        if(retriveStagedEffect(i)){
+            strcat(buf, " ");
+            strcat(buf, retriveStagedEffect(i)->name);
+        }else{
+            strcat(buf, " Empty");
+        }
+
+        gwinSetText(tmp->btn_effectIndicate[i], buf, 1);
     }
 
     return;
