@@ -48,12 +48,18 @@
 //extern FATFS FatFs;
 //extern FIL fil;
 
-extern DMA_HandleTypeDef hdma_adc2;
 extern ADC_HandleTypeDef hadc2;
 
-extern struct Effect_t *EffectList[STAGE_NUM];
 extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
-extern int8_t controllingStage;
+
+enum{
+	LIST_TAB,
+	PARAM_TAB,
+	SELECT_EFFECT_TAB,
+	TAB_NUM
+};
+struct tab_t *tabs[TAB_NUM];
+struct tab_t *current_tab = NULL;
 
 struct tab_list_t listTab;
 struct tab_param_t paramTab;
@@ -61,8 +67,6 @@ struct tab_select_effect_t selectEffectTab;
 
 uint8_t currentConfig;
 
-struct tab_t *tabs[TAB_NUM];
-struct tab_t *current_tab = NULL;
 
 static GListener gl;
 
@@ -71,6 +75,7 @@ static uint32_t tabState = 0;
 uint8_t potValues[2][4];
 
 GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
+
 
 void SwitchTab(uint32_t tab){
 	if(current_tab)
@@ -82,7 +87,7 @@ void SwitchTab(uint32_t tab){
 	tabState = tab;
 	return;
 }
-
+/*
 void StageEffectSelect(uint8_t whichEffect){
 	struct Effect_t *recycle = EffectList[controllingStage];
 
@@ -121,7 +126,7 @@ void StageEffectSelect(uint8_t whichEffect){
 		recycle->del(recycle);
 	}
 
-	/* Reset value in this stage */
+// Reset value in this stage 
 	ValueForEachStage[controllingStage][0] = 0;
 	ValueForEachStage[controllingStage][1] = 0;
 	ValueForEachStage[controllingStage][2] = 0;
@@ -130,8 +135,9 @@ void StageEffectSelect(uint8_t whichEffect){
 		EffectList[controllingStage]->adj(EffectList[controllingStage], ValueForEachStage[0]);
 	}
 }
+*/
 
-void UserInterface(void *argument){
+void UserInterface(void const *argument){
 	GEvent* event;
 	uint32_t i;
 	uint32_t diff, cnt, orig;
@@ -139,10 +145,12 @@ void UserInterface(void *argument){
 
 	currentConfig = 0;
 
+    /*
     buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
     buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
     buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
     buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+    */
 
 	//if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
@@ -151,23 +159,18 @@ void UserInterface(void *argument){
 
 	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
 	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
-	vTaskDelay(100);
 	// Attach the mouse input
 
+    
 	// create the widget
 	tabs[LIST_TAB] = tab_list_init(&listTab); 
-	tabs[PARAM_TAB] = tab_param_init(&paramTab); 
-	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
-
-	// We want to listen for widget events
-	geventListenerInit(&gl);
-	gwinAttachListener(&gl);
-
+	//tabs[PARAM_TAB] = tab_param_init(&paramTab); 
+	//tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
 	SwitchTab(LIST_TAB);
 
 	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
 
-	ReadStageSetting(0);
+	//ReadStageSetting(0);
 
 	while(1) {
 		// Get an Event
@@ -189,7 +192,8 @@ void UserInterface(void *argument){
                potApply[i] = potValues[1][i];
 		    }
         }
-
+        
+        /*
 		if(diff){
 			if(EffectList[controllingStage]){
 				EffectList[controllingStage]->adj(EffectList[controllingStage], potApply);
@@ -205,8 +209,8 @@ void UserInterface(void *argument){
                 potValues[1][i] = potApply[i];
             }
 		}
-
-
+        */
+        /*
 		if(cnt == 50){
 			SwitchTab(orig);
 			SaveStageSetting(currentConfig);
@@ -214,9 +218,9 @@ void UserInterface(void *argument){
 		}else if(cnt < 50){
 			cnt++;
 		}
-        
+        */
 		current_tab->refresh(current_tab);
-        
+        /*
         if(tabState == LIST_TAB){
             if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
                 buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
@@ -243,8 +247,8 @@ void UserInterface(void *argument){
                 ReadStageSetting(currentConfig);
             }
         }
+        */
 	}
 
-	while(1){
-	}
+	while(1);
 }
