@@ -35,66 +35,12 @@ uint8_t transmitPipeHead = 0;
 uint8_t pipeUsage = 0;
 q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
-
 struct Effect_t *effectList[STAGE_NUM];
 uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
-int8_t controllingStage = 0;
     
 int16_t wavData[4200];
 
 extern uint8_t potRawValues[4];
-
-void attachNewEffect(uint32_t stage, EffectType_t effectType){
-	if(effectList[stage])
-		effectList[stage]->del(effectList[stage]);
-    //XXX: Probably need to return to RTOS for truly releasing memory
-    
-
-	switch(effectType){
-        case NONE:
-            effectList[stage] = NULL;
-            break;
-        case VOLUME:
-            effectList[stage] = new_Volume();
-            break;
-        case COMPRESSOR:
-            effectList[stage] = new_Compressor();
-            break;
-        case DISTORTION:
-            effectList[stage] = new_Distortion();
-            break;
-        case OVERDRIVE:
-            effectList[stage] = new_Overdrive();
-            break;
-        case DELAY:
-            effectList[stage] = new_Delay();
-            break;
-        case REVERB:
-            effectList[stage] = new_Reverb();
-            break;
-        case FLANGER:
-            effectList[stage] = new_Flanger();
-            break;
-        case EQULIZER:
-            effectList[stage] = new_Equalizer();
-            break;
-        default:
-            assert_param(0);
-            effectList[stage] = NULL;
-            break;
-	}
-     
-    return;
-}
-
-void demolishEffect(uint32_t stage){
-	if(effectList[stage])
-		effectList[stage]->del(effectList[stage]);
-
-    effectList[stage] = NULL;
-
-    return;
-}
 
 void SignalProcessingUnit(void const * argument){
     uint32_t i;
@@ -189,4 +135,73 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
 
     pipeUsage--;
     return;
+}
+
+void attachEffect(uint32_t stage, EffectType_t effectType){
+	if(effectList[stage])
+		effectList[stage]->del(effectList[stage]);
+    //XXX: Probably need to return to RTOS for truly releasing memory
+    
+
+	switch(effectType){
+        case NONE:
+            effectList[stage] = NULL;
+            break;
+        case VOLUME:
+            effectList[stage] = new_Volume();
+            break;
+        case COMPRESSOR:
+            effectList[stage] = new_Compressor();
+            break;
+        case DISTORTION:
+            effectList[stage] = new_Distortion();
+            break;
+        case OVERDRIVE:
+            effectList[stage] = new_Overdrive();
+            break;
+        case DELAY:
+            effectList[stage] = new_Delay();
+            break;
+        case REVERB:
+            effectList[stage] = new_Reverb();
+            break;
+        case FLANGER:
+            effectList[stage] = new_Flanger();
+            break;
+        case EQULIZER:
+            effectList[stage] = new_Equalizer();
+            break;
+        default:
+            assert_param(0);
+            effectList[stage] = NULL;
+            break;
+	}
+     
+    return;
+}
+
+const char *cvtToEffectName(EffectType_t ee){
+	switch(ee){
+        case NONE:
+            return "None";
+        case VOLUME:
+            return "Volume";
+        case COMPRESSOR:
+            return "Compressor";
+        case DISTORTION:
+            return "Distortion";
+        case OVERDRIVE:
+            return "OverDrive";
+        case DELAY:
+            return "Delay";
+        case REVERB:
+            return "Reverb";
+        case FLANGER:
+            return "Flanger";
+        case EQULIZER:
+            return "Equalizer";
+        default:
+            return "Error Cvt";
+	}
+    return "Error Cvt";
 }
