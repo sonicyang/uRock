@@ -8,29 +8,7 @@
 #include "setting.h"
 #include "ui.h"
 
-static char *cvtToEffectName(uint32_t ee){
-	switch(ee){
-	case VOL:
-		return "Volume";
-	case COMP:
-		return "Compressor";
-	case DISTOR:
-		return "Distortion";
-	case OVERDR:
-		return "OverDrive";
-	case DELAY:
-		return "Delay";
-	case REVERB:
-		return "Reverb";
-	case FLANGE:
-		return "Flanger";
-	case EQULIZ:
-		return "Equalizer";
-	default:
-		return "None";
-	}
-	return "None";
-}
+extern uint32_t selectedEffectStage;
 
 void tab_select_effect_show(void* opaque){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
@@ -58,21 +36,21 @@ void tab_select_effect_refresh(void* opaque){
 	return;
 }
 
-void tab_select_effect_eHandle(void* opaque, GEventGWinButton* event){
+void tab_select_effect_bHandle(void* opaque, GEventGWinButton* event){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
 	uint32_t i;
-/*
-	for(i = 0; i < EFFECT_TYPE_NUM - 1; i++){
-		if ((event)->button == tmp->btn_effectTypes[i]){
-			StageEffectSelect(i);
+
+	for(i = 0; i < EFFECT_TYPE_NUM; i++){
+		if ((event)->gwin == tmp->btn_effectTypes[i]){
+            attachEffect(selectedEffectStage, i);
 			SwitchTab(LIST_TAB);
 		}
 	}
 
-	if ((event)->button == tmp->btn_effectTypes[EFFECT_TYPE_NUM -1]){
+	if ((event)->gwin == tmp->btn_effectTypes[EFFECT_TYPE_NUM -1]){
 		SwitchTab(LIST_TAB);
 	}
-*/
+
 	return;
 }
 
@@ -104,7 +82,7 @@ struct tab_t *tab_select_effect_init(struct tab_select_effect_t* opaque){
 	opaque->parent.show = tab_select_effect_show;
 	opaque->parent.hide = tab_select_effect_hide;
 	opaque->parent.refresh = tab_select_effect_refresh;
-	opaque->parent.eHandle = tab_select_effect_eHandle;
+	opaque->parent.bHandle = tab_select_effect_bHandle;
 
 	return (struct tab_t*)opaque;
 }

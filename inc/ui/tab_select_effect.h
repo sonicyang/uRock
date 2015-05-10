@@ -3,6 +3,8 @@
 
 #include "tab_base.h"
 
+#include "spu.h"
+
 #include "setting.h"
 
 #include "gfxconf.h"
@@ -11,7 +13,7 @@
 struct tab_select_effect_t{
     struct tab_t parent;
 
-    GHandle btn_effectTypes[EFFECT_TYPE_NUM];
+    GHandle btn_effectTypes[EFFECT_TYPE_NUM + 1];
 };
 
 struct tab_t *tab_select_effect_init(struct tab_select_effect_t* opaque);

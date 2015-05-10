@@ -49,7 +49,6 @@
 //extern FIL fil;
 
 extern ADC_HandleTypeDef hadc2;
-
 extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 
 struct tab_t *tabs[TAB_NUM];
@@ -59,8 +58,9 @@ struct tab_list_t listTab;
 struct tab_param_t paramTab;
 struct tab_select_effect_t selectEffectTab;
 
-uint8_t currentConfig;
+uint32_t selectedEffectStage = 0;
 
+uint8_t currentConfig;
 
 static GListener gl;
 
@@ -111,7 +111,7 @@ void UserInterface(void const *argument){
 	// create the widget
 	tabs[LIST_TAB] = tab_list_init(&listTab); 
 	//tabs[PARAM_TAB] = tab_param_init(&paramTab); 
-	//tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
+	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
 	SwitchTab(LIST_TAB);
 
 	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4

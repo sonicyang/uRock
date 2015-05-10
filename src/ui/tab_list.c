@@ -1,6 +1,7 @@
 #include "tab_list.h"
 
 #include "base-effect.h"
+#include "spu.h"
 
 #include "gfxconf.h"
 #include "gfx.h"
@@ -13,7 +14,7 @@
 #include "ui.h"
 
 extern struct Effect_t *effectList[STAGE_NUM];
-extern int8_t controllingStage;
+extern uint32_t selectedEffectStage;
 
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
@@ -26,7 +27,7 @@ void tab_list_refresh(void* opaque){
         }else{
             gwinSetText(tmp->label_effectName[i], "", 0);
         }
-        if(i == controllingStage){
+        if(i == selectedEffectStage){
             gwinSetText(tmp->btn_effectIndicate[i], "->", 0);
         }else{
             gwinSetText(tmp->btn_effectIndicate[i], "", 0);
@@ -42,13 +43,13 @@ void tab_list_bHandle(void* opaque, GEventGWinButton* event){
     
     for(i = 0; i < STAGE_NUM; i++){
         if ((event)->gwin == tmp->btn_effectIndicate[i]){
-            controllingStage = i;
+            selectedEffectStage = i;
         }
     }
 
     for(i = 0; i < STAGE_NUM; i++){
         if ((event)->gwin == tmp->btn_effectSwitch[i]){
-            controllingStage = i;
+            selectedEffectStage = i;
             SwitchTab(SELECT_EFFECT_TAB);
         }
     }
