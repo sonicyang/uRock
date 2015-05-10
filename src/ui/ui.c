@@ -203,6 +203,7 @@ void SwitchTab(uint32_t tabSwitching){
 	tabs[currentTabNumber]->hide(tabs[currentTabNumber]);
 	currentTabNumber = tabSwitching;
 	tabs[currentTabNumber]->show(tabs[currentTabNumber]);
+    tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
 
 	return;
 }
