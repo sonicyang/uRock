@@ -13,6 +13,8 @@
 
 #include "ui.h"
 
+#include "helper.h"
+
 extern uint32_t selectedEffectStage;
 
 void tab_list_refresh(void* opaque){
@@ -21,15 +23,9 @@ void tab_list_refresh(void* opaque){
 
     for(i = 0; i < STAGE_NUM; i++){
         if(retriveStagedEffect(i))
-            gwinSetText(tmp->label_effectName[i], retriveStagedEffect(i)->name, 0);
+            gwinSetText(tmp->btn_effectIndicate[i], retriveStagedEffect(i)->name, 0);
         else
-            gwinSetText(tmp->label_effectName[i], "", 0);
-
-        if(i == selectedEffectStage){
-            gwinSetText(tmp->btn_effectIndicate[i], "->", 0);
-        }else{
             gwinSetText(tmp->btn_effectIndicate[i], "", 0);
-        }
     }
 
     return;
@@ -42,13 +38,14 @@ void tab_list_bHandle(void* opaque, GEventGWinButton* event){
     for(i = 0; i < STAGE_NUM; i++){
         if ((event)->gwin == tmp->btn_effectIndicate[i]){
             selectedEffectStage = i;
+            SwitchTab(PARAM_TAB);
         }
     }
 
     for(i = 0; i < STAGE_NUM; i++){
         if ((event)->gwin == tmp->btn_effectSwitch[i]){
             selectedEffectStage = i;
-            SwitchTab(SELECT_EFFECT_TAB);
+            SwitchTab(PARAM_TAB);
         }
     }
     /*
@@ -78,12 +75,12 @@ void tab_list_show(void* opaque){
     gwinSetVisible(tmp->label_uRock, TRUE);
     for(i = 0; i < STAGE_NUM; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], TRUE);
-        gwinSetVisible(tmp->label_effectName[i], TRUE);
-        gwinSetVisible(tmp->btn_effectSwitch[i], TRUE);
+        //gwinSetVisible(tmp->label_effectName[i], TRUE);
+        //gwinSetVisible(tmp->btn_effectSwitch[i], TRUE);
     }
 
-    gwinSetVisible(tmp->btn_playWav, TRUE);
-    gwinSetVisible(tmp->btn_recordWav, TRUE);
+    //gwinSetVisible(tmp->btn_playWav, TRUE);
+    //gwinSetVisible(tmp->btn_recordWav, TRUE);
 
     return;
 }
@@ -95,12 +92,12 @@ void tab_list_hide(void* opaque){
     gwinSetVisible(tmp->label_uRock, FALSE);
     for(i = 0; i < STAGE_NUM; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], FALSE);
-        gwinSetVisible(tmp->label_effectName[i], FALSE);
-        gwinSetVisible(tmp->btn_effectSwitch[i], FALSE);
+        //gwinSetVisible(tmp->label_effectName[i], FALSE);
+        //gwinSetVisible(tmp->btn_effectSwitch[i], FALSE);
     }
 
-    gwinSetVisible(tmp->btn_playWav, FALSE);
-    gwinSetVisible(tmp->btn_recordWav, FALSE);
+    //gwinSetVisible(tmp->btn_playWav, FALSE);
+    //gwinSetVisible(tmp->btn_recordWav, FALSE);
 
     return;
 }
@@ -108,46 +105,49 @@ void tab_list_hide(void* opaque){
 struct tab_t *tab_list_init(struct tab_list_t* opaque){
     uint32_t i;
     GWidgetInit wi;
+    char buf[3];
 
     /* StageTab */
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 0;
+    wi.g.x = 30;
     wi.g.y = 0;
-    wi.g.width = 100;
+    wi.g.width = 240;
     wi.g.height = 20;
-    wi.text = "uRock";
+    wi.text = "uRock : YouRock";
     opaque->label_uRock = gwinLabelCreate(NULL, &wi);
 
-    for(i = 0; i < STAGE_NUM; i++){
+    for(i = 0; i < STAGE_NUM / 2; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
         wi.g.x = 10;
-        wi.g.y = 50 + 40 * i;
-        wi.g.width = 30;
-        wi.g.height = 30;
+        wi.g.y = 50 + 60 * i;
+        wi.g.width = 100;
+        wi.g.height = 50;
+        wi.text = "";
+        opaque->btn_effectIndicate[i] = gwinButtonCreate(NULL, &wi);
+    }
+    for(; i < STAGE_NUM; i++){
+        gwinWidgetClearInit(&wi);
+        wi.g.show = FALSE;
+        wi.g.x = 130;
+        wi.g.y = 50 + 60 * (7 - i);
+        wi.g.width = 100;
+        wi.g.height = 50;
         wi.text = "";
         opaque->btn_effectIndicate[i] = gwinButtonCreate(NULL, &wi);
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 50;
-        wi.g.y = 50 + 40 * i;
-        wi.g.width = 140;
-        wi.g.height = 30;
-        wi.text = "";
+        wi.g.x = 130;
+        wi.g.y = 90 + 60 * (7 - i);
+        wi.g.width = 10;
+        wi.g.height = 10;
+        itoa(i, buf);
+        wi.text = buf;
         opaque->label_effectName[i] = gwinLabelCreate(NULL, &wi);
-
-        gwinWidgetClearInit(&wi);
-        wi.g.show = FALSE;
-        wi.g.x = 200;
-        wi.g.y = 50 + 40 * i;
-        wi.g.width = 30;
-        wi.g.height = 30;
-        wi.text = "";
-        opaque->btn_effectSwitch[i] = gwinButtonCreate(NULL, &wi);
     }
-
+/*
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
     wi.g.x = 10;
@@ -165,11 +165,12 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     wi.g.height = 100;
     wi.text = "R";
     opaque->btn_recordWav = gwinButtonCreate(NULL, &wi);
-
+    */
     opaque->parent.show = tab_list_show;
     opaque->parent.hide = tab_list_hide;
     opaque->parent.refresh = tab_list_refresh;
     opaque->parent.bHandle = tab_list_bHandle;
+    
 
     return (struct tab_t*)opaque;
 }

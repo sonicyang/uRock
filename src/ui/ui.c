@@ -103,7 +103,7 @@ void UserInterface(void const *argument){
 	gfxInit();
 	gdispClear(Black);
 
-	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
+	gwinSetDefaultFont(gdispOpenFont("DejaVuSans20"));
 	gwinSetDefaultStyle(&BlackWidgetStyle, FALSE);
     geventListenerInit(&gl);
     gwinAttachListener(&gl);
