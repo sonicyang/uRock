@@ -33,33 +33,5 @@
 // If TRUE this is a really slow CPU and we should always clear the FIFO between reads.
 #define GMOUSE_STMPE811_SLOW_CPU				FALSE
 
-static bool_t init_board(GMouse* m, unsigned driverinstance) {
-
-    return TRUE;
-}
-
-#if GMOUSE_STMPE811_GPIO_IRQPIN
-	static bool_t getpin_irq(GMouse* m) {
-
-        return TRUE;
-	}
-#endif
-
-static inline void aquire_bus(GMouse* m) {
-}
-
-static inline void release_bus(GMouse* m) {
-}
-
-static void write_reg(GMouse* m, uint8_t reg, uint8_t val) {
-}
-
-static uint8_t read_byte(GMouse* m, uint8_t reg) {
-    return 0;
-}
-
-static uint16_t read_word(GMouse* m, uint8_t reg) {
-    return 0;
-}
 
 #endif /* _GINPUT_LLD_MOUSE_BOARD_H */
