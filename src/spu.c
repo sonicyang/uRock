@@ -44,6 +44,8 @@ int16_t wavData[4200];
 
 extern uint8_t potRawValues[4];
 
+#include "gfx.h"
+
 void SignalProcessingUnit(void const * argument){
     uint32_t i;
 
@@ -51,7 +53,9 @@ void SignalProcessingUnit(void const * argument){
         effectList[i] = NULL;
     }
 
-    effectList[0] = new_Volume(); 
+    gfxInit();
+
+//    effectList[0] = new_Volume(); 
 
     /* Semaphore Blocker setup*/ 
     osSemaphoreDef(SPUH);
