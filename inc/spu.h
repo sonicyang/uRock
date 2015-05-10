@@ -11,13 +11,12 @@ typedef enum {
     REVERB,
     FLANGER,
     EQULIZER,
-    BACK,
     EFFECT_TYPE_NUM
 } EffectType_t;
 
 void SignalProcessingUnit(void const * argument);
 
-void attachNewEffect(uint32_t stage, EffectType_t effectType);
-void demolishEffect(uint32_t stage);
+void attachEffect(uint32_t stage, EffectType_t effectType);
+const char *cvtToEffectName(EffectType_t ee);
 
 #endif //__SPU_H__
