@@ -20,7 +20,10 @@ void tab_list_refresh(void* opaque){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
-        gwinSetText(tmp->label_effectName[i], retriveEffectStageName(i), 0);
+        if(retriveStagedEffect(i))
+            gwinSetText(tmp->label_effectName[i], retriveStagedEffect(i)->name, 0);
+        else
+            gwinSetText(tmp->label_effectName[i], "", 0);
 
         if(i == selectedEffectStage){
             gwinSetText(tmp->btn_effectIndicate[i], "->", 0);

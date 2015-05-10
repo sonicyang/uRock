@@ -206,8 +206,6 @@ const char *cvtToEffectName(EffectType_t ee){
     return "Error Cvt";
 }
 
-const char *retriveEffectStageName(uint32_t stage){
-    if(effectList[stage])
-        return effectList[stage]->name;
-    return "";
+const struct Effect_t* const retriveStagedEffect(uint32_t stage){
+    return (const struct Effect_t* const)effectList[stage];
 }
