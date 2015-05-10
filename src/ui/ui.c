@@ -101,16 +101,16 @@ void UserInterface(void const *argument){
 	//if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 
 	gfxInit();
-	gdispClear(White);
+	gdispClear(Black);
 
 	gwinSetDefaultFont(gdispOpenFont("DejaVuSans16"));
-	gwinSetDefaultStyle(&WhiteWidgetStyle, FALSE);
+	gwinSetDefaultStyle(&BlackWidgetStyle, FALSE);
     geventListenerInit(&gl);
     gwinAttachListener(&gl);
     
 	// create the widget
 	tabs[LIST_TAB] = tab_list_init(&listTab); 
-	//tabs[PARAM_TAB] = tab_param_init(&paramTab); 
+	tabs[PARAM_TAB] = tab_param_init(&paramTab); 
 	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
 	SwitchTab(LIST_TAB);
 
