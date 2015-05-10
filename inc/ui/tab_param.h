@@ -14,6 +14,9 @@ struct tab_param_t{
     GHandle label_effectTitle;
     GHandle label_param[MAX_EFFECT_PARAM];
     GHandle vbar_param[MAX_EFFECT_PARAM];
+
+    GHandle btn_change;
+    GHandle btn_back;
 };
 
 struct tab_t *tab_param_init(struct tab_param_t* opaque);

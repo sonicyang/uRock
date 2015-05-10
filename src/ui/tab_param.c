@@ -1,6 +1,7 @@
 #include "tab_param.h"
 
 #include "spu.h"
+#include "ui.h"
 
 #include "gfxconf.h"
 #include "gfx.h"
@@ -21,6 +22,8 @@ void tab_param_show(void* opaque){
         gwinSetVisible(tmp->vbar_param[i], TRUE);
     }
 
+    gwinSetVisible(tmp->btn_back, TRUE);
+
     return;
 }
 
@@ -33,6 +36,8 @@ void tab_param_hide(void* opaque){
         gwinSetVisible(tmp->label_param[i], FALSE);
         gwinSetVisible(tmp->vbar_param[i], FALSE);
     }
+    
+    gwinSetVisible(tmp->btn_back, FALSE);
 
     return;
 }
@@ -74,6 +79,11 @@ void tab_param_refresh(void* opaque){
 }
 
 void tab_param_bHandle(void* opaque, GEventGWinButton* event){
+    struct tab_param_t *tmp = (struct tab_param_t*)opaque;
+
+    if ((event)->gwin == tmp->btn_back){
+        SwitchTab(LIST_TAB);
+    }
     return;
 }
 
@@ -95,15 +105,24 @@ struct tab_t *tab_param_init(struct tab_param_t* opaque){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
         wi.g.x = 5;
-        wi.g.y = 60 + i * 60;
+        wi.g.y = 35 + i * 55;
         wi.g.width = (240 - 10);
-        wi.g.height = 25;
+        wi.g.height = 20;
         wi.text = "";
         opaque->label_param[i] = gwinLabelCreate(NULL, &wi);
 
         wi.g.y += 25;
         opaque->vbar_param[i] = gwinProgressbarCreate(NULL, &wi);
     }
+
+    gwinWidgetClearInit(&wi);
+    wi.g.show = FALSE;
+    wi.g.x = 130;
+    wi.g.y = 260;
+    wi.g.width = 100;
+    wi.g.height = 45;
+    wi.text = "Back";
+    opaque->btn_back = gwinButtonCreate(NULL, &wi);
 
     opaque->parent.show = tab_param_show;
     opaque->parent.hide = tab_param_hide;
