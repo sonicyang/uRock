@@ -12,7 +12,7 @@
 
 #include "ui.h"
 
-extern struct Effect_t *effectList[STAGE_NUM];
+extern struct Effect_t *EffectList[STAGE_NUM];
 extern int8_t controllingStage;
 
 void tab_list_refresh(void* opaque){
@@ -20,8 +20,8 @@ void tab_list_refresh(void* opaque){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
-        if (effectList[i]){
-            gwinSetText(tmp->label_effectName[i], effectList[i]->name, 0);
+        if (EffectList[i]){
+            gwinSetText(tmp->label_effectName[i], EffectList[i]->name, 0);
 
         }else{
             gwinSetText(tmp->label_effectName[i], "", 0);
@@ -36,24 +36,24 @@ void tab_list_refresh(void* opaque){
     return;
 }
 
-void tab_list_bHandle(void* opaque, GEventGWinButton* event){
+void tab_list_eHandle(void* opaque, GEventGWinButton* event){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
-    
+    /*
     for(i = 0; i < STAGE_NUM; i++){
-        if ((event)->gwin == tmp->btn_effectIndicate[i]){
+        if ((event)->button == tmp->btn_effectIndicate[i]){
             controllingStage = i;
         }
     }
 
     for(i = 0; i < STAGE_NUM; i++){
-        if ((event)->gwin == tmp->btn_effectSwitch[i]){
+        if ((event)->button == tmp->btn_effectSwitch[i]){
             controllingStage = i;
             SwitchTab(SELECT_EFFECT_TAB);
         }
     }
-    /*
-    if ((event)->gwin == tmp->btn_playWav){
+
+    if ((event)->button == tmp->btn_playWav){
         if (EffectList[3])
             EffectList[3]->del(EffectList[3]);
 
@@ -61,14 +61,14 @@ void tab_list_bHandle(void* opaque, GEventGWinButton* event){
         //EffectList[3] = new_WavPlayer();
     }
 
-    if ((event)->gwin == tmp->btn_recordWav){
+    if ((event)->button == tmp->btn_recordWav){
         if (EffectList[3])
             EffectList[3]->del(EffectList[3]);
 
         vTaskDelay(1500 / portTICK_RATE_MS);
         //EffectList[3] = new_WavRecoder();
     }
-    */
+*/
     return;
 }
 
@@ -170,7 +170,7 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     opaque->parent.show = tab_list_show;
     opaque->parent.hide = tab_list_hide;
     opaque->parent.refresh = tab_list_refresh;
-    opaque->parent.bHandle = tab_list_bHandle;
+    opaque->parent.eHandle = tab_list_eHandle;
 
     return (struct tab_t*)opaque;
 }

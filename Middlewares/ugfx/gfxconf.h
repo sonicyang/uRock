@@ -230,8 +230,8 @@
 #define GINPUT_NEED_MOUSE                            TRUE
 //    #define GINPUT_TOUCH_STARTRAW                    FALSE
 //    #define GINPUT_TOUCH_NOTOUCH                     FALSE
-//    #define GINPUT_TOUCH_NOCALIBRATE                 FALSE
-//    #define GINPUT_TOUCH_NOCALIBRATE_GUI             FALSE
+    #define GINPUT_TOUCH_NOCALIBRATE                 TRUE
+    #define GINPUT_TOUCH_NOCALIBRATE_GUI             TRUE
 //    #define GINPUT_MOUSE_POLL_PERIOD                 25
 //    #define GINPUT_MOUSE_CLICK_TIME                  300
 //    #define GINPUT_TOUCH_CXTCLICK_TIME               700

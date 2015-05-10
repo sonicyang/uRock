@@ -7,13 +7,13 @@
 typedef void(*ShowFunc)(void *opaque);
 typedef void(*HideFunc)(void *opaque);
 typedef void(*RefreshFunc)(void *opaque);
-typedef void(*EventHandleFunc)(void *opaque, GEventGWinButton* event);
+typedef void(*ButtonEventHandleFunc)(void *opaque, GEventGWinButton* event);
 
 struct tab_t{
     ShowFunc show;
     HideFunc hide;
     RefreshFunc refresh;
-    EventHandleFunc eHandle;
+    ButtonEventHandleFunc bHandle;
 };
 
 #endif //__TAB_LIST_H__

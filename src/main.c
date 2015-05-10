@@ -40,6 +40,7 @@
 #include "stm32f429i_discovery_ts.h"
 
 #include "spu.h"
+#include "ui.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -55,6 +56,7 @@ DMA_HandleTypeDef hdma_sai1_b;
 DMA_HandleTypeDef hdma_adc2;
 
 osThreadId SPU_TaskHandle;
+osThreadId UI_TaskHandle;
 
 /* USER CODE BEGIN PV */
 
@@ -96,8 +98,6 @@ int main(void)
   MX_SAI1_Init();
   MX_ADC2_Init();
 
-  HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potRawValues, 3); //TODO: Make 4
-
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
@@ -117,6 +117,8 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadDef(SPU_Task, SignalProcessingUnit, osPriorityRealtime, 1, 1024);
   SPU_TaskHandle = osThreadCreate(osThread(SPU_Task), NULL);
+  osThreadDef(UI_Task, UserInterface, osPriorityNormal, 1, 2048);
+  UI_TaskHandle = osThreadCreate(osThread(UI_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

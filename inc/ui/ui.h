@@ -10,7 +10,7 @@ enum{
 	TAB_NUM
 };
 
-void UserInterface(void *argument);
+void UserInterface(void const *argument);
 void SwitchTab(uint32_t tab);
 void StageEffectSelect(uint8_t whichEffect);
 

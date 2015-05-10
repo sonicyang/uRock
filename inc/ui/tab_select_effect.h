@@ -8,20 +8,6 @@
 #include "gfxconf.h"
 #include "gfx.h"
 
-enum {
-    NONE,
-    VOL,
-    COMP,
-    DISTOR,
-    OVERDR,
-    DELAY,
-    REVERB,
-    FLANGE,
-    EQULIZ,
-    BACK,
-    EFFECT_TYPE_NUM
-};
-
 struct tab_select_effect_t{
     struct tab_t parent;
 
