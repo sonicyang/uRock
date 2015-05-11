@@ -11,6 +11,7 @@ UGFXSRCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/gdriver \
 			 Middlewares/ugfx/src/gqueue \
 			 Middlewares/ugfx/src/gox  \
+			 Middlewares/ugfx/src/gfile \
 			 Middlewares/ugfx/drivers/gdisp/STM32F429iDiscovery \
 			 Middlewares/ugfx/drivers/ginput/touch/STMPE811
 
@@ -23,6 +24,7 @@ UGFXINCDIR = Middlewares/ugfx \
 			 Middlewares/ugfx/src/gdriver \
 			 Middlewares/ugfx/src/gwin \
 			 Middlewares/ugfx/src/gos \
+			 Middlewares/ugfx/src/gfile \
 			 Middlewares/ugfx/drivers/gdisp/STM32F429iDiscovery \
 			 Middlewares/ugfx/drivers/ginput/touch/STMPE811
 
