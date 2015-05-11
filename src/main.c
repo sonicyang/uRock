@@ -50,10 +50,15 @@
 SAI_HandleTypeDef hsai_BlockA1;
 SAI_HandleTypeDef hsai_BlockB1;
 ADC_HandleTypeDef hadc2;
+SD_HandleTypeDef hsd;
 
 DMA_HandleTypeDef hdma_sai1_a;
 DMA_HandleTypeDef hdma_sai1_b;
 DMA_HandleTypeDef hdma_adc2;
+DMA_HandleTypeDef hdma_sdiorx;
+DMA_HandleTypeDef hdma_sdiotx;
+
+HAL_SD_CardInfoTypedef SDCardInfo;
 
 osThreadId SPU_TaskHandle;
 osThreadId UI_TaskHandle;
@@ -68,6 +73,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SAI1_Init(void);
 static void MX_ADC2_Init(void);
+static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
 
@@ -97,6 +103,7 @@ int main(void)
   MX_DMA_Init();
   MX_SAI1_Init();
   MX_ADC2_Init();
+  MX_SDIO_SD_Init();
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -285,6 +292,19 @@ void MX_ADC2_Init(void)
  
 }
 
+void MX_SDIO_SD_Init(void)
+{
+
+  hsd.Instance = SDIO;
+  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd.Init.ClockDiv = 5;
+  HAL_SD_Init(&hsd, &SDCardInfo);
+
+}
+
 /** 
   * Enable DMA controller clock
   */
@@ -298,6 +318,10 @@ void MX_DMA_Init(void)
   HAL_NVIC_EnableIRQ(DMA2_Stream4_IRQn);
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 7, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+  HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 8, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 
 }
 
@@ -312,7 +336,9 @@ void MX_GPIO_Init(void)
 {
 
   /* GPIO Ports Clock Enable */
+  __GPIOA_CLK_ENABLE();
   __GPIOC_CLK_ENABLE();
+  __GPIOD_CLK_ENABLE();
   __GPIOE_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
 

@@ -65,6 +65,9 @@ int SAI1_client =0;
 
 extern DMA_HandleTypeDef hdma_adc2;
 
+extern DMA_HandleTypeDef hdma_sdiorx;
+extern DMA_HandleTypeDef hdma_sdiotx;
+
 void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
 {
 
@@ -249,6 +252,91 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc){
  
     /* Peripheral DMA DeInit*/
      HAL_DMA_DeInit(hadc->DMA_Handle);
+  }
+}
+
+void HAL_SD_MspInit(SD_HandleTypeDef* hsd){
+  GPIO_InitTypeDef GPIO_InitStruct;
+  if(hsd->Instance==SDIO)
+  {
+    /* Peripheral clock enable */
+    __SDIO_CLK_ENABLE();
+  
+  /**SDIO GPIO Configuration  
+  PC8   ------> SDIO_D0
+  PC12   ------> SDIO_CK
+  PD2   ------> SDIO_CMD 
+  */
+    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_12;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+    
+    /* Peripheral DMA init*/
+  
+    hdma_sdiorx.Instance = DMA2_Stream3;
+    hdma_sdiorx.Init.Channel = DMA_CHANNEL_4;
+    hdma_sdiorx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_sdiorx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_sdiorx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_sdiorx.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_sdiorx.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_sdiorx.Init.Mode = DMA_PFCTRL;
+    hdma_sdiorx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+    hdma_sdiorx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+    hdma_sdiorx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+    hdma_sdiorx.Init.MemBurst = DMA_MBURST_INC4;
+    hdma_sdiorx.Init.PeriphBurst = DMA_PBURST_INC4;
+    HAL_DMA_Init(&hdma_sdiorx);
+
+    hdma_sdiotx.Instance = DMA2_Stream6;
+    hdma_sdiotx.Init.Channel = DMA_CHANNEL_4;
+    hdma_sdiotx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_sdiotx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_sdiotx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_sdiotx.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_sdiotx.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_sdiotx.Init.Mode = DMA_PFCTRL;
+    hdma_sdiotx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+    hdma_sdiotx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+    hdma_sdiotx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+    hdma_sdiotx.Init.MemBurst = DMA_MBURST_INC4;
+    hdma_sdiotx.Init.PeriphBurst = DMA_PBURST_INC4;
+    HAL_DMA_Init(&hdma_sdiotx);
+
+    /* Several peripheral DMA handle pointers point to the same DMA handle.
+     Be aware that there is only one stream to perform all the requested DMAs. */
+    __HAL_LINKDMA(hsd,hdmarx,hdma_sdiorx);
+
+    __HAL_LINKDMA(hsd,hdmatx,hdma_sdiotx);
+    
+  }
+}
+
+void HAL_SD_MspDeInit(SD_HandleTypeDef* hsd){
+  if(hsd->Instance==SDIO)
+  {
+    /* Peripheral clock disable */
+    __SDIO_CLK_DISABLE();
+  
+  /**SDIO GPIO Configuration  
+  PC8   ------> SDIO_D0
+  PC12   ------> SDIO_CK
+  PD2   ------> SDIO_CMD 
+  */
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_8|GPIO_PIN_12);
+
+    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_2);
+
   }
 }
 
