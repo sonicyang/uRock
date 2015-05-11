@@ -1,11 +1,11 @@
 /*---------------------------------------------------------------------------/
-/  FatFs - FAT file system module include file  R0.10     (C)ChaN, 2013
+/  FatFs - FAT file system module include file  R0.10b    (C)ChaN, 2014
 /----------------------------------------------------------------------------/
 / FatFs module is a generic FAT file system module for small embedded systems.
 / This is a free software that opened for education, research and commercial
 / developments under license policy of following terms.
 /
-/  Copyright (C) 2013, ChaN, all right reserved.
+/  Copyright (C) 2014, ChaN, all right reserved.
 /
 / * The FatFs module is a free software and there is NO WARRANTY.
 / * No restriction on use. You can use, modify and redistribute it for
@@ -15,7 +15,7 @@
 /----------------------------------------------------------------------------*/
 
 #ifndef _FATFS
-#define _FATFS	80960	/* Revision ID */
+#define _FATFS	8051	/* Revision ID */
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +53,7 @@ extern PARTITION VolToPart[];	/* Volume - Partition resolution table */
 
 #if _LFN_UNICODE			/* Unicode string */
 #if !_USE_LFN
-#error _LFN_UNICODE must be 0 in non-LFN cfg.
+#error _LFN_UNICODE must be 0 at non-LFN cfg.
 #endif
 #ifndef _INC_TCHAR
 typedef WCHAR TCHAR;
@@ -87,7 +87,7 @@ typedef struct {
 	BYTE	fsi_flag;		/* FSINFO flags (b7:disabled, b0:dirty) */
 	WORD	id;				/* File system mount ID */
 	WORD	n_rootdir;		/* Number of root directory entries (FAT12/16) */
-#if _MAX_SS != 512
+#if _MAX_SS != _MIN_SS
 	WORD	ssize;			/* Bytes per sector (512, 1024, 2048 or 4096) */
 #endif
 #if _FS_REENTRANT
@@ -100,14 +100,14 @@ typedef struct {
 #if _FS_RPATH
 	DWORD	cdir;			/* Current directory start cluster (0:root) */
 #endif
-	DWORD	n_fatent;		/* Number of FAT entries (= number of clusters + 2) */
+	DWORD	n_fatent;		/* Number of FAT entries, = number of clusters + 2 */
 	DWORD	fsize;			/* Sectors per FAT */
 	DWORD	volbase;		/* Volume start sector */
 	DWORD	fatbase;		/* FAT start sector */
 	DWORD	dirbase;		/* Root directory start sector (FAT32:Cluster#) */
 	DWORD	database;		/* Data start sector */
 	DWORD	winsect;		/* Current sector appearing in the win[] */
-
+	
 } FATFS;
 
 
@@ -120,26 +120,27 @@ typedef struct {
 	UINT	d32[_MAX_SS/4]; /* Force 32bits alignement */     
 	BYTE	d8[_MAX_SS];	/* File data read/write buffer */
   }buf;
-#endif  
+#endif
 	FATFS*	fs;				/* Pointer to the related file system object (**do not change order**) */
 	WORD	id;				/* Owner file system mount ID (**do not change order**) */
-	BYTE	flag;			/* File status flags */
+	BYTE	flag;			/* Status flags */
 	BYTE	err;			/* Abort flag (error code) */
 	DWORD	fptr;			/* File read/write pointer (Zeroed on file open) */
 	DWORD	fsize;			/* File size */
-	DWORD	sclust;			/* File data start cluster (0:no data cluster, always 0 when fsize is 0) */
-	DWORD	clust;			/* Current cluster of fpter */
-	DWORD	dsect;			/* Current data sector of fpter */
+	DWORD	sclust;			/* File start cluster (0:no cluster chain, always 0 when fsize is 0) */
+	DWORD	clust;			/* Current cluster of fpter (not valid when fprt is 0) */
+	DWORD	dsect;			/* Sector number appearing in buf[] (0:invalid) */
 #if !_FS_READONLY
-	DWORD	dir_sect;		/* Sector containing the directory entry */
-	BYTE*	dir_ptr;		/* Pointer to the directory entry in the window */
+	DWORD	dir_sect;		/* Sector number containing the directory entry */
+	BYTE*	dir_ptr;		/* Pointer to the directory entry in the win[] */
 #endif
 #if _USE_FASTSEEK
 	DWORD*	cltbl;			/* Pointer to the cluster link map table (Nulled on file open) */
 #endif
 #if _FS_LOCK
-	UINT	lockid;			/* File lock ID (index of file semaphore table Files[]) */
+	UINT	lockid;			/* File lock ID origin from 1 (index of file semaphore table Files[]) */
 #endif
+
 } FIL;
 
 
@@ -239,7 +240,7 @@ FRESULT f_chdir (const TCHAR* path);								/* Change current directory */
 FRESULT f_chdrive (const TCHAR* path);								/* Change current drive */
 FRESULT f_getcwd (TCHAR* buff, UINT len);							/* Get current directory */
 FRESULT f_getfree (const TCHAR* path, DWORD* nclst, FATFS** fatfs);	/* Get number of free clusters on the drive */
-FRESULT f_getlabel (const TCHAR* path, TCHAR* label, DWORD* sn);	/* Get volume label */
+FRESULT f_getlabel (const TCHAR* path, TCHAR* label, DWORD* vsn);	/* Get volume label */
 FRESULT f_setlabel (const TCHAR* label);							/* Set volume label */
 FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt);			/* Mount/Unmount a logical drive */
 FRESULT f_mkfs (const TCHAR* path, BYTE sfd, UINT au);				/* Create a file system on the volume */
@@ -353,4 +354,3 @@ int ff_del_syncobj (_SYNC_t sobj);				/* Delete a sync object */
 #endif
 
 #endif /* _FATFS */
-

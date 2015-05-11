@@ -12,8 +12,8 @@
 #include "gfile_fatfs_wrapper.h"
 
 // Include the source we want
-#include "3rdparty/fatfs-0.10b/src/ff.c"
-#include "3rdparty/fatfs-0.10b/src/option/unicode.c"
+#include "3rdparty/fatfs-0.10b/src/ff.h"
+//#include "3rdparty/fatfs-0.10b/src/option/unicode.c"
 
 // Extra operating system support
 #if _FS_REENTRANT

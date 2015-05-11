@@ -92,16 +92,16 @@
 
 #define GDISP_NEED_IMAGE                             TRUE
     #define GDISP_NEED_IMAGE_NATIVE                  TRUE
-//    #define GDISP_NEED_IMAGE_GIF                     FALSE
-//    #define GDISP_NEED_IMAGE_BMP                     FALSE
+    #define GDISP_NEED_IMAGE_GIF                     FALSE
+    #define GDISP_NEED_IMAGE_BMP                     FALSE
 //        #define GDISP_NEED_IMAGE_BMP_1               FALSE
 //        #define GDISP_NEED_IMAGE_BMP_4               FALSE
 //        #define GDISP_NEED_IMAGE_BMP_4_RLE           FALSE
 //        #define GDISP_NEED_IMAGE_BMP_8               FALSE
 //        #define GDISP_NEED_IMAGE_BMP_8_RLE           FALSE
 //        #define GDISP_NEED_IMAGE_BMP_16              FALSE
-//        #define GDISP_NEED_IMAGE_BMP_24              FALSE
-//        #define GDISP_NEED_IMAGE_BMP_32              FALSE
+        #define GDISP_NEED_IMAGE_BMP_24              FALSE
+        #define GDISP_NEED_IMAGE_BMP_32              FALSE
 //    #define GDISP_NEED_IMAGE_JPG                     FALSE
 //    #define GDISP_NEED_IMAGE_PNG                     FALSE
 //    #define GDISP_NEED_IMAGE_ACCOUNTING              FALSE
@@ -261,9 +261,9 @@
 //#define GFILE_NEED_NOAUTOSYNC                        FALSE
 
 //#define GFILE_NEED_MEMFS                             FALSE
-#define GFILE_NEED_ROMFS                             FALSE
+#define GFILE_NEED_ROMFS                             TRUE
 //#define GFILE_NEED_RAMFS                             FALSE
-//#define GFILE_NEED_FATFS                             FALSE
+#define GFILE_NEED_FATFS                             TRUE
 //#define GFILE_NEED_NATIVEFS                          TRUE
 //#define GFILE_NEED_CHBIOSFS                          FALSE
 
