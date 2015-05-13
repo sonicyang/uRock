@@ -62,10 +62,6 @@ uint32_t selectedEffectStage = 0;
 
 uint8_t currentConfig;
 
-static GListener gl;
-
-
-uint8_t potValues[2][4];
 
 GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
 
@@ -84,9 +80,13 @@ GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
 */
 
 void UserInterface(void const *argument){
-	GEvent* event;
 	uint32_t i;
-	uint32_t diff, cnt, orig;
+	uint32_t diff_flag, cnt, orig;
+
+    static GListener gl;
+	GEvent* event;
+
+    uint8_t potValues[2][4];
     uint8_t potApply[4];
 
 	currentConfig = 0;
@@ -120,52 +120,40 @@ void UserInterface(void const *argument){
 
 	while(1) {
 		// Get an Event
-		event = geventEventWait(&gl, TIME_INFINITE);
+		event = geventEventWait(&gl, 50);
 
 		switch(event->type) {
-		case GEVENT_GWIN_BUTTON:
-			tabs[currentTabNumber]->bHandle(tabs[currentTabNumber], (GEventGWinButton*)event);
-			break;
+            case GEVENT_GWIN_BUTTON:
+                tabs[currentTabNumber]->bHandle(tabs[currentTabNumber], (GEventGWinButton*)event);
+                break;
 		}
 
-		diff = 0;
 
-		for(i = 0; i < 4; i++){
-            if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5)){
-                potApply[i] = potValues[0][i];
-				diff++;
-            }else{
-               potApply[i] = potValues[1][i];
-		    }
+        //XXX: Use Event System and Callback
+        //TODO: Sync Pots before set new value
+        if(currentTabNumber == PARAM_TAB){
+            diff_flag = 0;
+
+            for(i = 0; i < 4; i++){
+                if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5)){
+                    potApply[i] = potValues[0][i];
+                    diff_flag++;
+                }else{
+                   potApply[i] = potValues[1][i];
+                }
+            }
+
+            if(diff_flag){
+                if (retriveStagedEffect(selectedEffectStage))
+                    retriveStagedEffect(selectedEffectStage)->adj((void*)retriveStagedEffect(selectedEffectStage), potApply);
+
+                for(i = 0; i < 4; i++){
+                    potValues[1][i] = potApply[i];
+                }
+                tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
+            }
         }
         
-        /*
-		if(diff){
-			if(EffectList[controllingStage]){
-				EffectList[controllingStage]->adj(EffectList[controllingStage], potApply);
-
-				if(tabState == LIST_TAB){
-					orig = tabState;
-					SwitchTab(PARAM_TAB);
-				}
-				cnt = 0;
-
-			}
-            for(i = 0; i < 4; i++){
-                potValues[1][i] = potApply[i];
-            }
-		}
-        */
-        /*
-		if(cnt == 50){
-			SwitchTab(orig);
-			SaveStageSetting(currentConfig);
-			cnt++;
-		}else if(cnt < 50){
-			cnt++;
-		}
-        */
-        tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
         /*
         if(tabState == LIST_TAB){
             if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
