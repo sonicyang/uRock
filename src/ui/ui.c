@@ -81,7 +81,7 @@ GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
 
 void UserInterface(void const *argument){
 	uint32_t i;
-	uint32_t diff_flag, cnt, orig;
+	uint32_t diff_flag;
 
     static GListener gl;
 	GEvent* event;
