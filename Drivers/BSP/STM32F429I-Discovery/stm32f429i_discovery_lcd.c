@@ -204,7 +204,7 @@ uint8_t BSP_LCD_Init(void)
     /* PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 192/4 = 48 Mhz */
     /* LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_8 = 48/4 = 6Mhz */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-    //PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
+    PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
     PeriphClkInitStruct.PLLSAI.PLLSAIR = 4;
     PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_8;
     HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct); 
