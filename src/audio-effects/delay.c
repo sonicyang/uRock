@@ -71,8 +71,10 @@ struct Effect_t* new_Delay(){
     tmp->blockPtr = 0;
     tmp->baseAddress = allocateDelayLine();
 
-    if(tmp->baseAddress < 0)
+    if(tmp->baseAddress < 0){
+        vPortFree(tmp); 
         return NULL;
+    }
 
     return (struct Effect_t*)tmp;
 }
