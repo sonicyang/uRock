@@ -9,6 +9,8 @@ FATINCDIR = Middlewares/Third_Party/FatFs/src \
 FATSRC += $(wildcard $(addsuffix /*.c,$(FATSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(FATSRCDIR)))
 
+FATSRC += Middlewares/Third_Party/FatFs/src/option/cc950.c
+
 INCLUDES += $(addprefix -I,$(FATINCDIR))
 
 FATOBJS += $(addprefix $(OUTDIR)/$(FATOUTDIR)/,$(patsubst %.s,%.o,$(FATSRC:.c=.o)))
