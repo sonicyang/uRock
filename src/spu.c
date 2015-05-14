@@ -180,6 +180,7 @@ void attachEffect(uint32_t stage, EffectType_t effectType){
     return;
 }
 
+//XXX: dynamic gen these
 const char *cvtToEffectName(EffectType_t ee){
 	switch(ee){
         case NONE:
@@ -204,6 +205,37 @@ const char *cvtToEffectName(EffectType_t ee){
             return "Error Cvt";
 	}
     return "Error Cvt";
+}
+
+EffectType_t cvtToEffectId(const char* name){
+    if (strcmp(name, "Volume") == 0)
+        return VOLUME;
+
+    if (strcmp(name, "Compressor") == 0)
+        return COMPRESSOR;
+
+    if (strcmp(name, "Distortion") == 0)
+        return DISTORTION;
+
+    if (strcmp(name, "Overdrive") == 0)
+        return OVERDRIVE;
+
+    if (strcmp(name, "Delay") == 0)
+        return DELAY;
+
+    if (strcmp(name, "Reverb") == 0)
+        return REVERB;
+
+    if (strcmp(name, "Flanger") == 0)
+        return FLANGER;
+
+    if (strcmp(name, "Equalizer") == 0)
+        return EQULIZER;
+
+    if (strcmp(name, "None") == 0)
+        return NONE;
+
+    return NONE;
 }
 
 const struct Effect_t* const retriveStagedEffect(uint32_t stage){

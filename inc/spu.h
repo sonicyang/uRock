@@ -20,6 +20,7 @@ void SignalProcessingUnit(void const * argument);
 
 void attachEffect(uint32_t stage, EffectType_t effectType);
 const char *cvtToEffectName(EffectType_t ee);
+EffectType_t cvtToEffectId(const char* name);
 const struct Effect_t* const retriveStagedEffect(uint32_t stage);
 
 #endif //__SPU_H__
