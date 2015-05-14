@@ -80,6 +80,7 @@ struct Effect_t* new_Flanger(){
     tmp->attenuation.upperBound = -2.0f;
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -30.0f;
+    tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * 2 * Q_1); //saving memory
 
     tmp->speed.name = "Speed";
     tmp->speed.upperBound = 500.0f;

@@ -61,6 +61,7 @@ struct Effect_t* new_Delay(){
     tmp->attenuation.upperBound = -5.0f;
     tmp->attenuation.lowerBound = -30.0f;
     tmp->attenuation.value = -10.0f;
+    tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * Q_1);
 
     tmp->delayTime.name = "Delay";
     tmp->delayTime.upperBound = 500.0f;

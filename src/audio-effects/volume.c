@@ -47,7 +47,8 @@ struct Effect_t* new_Volume(){
     tmp->gain.name = "Volume";
     tmp->gain.upperBound = 0.0f;
     tmp->gain.lowerBound = -30.0f;
-    tmp->gain.value = 0.0f;
+    tmp->gain.value = -15.0f;
+    tmp->cache = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * Q_1);
 
     return (struct Effect_t*)tmp;
 }

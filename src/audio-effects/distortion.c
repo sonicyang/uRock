@@ -49,6 +49,7 @@ struct Effect_t* new_Distortion(){
     tmp->volume.upperBound = 0.0f;
     tmp->volume.lowerBound = -30.0f;
     tmp->volume.value = 0.0f;
+    tmp->cache = (q31_t)(powf(10, (tmp->volume.value * 0.1f)) * Q_1);
 
     return (struct Effect_t*)tmp;
 }
