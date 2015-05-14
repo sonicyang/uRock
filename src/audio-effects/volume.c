@@ -38,7 +38,7 @@ void getParam_Volume(void *opaque, struct parameter_t* param[], uint8_t* paramNu
 struct Effect_t* new_Volume(){
     struct Volume_t* tmp = pvPortMalloc(sizeof(struct Volume_t));
 
-    strcpy(tmp->parent.name, "Volume");
+    strcpy(tmp->parent.name, VolumeId.name);
     tmp->parent.func = Volume;
     tmp->parent.del = delete_Volume;
     tmp->parent.adj = adjust_Volume;

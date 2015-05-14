@@ -12,4 +12,9 @@ struct Distortion_t{
 
 struct Effect_t* new_Distortion();
 
+static struct EffectType_t DistortionId = {
+    .name = "Distortion",
+    .Init = new_Distortion
+};
+
 #endif //__DISTORTION_H__

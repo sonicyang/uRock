@@ -13,7 +13,7 @@
 struct tab_select_effect_t{
     struct tab_t parent;
 
-    GHandle btn_effectTypes[EFFECT_TYPE_NUM + 1];
+    GHandle btn_effectTypes[EFFECT_NUM + 1];
     GHandle btn_back;
 };
 

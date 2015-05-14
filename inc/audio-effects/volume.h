@@ -11,4 +11,9 @@ struct Volume_t{
 
 struct Effect_t* new_Volume();
 
+static struct EffectType_t VolumeId = {
+    .name = "Volume",
+    .Init = new_Volume
+};
+
 #endif //__VOLUME_H__

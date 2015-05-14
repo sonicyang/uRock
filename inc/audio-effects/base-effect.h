@@ -35,6 +35,13 @@ struct Effect_t{
     getParamFunc getParam;
 };
 
+typedef struct Effect_t*(*newEffectFunc)(void);
+
+struct EffectType_t{
+    const char name[16];
+    newEffectFunc   Init;
+};
+
 struct wavHeader_t{
     char        filID[4];
     uint32_t    filSize;

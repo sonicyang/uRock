@@ -9,4 +9,9 @@ struct Reverb_t{
 
 struct Effect_t* new_Reverb();
 
+static struct EffectType_t ReverbId = {
+    .name = "Reverb",
+    .Init = new_Reverb
+};
+
 #endif //__REVERB_H__

@@ -74,8 +74,6 @@ void UserInterface(void const *argument){
     GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
     uint8_t currentConfig = 0;
 
-    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
-	if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
 	ReadStageSetting(currentConfig);
 
 	gfxInit();
@@ -94,7 +92,7 @@ void UserInterface(void const *argument){
 
 	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
     buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-    buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+    buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
     buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2);
     buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
 
@@ -142,8 +140,8 @@ void UserInterface(void const *argument){
                 currentConfig = 0;
                 ReadStageSetting(currentConfig);
             }
-            if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1)){
-                buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+            if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)){
+                buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
                 SaveStageSetting(currentConfig);
                 currentConfig = 1;
                 ReadStageSetting(currentConfig);
@@ -160,6 +158,7 @@ void UserInterface(void const *argument){
                 currentConfig = 3;
                 ReadStageSetting(currentConfig);
             }
+            tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
         }
 	}
 

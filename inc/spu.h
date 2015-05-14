@@ -1,26 +1,43 @@
 #ifndef __SPU_H__
 #define __SPU_H__
 
+#include "setting.h"
+
 #include "base-effect.h"
 
-typedef enum {
-    NONE,
-    VOLUME,
-    COMPRESSOR,
-    DISTORTION,
-    OVERDRIVE,
-    DELAY,
-    REVERB,
-    FLANGER,
-    EQULIZER,
-    EFFECT_TYPE_NUM
-} EffectType_t;
+#include "none.h"
+
+#include "volume.h"
+#include "compressor.h"
+
+#include "distortion.h"
+#include "overdrive.h"
+
+#include "equalizer.h"
+
+#include "delay.h"
+#include "reverb.h"
+
+#include "phaser.h"
+#include "flanger.h"
+
+static const struct EffectType_t* EFFECTS[EFFECT_NUM] = {
+    &NoneId,
+    &VolumeId,
+    &CompressorId,
+    &DistortionId,
+    &OverdriveId,
+    &DelayId,
+    &ReverbId,
+    &FlangerId,
+    &EqualizerId,
+};
 
 void SignalProcessingUnit(void const * argument);
 
-void attachEffect(uint32_t stage, EffectType_t effectType);
-const char *cvtToEffectName(EffectType_t ee);
-EffectType_t cvtToEffectId(const char* name);
+void attachEffect(uint32_t stage, uint32_t effectType);
+const char *cvtToEffectName(uint32_t ee);
+uint32_t cvtToEffectId(const char* name);
 const struct Effect_t* const retriveStagedEffect(uint32_t stage);
 
 #endif //__SPU_H__

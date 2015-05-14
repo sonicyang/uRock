@@ -9,7 +9,7 @@
 #define CONFIG_BUTTON_NUM   4
 #define CONFIG_BUTTON_PORT  GPIOA
 #define CONFIG_BUTTON1_PIN  GPIO_PIN_0
-#define CONFIG_BUTTON2_PIN  GPIO_PIN_1
+#define CONFIG_BUTTON2_PIN  GPIO_PIN_7
 #define CONFIG_BUTTON3_PIN  GPIO_PIN_2
 #define CONFIG_BUTTON4_PIN  GPIO_PIN_5
 static const uint32_t CONFIG_BUTTON_PINS[4] = {CONFIG_BUTTON1_PIN, CONFIG_BUTTON2_PIN, CONFIG_BUTTON3_PIN, CONFIG_BUTTON4_PIN};
@@ -45,6 +45,7 @@ static const uint32_t POT_PINS[4] = {POT1_PIN, POT2_PIN, POT3_PIN, POT4_PIN};
 /* ============================
  * Effect related Configuration
  * ===========================*/
+#define EFFECT_NUM 9
 #define MAX_EFFECT_PARAM 4
 
 #define MAX_CONFIG_NUM 4

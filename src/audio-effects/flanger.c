@@ -70,7 +70,7 @@ void getParam_Flanger(void *opaque, struct parameter_t *param[], uint8_t* paramN
 
 struct Effect_t* new_Flanger(){
     struct Flanger_t* tmp = pvPortMalloc(sizeof(struct Flanger_t));
-    strcpy(tmp->parent.name, "Flanger");
+    strcpy(tmp->parent.name, FlangerId.name);
     tmp->parent.func = Flanger;
     tmp->parent.del = delete_Flanger;
     tmp->parent.adj = adjust_Flanger;

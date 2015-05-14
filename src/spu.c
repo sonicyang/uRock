@@ -1,23 +1,6 @@
 #include "cmsis_os.h"
 
-#include "setting.h"
-#include "base-effect.h"
-
 #include "spu.h"
-
-#include "volume.h"
-#include "compressor.h"
-
-#include "distortion.h"
-#include "overdrive.h"
-
-#include "equalizer.h"
-
-#include "delay.h"
-#include "reverb.h"
-
-#include "phaser.h"
-#include "flanger.h"
 
 //#include "wavplayer.h"
 //#include "wavrecoder.h"
@@ -36,7 +19,6 @@ uint8_t pipeUsage = 0;
 q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
 struct Effect_t *effectList[STAGE_NUM];
-uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
     
 int16_t wavData[4200];
 
@@ -48,8 +30,6 @@ void SignalProcessingUnit(void const * argument){
     for(i = 0; i < STAGE_NUM; i++){
         effectList[i] = NULL;
     }
-
-//    effectList[0] = new_Volume(); 
 
     /* Semaphore Blocker setup*/ 
     osSemaphoreDef(SPUH);
@@ -137,105 +117,28 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
     return;
 }
 
-void attachEffect(uint32_t stage, EffectType_t effectType){
+void attachEffect(uint32_t stage, uint32_t effectId){
 	if(effectList[stage])
 		effectList[stage]->del(effectList[stage]);
     //XXX: Probably need to return to RTOS for truly releasing memory
     
-
-	switch(effectType){
-        case NONE:
-            effectList[stage] = NULL;
-            break;
-        case VOLUME:
-            effectList[stage] = new_Volume();
-            break;
-        case COMPRESSOR:
-            effectList[stage] = new_Compressor();
-            break;
-        case DISTORTION:
-            effectList[stage] = new_Distortion();
-            break;
-        case OVERDRIVE:
-            effectList[stage] = new_Overdrive();
-            break;
-        case DELAY:
-            effectList[stage] = new_Delay();
-            break;
-        case REVERB:
-            effectList[stage] = new_Reverb();
-            break;
-        case FLANGER:
-            effectList[stage] = new_Flanger();
-            break;
-        case EQULIZER:
-            effectList[stage] = new_Equalizer();
-            break;
-        default:
-            assert_param(0);
-            effectList[stage] = NULL;
-            break;
-	}
+    effectList[stage] = EFFECTS[effectId]->Init();
      
     return;
 }
 
-//XXX: dynamic gen these
-const char *cvtToEffectName(EffectType_t ee){
-	switch(ee){
-        case NONE:
-            return "None";
-        case VOLUME:
-            return "Volume";
-        case COMPRESSOR:
-            return "Compressor";
-        case DISTORTION:
-            return "Distortion";
-        case OVERDRIVE:
-            return "OverDrive";
-        case DELAY:
-            return "Delay";
-        case REVERB:
-            return "Reverb";
-        case FLANGER:
-            return "Flanger";
-        case EQULIZER:
-            return "Equalizer";
-        default:
-            return "Error Cvt";
-	}
-    return "Error Cvt";
+const char *cvtToEffectName(uint32_t effectId){
+    return EFFECTS[effectId]->name;
 }
 
-EffectType_t cvtToEffectId(const char* name){
-    if (strcmp(name, "Volume") == 0)
-        return VOLUME;
+uint32_t cvtToEffectId(const char* name){
+    uint32_t i;
+    for(i = 0; i < EFFECT_NUM; i++){
+        if (strcmp(name, EFFECTS[i]->name) == 0)
+            return i;
+    }
 
-    if (strcmp(name, "Compressor") == 0)
-        return COMPRESSOR;
-
-    if (strcmp(name, "Distortion") == 0)
-        return DISTORTION;
-
-    if (strcmp(name, "Overdrive") == 0)
-        return OVERDRIVE;
-
-    if (strcmp(name, "Delay") == 0)
-        return DELAY;
-
-    if (strcmp(name, "Reverb") == 0)
-        return REVERB;
-
-    if (strcmp(name, "Flanger") == 0)
-        return FLANGER;
-
-    if (strcmp(name, "Equalizer") == 0)
-        return EQULIZER;
-
-    if (strcmp(name, "None") == 0)
-        return NONE;
-
-    return NONE;
+    return 0;
 }
 
 const struct Effect_t* const retriveStagedEffect(uint32_t stage){

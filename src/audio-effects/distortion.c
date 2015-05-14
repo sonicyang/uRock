@@ -1,6 +1,18 @@
 #include "distortion.h"
 #include "helper.h"
 #include "FreeRTOS.h"
+
+static const char* effectName = "Distortion";
+static uint32_t effectID;
+
+__attribute__((constructor))
+void init_Distortion(uint32_t givenID, char* name){
+    effectID = givenID;
+    strcpy(name, effectName);
+
+    return;
+}
+
 void Distortion(q31_t* pData, void *opaque){
     struct Distortion_t *tmp = (struct Distortion_t*)opaque;
     arm_scale_q31(pData, tmp->gain.value * Q_1, Q_MULT_SHIFT, pData, SAMPLE_NUM);
@@ -34,7 +46,8 @@ void getParam_Distortion(void *opaque, struct parameter_t *param[], uint8_t* par
 
 struct Effect_t* new_Distortion(){
     struct Distortion_t* tmp = pvPortMalloc(sizeof(struct Distortion_t));
-    strcpy(tmp->parent.name, "Distortion");
+
+    strcpy(tmp->parent.name, DistortionId.name);
     tmp->parent.func = Distortion;
     tmp->parent.del = delete_Distortion;
     tmp->parent.adj = adjust_Distortion;

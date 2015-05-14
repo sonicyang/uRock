@@ -65,7 +65,8 @@ void getParam_Overdrive(void *opaque, struct parameter_t* param[], uint8_t* para
 
 struct Effect_t* new_Overdrive(){
     struct Overdrive_t* tmp = pvPortMalloc(sizeof(struct Overdrive_t));
-    strcpy(tmp->parent.name, "Overdrive");
+
+    strcpy(tmp->parent.name, OverdriveId.name);
     tmp->parent.func = Overdrive;
     tmp->parent.del = delete_Overdrive;
     tmp->parent.adj = adjust_Overdrive;

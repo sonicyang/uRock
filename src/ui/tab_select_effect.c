@@ -14,7 +14,7 @@ void tab_select_effect_show(void* opaque){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
 	uint32_t i;
 
-	for(i = 0; i < EFFECT_TYPE_NUM; i++){
+	for(i = 0; i < EFFECT_NUM; i++){
 		gwinSetVisible(tmp->btn_effectTypes[i], TRUE);
 	}
 
@@ -27,7 +27,7 @@ void tab_select_effect_hide(void* opaque){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
 	uint32_t i;
 
-	for(i = 0; i < EFFECT_TYPE_NUM; i++){
+	for(i = 0; i < EFFECT_NUM; i++){
 		gwinSetVisible(tmp->btn_effectTypes[i], FALSE);
 	}
 
@@ -44,7 +44,7 @@ void tab_select_effect_bHandle(void* opaque, GEventGWinButton* event){
 	struct tab_select_effect_t *tmp = (struct tab_select_effect_t*)opaque;
 	uint32_t i;
 
-	for(i = 0; i < EFFECT_TYPE_NUM; i++){
+	for(i = 0; i < EFFECT_NUM; i++){
 		if ((event)->gwin == tmp->btn_effectTypes[i]){
             attachEffect(selectedEffectStage, i);
 			SwitchTab(PARAM_TAB);
@@ -63,7 +63,7 @@ struct tab_t *tab_select_effect_init(struct tab_select_effect_t* opaque){
 	GWidgetInit wi;
 
 	/* SelectStageTab */
-	for(i = 0; i < EFFECT_TYPE_NUM; i++){
+	for(i = 0; i < EFFECT_NUM; i++){
 		gwinWidgetClearInit(&wi);
 		wi.g.show = FALSE;
 		wi.g.x = 5;

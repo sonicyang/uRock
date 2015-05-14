@@ -51,7 +51,8 @@ void getParam_Delay(void *opaque, struct parameter_t *param[], uint8_t* paramNum
 
 struct Effect_t* new_Delay(){
     struct Delay_t* tmp = pvPortMalloc(sizeof(struct Delay_t));
-    strcpy(tmp->parent.name, "Delay");
+
+    strcpy(tmp->parent.name, DelayId.name);
     tmp->parent.func = Delay;
     tmp->parent.del = delete_Delay;
     tmp->parent.adj = adjust_Delay;
