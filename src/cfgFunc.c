@@ -30,16 +30,24 @@ void SaveStageSetting(uint32_t saveSlot){
 
     switch (saveSlot) {
         case 0:
-            if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
             break;
         case 1:
-            if (f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
             break;
         case 2:
-            if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
             break;
         case 3:
-            if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
             break;
         default:
             /* XXX Bad hack */
@@ -88,7 +96,7 @@ void SaveStageSetting(uint32_t saveSlot){
             f_write(&fil, "None\n", 5, NULL);
         }
     }
-
+    f_sync(&fil);
     f_close(&fil);
 }
 
@@ -106,16 +114,24 @@ void ReadStageSetting(uint32_t saveSlot){
 
     switch (saveSlot) {
         case 0:
-            if (f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
             break;
         case 1:
-            if (f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
             break;
         case 2:
-            if (f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
             break;
         case 3:
-            if (f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_READ) != FR_OK) for(;;);
+            do{
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+            }while(f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
             break;
         default:
         /* XXX Bad hack */
@@ -155,10 +171,9 @@ void ReadStageSetting(uint32_t saveSlot){
 
         attachEffect(i, cvtToEffectId(stageNamePtr));
 
-        if (cvtToEffectId(stageNamePtr) == NONE)
-            continue;
-
         //XXX: to Brainless mode, effect will ignore extra param given
+        if(!retriveStagedEffect(i))
+            continue;
         retriveStagedEffect(i)->getParam((void*)retriveStagedEffect(i), params, &paramNum);
 
         for (int i = 0; i < paramNum; ++i)

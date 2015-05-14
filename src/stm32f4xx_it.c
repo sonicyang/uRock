@@ -47,6 +47,9 @@ extern DMA_HandleTypeDef hdma_sai1_a;
 extern DMA_HandleTypeDef hdma_sai1_b;
 extern SAI_HandleTypeDef hsai_BlockA1;
 extern SAI_HandleTypeDef hsai_BlockB1;
+extern DMA_HandleTypeDef hdma_sdiorx;
+extern DMA_HandleTypeDef hdma_sdiotx;
+extern SD_HandleTypeDef hsd;
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
@@ -109,6 +112,21 @@ void DMA2_Stream1_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
   /* USER CODE END DMA2_Stream1_IRQn 1 */
+}
+
+void SDIO_IRQHandler(void){
+    HAL_SD_IRQHandler(&hsd);
+    return;
+}
+
+void DMA2_Stream3_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_sdiorx);
+    return;
+}
+
+void DMA2_Stream6_IRQHandler(void){
+    HAL_DMA_IRQHandler(&hdma_sdiotx);
+    return;
 }
 
 /* USER CODE BEGIN 1 */
