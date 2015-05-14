@@ -339,6 +339,7 @@ void MX_DMA_Init(void)
 */
 void MX_GPIO_Init(void)
 {
+  uint32_t i;
   GPIO_InitTypeDef GPIO_InitStruct;
 
   /* GPIO Ports Clock Enable */
@@ -348,11 +349,13 @@ void MX_GPIO_Init(void)
   __GPIOE_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
 
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_5;
+  GPIO_InitStruct.Pin = 0;
+  for(i = 0; i < CONFIG_BUTTON_NUM; i++)
+      GPIO_InitStruct.Pin |= CONFIG_BUTTON_PINS[i];
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(CONFIG_BUTTON_PORT, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 4 */

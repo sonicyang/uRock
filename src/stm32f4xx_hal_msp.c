@@ -34,6 +34,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "setting.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -210,16 +211,20 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* hsai)
 }
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
+  uint32_t i;
+
   GPIO_InitTypeDef GPIO_InitStruct;
   if(hadc->Instance==ADC2)
   {
     /* Peripheral clock enable */
     __ADC2_CLK_ENABLE();
  
-    GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_3 | GPIO_PIN_4;
+    GPIO_InitStruct.Pin = 0;
+    for(i = 0; i < POT_NUM; i++)
+      GPIO_InitStruct.Pin |= POT_PINS[i];
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    HAL_GPIO_Init(POT_PORT, &GPIO_InitStruct);
  
     /* Peripheral DMA init*/
  
