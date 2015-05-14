@@ -40,16 +40,18 @@
 
 #include "cfgFunc.h"
 
-//#include "ff.h"
+#include "ff.h"
+#include "ff_gen_drv.h"
+#include "sd_diskio.h"
 
 #define TAB_GROUP_1 0
 
-//extern char SD_Path[4];
-//extern FATFS FatFs;
-//extern FIL fil;
+extern uint8_t SD_DriverNum;      /* FatFS SD part */
+extern char SD_Path[4];
+extern FATFS FatFs;
+extern FIL fil;
 
 extern ADC_HandleTypeDef hadc2;
-extern uint8_t ValueForEachStage[STAGE_NUM][MAX_EFFECT_PARAM];
 
 struct tab_t *tabs[TAB_NUM];
 static uint32_t currentTabNumber = 0;
@@ -60,25 +62,6 @@ struct tab_select_effect_t selectEffectTab;
 
 uint32_t selectedEffectStage = 0;
 
-uint8_t currentConfig;
-
-
-GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
-
-
-
-/*
-// Reset value in this stage 
-	ValueForEachStage[controllingStage][0] = 0;
-	ValueForEachStage[controllingStage][1] = 0;
-	ValueForEachStage[controllingStage][2] = 0;
-
-	if (EffectList[controllingStage]){
-		EffectList[controllingStage]->adj(EffectList[controllingStage], ValueForEachStage[0]);
-	}
-}
-*/
-
 void UserInterface(void const *argument){
 	uint32_t i;
 	uint32_t diff_flag;
@@ -88,17 +71,12 @@ void UserInterface(void const *argument){
 
     uint8_t potValues[2][4];
     uint8_t potApply[4];
+    GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
+    uint8_t currentConfig = 0;
 
-	currentConfig = 0;
-
-    /*
-    buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
-    buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
-    buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
-    buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
-    */
-
-	//if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
+    SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+	if (f_mount(&FatFs, SD_Path, 1) != FR_OK) for(;;);
+	ReadStageSetting(currentConfig);
 
 	gfxInit();
 	gdispClear(Black);
@@ -115,8 +93,11 @@ void UserInterface(void const *argument){
 	SwitchTab(LIST_TAB);
 
 	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
+    buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+    buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+    buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2);
+    buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
 
-	//ReadStageSetting(0);
 
 	while(1) {
 		// Get an Event
@@ -154,34 +135,32 @@ void UserInterface(void const *argument){
             }
         }
         
-        /*
-        if(tabState == LIST_TAB){
-            if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2)){
-                buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_2);
+        if(currentTabNumber == LIST_TAB){
+            if (buttonPrevValue[0] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)){
+                buttonPrevValue[0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
                 SaveStageSetting(currentConfig);
                 currentConfig = 0;
                 ReadStageSetting(currentConfig);
             }
-            if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3)){
-                buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_3);
+            if (buttonPrevValue[1] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1)){
+                buttonPrevValue[1] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
                 SaveStageSetting(currentConfig);
                 currentConfig = 1;
                 ReadStageSetting(currentConfig);
             }
-            if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4)){
-                buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_4);
+            if (buttonPrevValue[2] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2)){
+                buttonPrevValue[2] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2);
                 SaveStageSetting(currentConfig);
                 currentConfig = 2;
                 ReadStageSetting(currentConfig);
             }
-            if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5)){
-                buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5);
+            if (buttonPrevValue[3] != HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)){
+                buttonPrevValue[3] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
                 SaveStageSetting(currentConfig);
                 currentConfig = 3;
                 ReadStageSetting(currentConfig);
             }
         }
-        */
 	}
 
 	while(1);

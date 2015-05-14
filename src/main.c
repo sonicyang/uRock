@@ -41,6 +41,9 @@
 
 #include "spu.h"
 #include "ui.h"
+#include "ff.h"
+#include "ff_gen_drv.h"
+#include "sd_diskio.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -62,6 +65,10 @@ HAL_SD_CardInfoTypedef SDCardInfo;
 
 osThreadId SPU_TaskHandle;
 osThreadId UI_TaskHandle;
+
+uint8_t SD_DriverNum;      /* FatFS SD part */
+char SD_Path[4];           /* SD card logical drive path */
+FATFS FatFs;
 
 /* USER CODE BEGIN PV */
 
@@ -332,6 +339,7 @@ void MX_DMA_Init(void)
 */
 void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   /* GPIO Ports Clock Enable */
   __GPIOA_CLK_ENABLE();
@@ -340,6 +348,11 @@ void MX_GPIO_Init(void)
   __GPIOE_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
 
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 4 */
