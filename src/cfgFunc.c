@@ -24,37 +24,32 @@
 
 #include <stdint.h>
 
+void openFile(FIL* fil, uint32_t configNumber, uint32_t mode){
+    char buf[32] = "0:/configK";
+    
+    if(configNumber < 0 || configNumber > 3){
+        fil = NULL;
+        return;
+    }
+
+    buf[9] = configNumber + 48;
+    if(mode){
+        f_unlink(buf);
+        do{
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }while(f_open(fil, buf, FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
+    }else{
+        do{
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }while(f_open(fil, buf, FA_OPEN_ALWAYS | FA_READ) != FR_OK);
+    }
+}
+
 void SaveStageSetting(uint32_t saveSlot){
     FIL fil;
     uint32_t i;
 
-    switch (saveSlot) {
-        case 0:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
-            break;
-        case 1:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
-            break;
-        case 2:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
-            break;
-        case 3:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE) != FR_OK);
-            break;
-        default:
-            /* XXX Bad hack */
-            while (1)
-                ;
-            break;
-    }
+    openFile(&fil, saveSlot, 0);
 
     for (i = 0; i < STAGE_NUM; ++i) {
         uint8_t paramNum;
@@ -112,33 +107,7 @@ void ReadStageSetting(uint32_t saveSlot){
     struct parameter_t* params[MAX_EFFECT_PARAM];
     uint8_t paramNum;
 
-    switch (saveSlot) {
-        case 0:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config0", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
-            break;
-        case 1:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config1", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
-            break;
-        case 2:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config2", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
-            break;
-        case 3:
-            do{
-                vTaskDelay(50 / portTICK_PERIOD_MS);
-            }while(f_open(&fil, "0:/config3", FA_OPEN_ALWAYS | FA_READ) != FR_OK);
-            break;
-        default:
-        /* XXX Bad hack */
-        while (1)
-            ;
-        break;
-    }
+    openFile(&fil, saveSlot, 0);
 
     for (i = 0; i < STAGE_NUM; ++i) {
         bufPos = 0;
