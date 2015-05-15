@@ -13,9 +13,10 @@ struct Overdrive_t{
 
 struct Effect_t* new_Overdrive();
 
-static struct EffectType_t OverdriveId = {
+static struct EffectType_t OverdriveId __attribute__((unused)) = {
     .name = "Overdrive",
     .Init = new_Overdrive
 };
+
 
 #endif //__OVERDRIVE_H__

@@ -17,9 +17,10 @@ struct Flanger_t{
 
 struct Effect_t* new_Flanger();
 
-static struct EffectType_t FlangerId = {
+static struct EffectType_t FlangerId __attribute__((unused)) = {
     .name = "Flanger",
     .Init = new_Flanger
 };
+
 
 #endif //__FLANGER_H__

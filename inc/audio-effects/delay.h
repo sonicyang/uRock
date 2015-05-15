@@ -14,9 +14,10 @@ struct Delay_t{
 
 struct Effect_t* new_Delay();
 
-static struct EffectType_t DelayId = {
+static struct EffectType_t DelayId __attribute__((unused)) = {
     .name = "Delay",
     .Init = new_Delay
 };
+
 
 #endif //__DELAY_H__

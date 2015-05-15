@@ -6,20 +6,6 @@
 
 #include "tab_select_effect.h"
 
-#include "volume.h"
-#include "compressor.h"
-
-#include "distortion.h"
-#include "overdrive.h"
-
-#include "equalizer.h"
-
-#include "delay.h"
-#include "reverb.h"
-
-#include "phaser.h"
-#include "flanger.h"
-
 #include "ff.h"
 
 #include <stdint.h>

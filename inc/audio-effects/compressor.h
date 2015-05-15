@@ -13,9 +13,8 @@ struct Compressor_t{
 
 struct Effect_t* new_Compressor();
 
-static struct EffectType_t CompressorId = {
+static struct EffectType_t CompressorId __attribute__((unused)) = {
     .name = "Compressor",
     .Init = new_Compressor
 };
-
 #endif //__COMPRESSOR_H__

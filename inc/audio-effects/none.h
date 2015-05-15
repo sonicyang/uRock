@@ -9,9 +9,10 @@ struct None_t{
 
 struct Effect_t* new_None();
 
-static struct EffectType_t NoneId = {
+static struct EffectType_t NoneId __attribute__((unused)) = {
     .name = "None",
     .Init = new_None
 };
+
 
 #endif //__NONE_H__

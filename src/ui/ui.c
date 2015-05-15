@@ -9,9 +9,10 @@
 #include "queue.h"
 #include "semphr.h"
 
+#include "setting.h"
 #include "spu.h"
 #include "ui.h"
-#include "setting.h"
+#include "cfgFunc.h"
 #include "base-effect.h"
 #include "helper.h"
 
@@ -22,34 +23,9 @@
 #include "gfxconf.h"
 #include "gfx.h"
 
-#include "volume.h"
-#include "compressor.h"
-
-#include "distortion.h"
-#include "overdrive.h"
-
-#include "equalizer.h"
-
-#include "delay.h"
-#include "reverb.h"
-
-#include "phaser.h"
-#include "flanger.h"
-
-//#include "wavplayer.h"
-
-#include "cfgFunc.h"
-
 #include "ff.h"
 #include "ff_gen_drv.h"
 #include "sd_diskio.h"
-
-#define TAB_GROUP_1 0
-
-extern uint8_t SD_DriverNum;      /* FatFS SD part */
-extern char SD_Path[4];
-extern FATFS FatFs;
-extern FIL fil;
 
 extern ADC_HandleTypeDef hadc2;
 

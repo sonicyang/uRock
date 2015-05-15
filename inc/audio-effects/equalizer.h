@@ -16,9 +16,10 @@ struct Equalizer_t{
 
 struct Effect_t* new_Equalizer();
 
-static struct EffectType_t EqualizerId = {
+static struct EffectType_t EqualizerId __attribute__((unused)) = {
     .name = "Equalizer",
     .Init = new_Equalizer
 };
+
 
 #endif //__EQUALIZER_H__

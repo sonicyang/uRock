@@ -21,7 +21,7 @@
 #include "phaser.h"
 #include "flanger.h"
 
-static const struct EffectType_t* EFFECTS[EFFECT_NUM] = {
+static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
     &NoneId,
     &VolumeId,
     &CompressorId,
