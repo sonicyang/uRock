@@ -4,6 +4,7 @@
 /*------------------------------------------------------------------------*/
 
 #include <stdlib.h>		/* ANSI memory controls */
+#include "FreeRTOS.h"
 #include "../ff.h"
 
 #if _FS_REENTRANT
@@ -101,7 +102,7 @@ void* ff_memalloc (	/* Returns pointer to the allocated memory block */
 	UINT size		/* Number of bytes to allocate */
 )
 {
-  return malloc(size);
+  return pvPortMalloc(size);
 }
 
 
@@ -113,7 +114,7 @@ void ff_memfree(
 	void* mblock	/* Pointer to the memory block to free */
 )
 {
-  free(mblock);
+  vPortFree(mblock);
 }
 
 #endif
