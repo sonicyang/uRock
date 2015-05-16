@@ -1,10 +1,9 @@
 /*------------------------------------------------------------------------*/
-/* Sample code of OS dependent controls for FatFs R0.10b                   */
-/* (C)ChaN, 2014                                                          */
+/* Sample code of OS dependent controls for FatFs R0.10                   */
+/* (C)ChaN, 2013                                                          */
 /*------------------------------------------------------------------------*/
 
-#include <stdlib.h>		/* ANSI memory controls */
-#include "FreeRTOS.h"
+#include "FreeRTOS.h"		/* ANSI memory controls */
 #include "../ff.h"
 
 #if _FS_REENTRANT

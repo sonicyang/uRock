@@ -9,6 +9,7 @@ FATINCDIR = Middlewares/Third_Party/FatFs/src \
 FATSRC += $(wildcard $(addsuffix /*.c,$(FATSRCDIR))) \
 		  $(wildcard $(addsuffix /*.s,$(FATSRCDIR)))
 
+FATSRC += Middlewares/Third_Party/FatFs/src/option/cc950.c
 FATSRC += Middlewares/Third_Party/FatFs/src/option/syscall.c
 
 INCLUDES += $(addprefix -I,$(FATINCDIR))

@@ -28,6 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "ff_gen_drv.h"
+#include "stm32f4xx_sd.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -41,9 +42,9 @@ static volatile DSTATUS Stat = STA_NOINIT;
 /* Private function prototypes -----------------------------------------------*/
 DSTATUS SD_initialize (void);
 DSTATUS SD_status (void);
-DRESULT SD_read (BYTE*, DWORD, BYTE);
+DRESULT SD_read (BYTE*, DWORD, UINT);
 #if _USE_WRITE == 1
-  DRESULT SD_write (const BYTE*, DWORD, BYTE);
+  DRESULT SD_write (const BYTE*, DWORD, UINT);
 #endif /* _USE_WRITE == 1 */
 #if _USE_IOCTL == 1
   DRESULT SD_ioctl (BYTE, void*);
@@ -107,46 +108,20 @@ DSTATUS SD_status(void)
   * @param  count: Number of sectors to read (1..128)
   * @retval DRESULT: Operation result
   */
-DRESULT SD_read(BYTE *buff, DWORD sector, BYTE count)
+
+DRESULT SD_read(BYTE *buff, DWORD sector, UINT count)
 {
-  uint32_t timeout = 100000;
-  DWORD scratch [BLOCK_SIZE / 4];  /* Alignment ensured, need enough stack */
-  uint8_t SD_state = MSD_OK;
-    
-  if ((DWORD)buff & 3) /* DMA Alignment issue, do single up to aligned buffer */
+  DRESULT res = RES_OK;
+  
+  if(BSP_SD_ReadBlocks((uint32_t*)buff, 
+                       (uint64_t) (sector * BLOCK_SIZE), 
+                       BLOCK_SIZE, 
+                       count) != MSD_OK)
   {
-    while (count--)
-    {
-      SD_state = BSP_SD_ReadBlocks_DMA((uint32_t*)scratch, (uint64_t) ((sector + count) * BLOCK_SIZE), BLOCK_SIZE, 1);
-      
-      while(BSP_SD_GetStatus() != SD_TRANSFER_OK)
-      {
-        if (timeout-- == 0)
-        {
-          return RES_ERROR;
-        }
-      }
-      memcpy (&buff[count * BLOCK_SIZE] ,scratch, BLOCK_SIZE);
-    }
-  }
-  else
-  {
-    SD_state = BSP_SD_ReadBlocks_DMA((uint32_t*)buff, (uint64_t) (sector * BLOCK_SIZE), BLOCK_SIZE, count);
-    
-    while(BSP_SD_GetStatus() != SD_TRANSFER_OK)
-    {  
-      if (timeout-- == 0)
-      {
-        return RES_ERROR;
-      }
-    }
-  }
-  if (SD_state == MSD_OK)
-  {
-    return RES_OK;
+    res = RES_ERROR;
   }
   
-  return RES_ERROR;
+  return res;
 }
 
 /**
@@ -157,47 +132,18 @@ DRESULT SD_read(BYTE *buff, DWORD sector, BYTE count)
   * @retval DRESULT: Operation result
   */
 #if _USE_WRITE == 1
-DRESULT SD_write(const BYTE *buff, DWORD sector, BYTE count)
+DRESULT SD_write(const BYTE *buff, DWORD sector, UINT count)
 {
-  uint32_t timeout = 100000;
-  DWORD scratch [BLOCK_SIZE / 4];  /* Alignment ensured, need enough stack */
-  uint8_t SD_state = MSD_OK;
+  DRESULT res = RES_OK;
   
-  if ((DWORD)buff & 3) /* DMA Alignment issue, do single up to aligned buffer */
+  if(BSP_SD_WriteBlocks((uint32_t*)buff, 
+                        (uint64_t)(sector * BLOCK_SIZE), 
+                        BLOCK_SIZE, count) != MSD_OK)
   {
-    while (count--)
-    {
-      memcpy (scratch, &buff[count * BLOCK_SIZE], BLOCK_SIZE);  
-      
-      SD_state = BSP_SD_WriteBlocks_DMA((uint32_t*)scratch, (uint64_t)((sector + count) * BLOCK_SIZE), BLOCK_SIZE, 1);
-      
-      while(BSP_SD_GetStatus() != SD_TRANSFER_OK)
-      {
-        if (timeout-- == 0)
-        {
-          return RES_ERROR;
-        }
-      }
-    }
-  }
-  else
-  {
-    SD_state = BSP_SD_WriteBlocks_DMA((uint32_t*)buff, (uint64_t)(sector * BLOCK_SIZE), BLOCK_SIZE, count);
-    
-    while(BSP_SD_GetStatus() != SD_TRANSFER_OK)
-    {
-      if (timeout-- == 0)
-      {
-        return RES_ERROR;
-      }
-    }
-  }
-  if (SD_state == MSD_OK)
-  {
-    return RES_OK;
+    res = RES_ERROR;
   }
   
-  return RES_ERROR;
+  return res;
 }
 #endif /* _USE_WRITE == 1 */
 
