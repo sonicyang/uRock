@@ -66,18 +66,18 @@
 	/*------------------------------------------------------------------------*/
 	/* Allocate a memory block                                                */
 	/*------------------------------------------------------------------------*/
-	void *ff_memalloc(UINT size)
-	{
-		return gfxAlloc( (size_t)size );
-	}
+	//void *ff_memalloc(UINT size)
+	//{
+	//	return gfxAlloc( (size_t)size );
+	//}
 
 	/*------------------------------------------------------------------------*/
 	/* Free a memory block                                                    */
 	/*------------------------------------------------------------------------*/
-	void ff_memfree(void *mblock)
-	{
-		gfxFree(mblock);
-	}
+	//void ff_memfree(void *mblock)
+	//{
+	//	gfxFree(mblock);
+	//}
 #endif /* _USE_LFN == 3 */
 
 #endif // GFX_USE_GFILE && GFILE_NEED_FATFS
