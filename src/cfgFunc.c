@@ -34,8 +34,13 @@ void openFile(FIL* fil, uint32_t configNumber, uint32_t mode){
 void SaveStageSetting(uint32_t saveSlot){
     FIL fil;
     uint32_t i;
+    f_unlink("0:/tst.txt");
+    f_open(&fil, "0:/tst.txt", FA_OPEN_ALWAYS | FA_CREATE_ALWAYS | FA_WRITE);
+    f_write(&fil, "XDDDD", 5, NULL);
+    f_sync(&fil);
+    f_close(&fil);
 
-    openFile(&fil, saveSlot, 0);
+    openFile(&fil, saveSlot, 1);
 
     for (i = 0; i < STAGE_NUM; ++i) {
         uint8_t paramNum;
