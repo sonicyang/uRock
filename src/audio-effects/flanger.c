@@ -46,8 +46,8 @@ void delete_Flanger(void *opaque){
 void adjust_Flanger(void *opaque, uint8_t* values){
     struct Flanger_t *tmp = (struct Flanger_t*)opaque;
     
-    LinkPot(&(tmp->speed), values[0]);  
-    LinkPot(&(tmp->attenuation), values[1]);  
+    LinkPot(&(tmp->attenuation), values[0]);  
+    LinkPot(&(tmp->speed), values[1]);  
     LinkPot(&(tmp->depth), values[2]);  
 
     tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * 2 * Q_1); //saving memory
