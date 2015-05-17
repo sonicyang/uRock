@@ -24,8 +24,6 @@
 #include "gfx.h"
 
 #include "ff.h"
-#include "ff_gen_drv.h"
-#include "sd_diskio.h"
 
 extern ADC_HandleTypeDef hadc2;
 
