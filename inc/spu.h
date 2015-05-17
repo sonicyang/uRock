@@ -21,6 +21,8 @@
 #include "phaser.h"
 #include "flanger.h"
 
+#include "peakFilter.h"
+#include "shelvingFilter.h"
 static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
     &NoneId,
     &VolumeId,
@@ -31,6 +33,8 @@ static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = 
     &ReverbId,
     &FlangerId,
     &EqualizerId,
+    &PeakFilterId,
+    &ShelvingFilterId,
 };
 
 void SignalProcessingUnit(void const * argument);

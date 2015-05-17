@@ -15,4 +15,5 @@ void ftoa(float n, char *res, int afterpoint);
 
 float atof(const char* s);
 
+q31_t arm_tan_q31(q31_t x);
 #endif //__HELPER_H__

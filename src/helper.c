@@ -116,3 +116,10 @@ float atof(const char* s){
 	};
 	return rez * fact;
 }
+
+
+q31_t arm_tan_q31(q31_t x){
+    return ((float)(arm_sin_q31(x) / Q_1)) /
+           ((float)(arm_cos_q31(x) / Q_1)) * Q_1;
+
+}
