@@ -75,6 +75,9 @@ void UserInterface(void const *argument){
         buttonPrevValue[i] = HAL_GPIO_ReadPin(CONFIG_BUTTON_PORT, CONFIG_BUTTON_PINS[i]);
     }
 
+    //For pedal
+    attachEffect(6, 1);
+
 	while(1) {
 		// Get an Event
 		event = geventEventWait(&gl, 50);
@@ -143,6 +146,10 @@ void UserInterface(void const *argument){
                     tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
                 }
             }
+
+            //For Pedal
+            potApply[0] = map(potValues[0][3], 39, 85, 0, 255);
+            retriveStagedEffect(6)->adj((void*)retriveStagedEffect(6), potApply);
         }
 	}
 

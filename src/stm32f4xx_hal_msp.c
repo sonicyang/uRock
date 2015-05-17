@@ -225,6 +225,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc){
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(POT_PORT, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = PEDAL_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(PEDAL_PORT, &GPIO_InitStruct);
  
     /* Peripheral DMA init*/
  
