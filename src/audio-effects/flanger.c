@@ -4,28 +4,25 @@
 
 void Flanger(q31_t* pData, void *opaque){
     struct Flanger_t *tmp = (struct Flanger_t*)opaque;
-    q31_t bData;
+    q31_t bData[256];
     q31_t fData[256];
-    uint32_t i;
-    int32_t relativeBlock;
+    int32_t relativeBlock = 0;
 
     arm_copy_q31(pData, fData, SAMPLE_NUM);
     arm_scale_q31(pData, (q31_t)(0.5 * Q_1), Q_MULT_SHIFT, pData, SAMPLE_NUM);
 
-    for (i = 0; i < SAMPLE_NUM; i++) {
-        relativeBlock = (tmp->blockPtr * SAMPLE_NUM + i - (uint32_t)(tmp->lfo.next(&(tmp->lfo))));
+    relativeBlock = (tmp->blockPtr * SAMPLE_NUM - (uint32_t)(tmp->lfo.next(&(tmp->lfo))));
 
-        if(relativeBlock < 0)
-            relativeBlock += 400 * SAMPLE_NUM;
+    if(relativeBlock < 0)
+        relativeBlock += 400 * SAMPLE_NUM;
 
-        BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * 4, (uint32_t*)&bData, 1);
+    BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * 4, (uint32_t*)&bData, SAMPLE_NUM);
 
-        arm_scale_q31(&bData, (q31_t)(0.2 * Q_1), Q_MULT_SHIFT, &bData, 1);
-        arm_add_q31(pData + i, &bData, pData + i, 1);
+    arm_scale_q31(bData, (q31_t)(0.2 * Q_1), Q_MULT_SHIFT, bData, SAMPLE_NUM);
+    arm_add_q31(pData, bData, pData, SAMPLE_NUM);
 
-        arm_scale_q31(&bData, tmp->cache, Q_MULT_SHIFT, &bData, 1);
-        arm_add_q31(fData + i, &bData, fData + i, 1);
-    }
+    arm_scale_q31(bData, tmp->cache, Q_MULT_SHIFT, bData, SAMPLE_NUM);
+    arm_add_q31(fData, bData, fData, SAMPLE_NUM);
 
     BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)fData, SAMPLE_NUM);
 
