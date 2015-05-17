@@ -42,7 +42,7 @@ void SaveStageSetting(uint32_t saveSlot){
 
     openFile(&fil, saveSlot, 1);
 
-    for (i = 0; i < STAGE_NUM; ++i) {
+    for (i = 0; i < STAGE_AVALIABLE; ++i) {
         uint8_t paramNum;
         struct parameter_t* params[MAX_EFFECT_PARAM];
         char buf[32];
@@ -100,7 +100,7 @@ void ReadStageSetting(uint32_t saveSlot){
 
     openFile(&fil, saveSlot, 0);
 
-    for (i = 0; i < STAGE_NUM; ++i) {
+    for (i = 0; i < STAGE_AVALIABLE; ++i) {
         bufPos = 0;
         stageNamePtr = buf;
 

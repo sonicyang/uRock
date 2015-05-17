@@ -9,7 +9,7 @@
 #define CONFIG_BUTTON_NUM   4
 #define CONFIG_BUTTON_PORT  GPIOA
 #define CONFIG_BUTTON1_PIN  GPIO_PIN_0
-#define CONFIG_BUTTON2_PIN  GPIO_PIN_7
+#define CONFIG_BUTTON2_PIN  GPIO_PIN_15
 #define CONFIG_BUTTON3_PIN  GPIO_PIN_10
 #define CONFIG_BUTTON4_PIN  GPIO_PIN_9
 static const uint32_t CONFIG_BUTTON_PINS[4] = {CONFIG_BUTTON1_PIN, CONFIG_BUTTON2_PIN, CONFIG_BUTTON3_PIN, CONFIG_BUTTON4_PIN};
@@ -22,6 +22,9 @@ static const uint32_t CONFIG_BUTTON_PINS[4] = {CONFIG_BUTTON1_PIN, CONFIG_BUTTON
 #define POT4_PIN    GPIO_PIN_0
 static const uint32_t POT_PINS[4] = {POT1_PIN, POT2_PIN, POT3_PIN, POT4_PIN};
 
+#define PEDAL_PORT  GPIOA
+#define PEDAL_PIN   GPIO_PIN_7
+
 
 /* ===============================
  * Audio I/O related configuration
@@ -31,6 +34,7 @@ static const uint32_t POT_PINS[4] = {POT1_PIN, POT2_PIN, POT3_PIN, POT4_PIN};
 #define SAMPLE_NUM 256
 
 #define STAGE_NUM 8
+#define STAGE_AVALIABLE 6
 #define PIPE_LENGTH 2 * STAGE_NUM
 
 /* Audio sample Parameter */
