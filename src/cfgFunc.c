@@ -135,9 +135,9 @@ void ReadStageSetting(uint32_t saveSlot){
         if(!retriveStagedEffect(i))
             continue;
         retriveStagedEffect(i)->getParam((void*)retriveStagedEffect(i), params, &paramNum);
-
+        //XXX: Use unLinkPot
         for (int i = 0; i < paramNum; ++i)
-            paramValues[i] = map(atof(paramPtrs[i]), params[0]->lowerBound, params[0]->upperBound, 0, 255);
+            paramValues[i] = map(atof(paramPtrs[i]), params[i]->lowerBound, params[i]->upperBound, 0, 255);
 
         retriveStagedEffect(i)->adj((void*)retriveStagedEffect(i), paramValues);
     }

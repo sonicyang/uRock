@@ -4,6 +4,7 @@
 #include "base-effect.h"
 
 void LinkPot(struct parameter_t *p, float value);
+float unLinkPot(struct parameter_t *p);
 float map(float value, float iupper, float ilower, float oupper, float olower);
 
 void reverse(char s[]);

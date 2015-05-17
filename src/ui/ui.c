@@ -38,14 +38,20 @@ uint32_t selectedEffectStage = 0;
 
 void UserInterface(void const *argument){
 	uint32_t i;
-	uint32_t diff_flag;
+	uint32_t diff_flag, tmp;
 
     static GListener gl;
 	GEvent* event;
 
-    uint8_t potValues[2][4];
-    uint8_t potApply[4];
+    uint8_t potValues[2][MAX_EFFECT_PARAM];
+    uint8_t potApply[MAX_EFFECT_PARAM];
+    struct parameter_t* params[MAX_EFFECT_PARAM];
+    uint8_t paramNum;
+    uint8_t paramValues;
+    uint8_t paramApplyFlag[MAX_EFFECT_PARAM];
+
     GPIO_PinState buttonPrevValue[MAX_CONFIG_NUM];
+
     uint8_t currentConfig = 0;
 
 	ReadStageSetting(currentConfig);
@@ -81,28 +87,51 @@ void UserInterface(void const *argument){
 
 
         //XXX: Use Event System and Callback
-        //TODO: Sync Pots before set new value
         if(currentTabNumber == PARAM_TAB){
             diff_flag = 0;
 
+            for(i = 0; i < MAX_EFFECT_PARAM; i++){
+                potApply[i] = potValues[0][i];
+            }
+
+            if (retriveStagedEffect(selectedEffectStage)){
+                retriveStagedEffect(selectedEffectStage)->getParam((void*)retriveStagedEffect(selectedEffectStage), params, &paramNum);
+                for(i = 0; i < paramNum; i++){
+                    if(!paramApplyFlag[i]){
+                        paramValues = unLinkPot(params[i]);
+
+                        if((potApply[i] - paramValues) < 0)
+                            tmp = paramValues - potApply[i];
+                        else
+                            tmp = potApply[i] - paramValues;
+
+                        if(tmp < 5){
+                           paramApplyFlag[i] = 1;
+                        }else{
+                           potApply[i] = paramValues;  
+                        }
+                    }
+
+                    if((potApply[i] - potValues[1][i]) < 0)
+                        tmp = potValues[1][i] - potApply[i];
+                    else
+                        tmp = potApply[i] - potValues[1][i];
+
+                    if(tmp > 5){
+                        diff_flag++;
+                    }
+                }
+                retriveStagedEffect(selectedEffectStage)->adj((void*)retriveStagedEffect(selectedEffectStage), potApply);
+                if(diff_flag)
+                    tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
+            }
+
             for(i = 0; i < 4; i++){
-                if(((potValues[1][i] - potValues[0][i]) > 5) || ((potValues[0][i] - potValues[1][i]) > 5)){
-                    potApply[i] = potValues[0][i];
-                    diff_flag++;
-                }else{
-                   potApply[i] = potValues[1][i];
-                }
+                potValues[1][i] = potApply[i];
             }
-
-            if(diff_flag){
-                if (retriveStagedEffect(selectedEffectStage))
-                    retriveStagedEffect(selectedEffectStage)->adj((void*)retriveStagedEffect(selectedEffectStage), potApply);
-
-                for(i = 0; i < 4; i++){
-                    potValues[1][i] = potApply[i];
-                }
-                tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
-            }
+        }else{
+            for(i = 0; i < MAX_EFFECT_PARAM; i++)
+                paramApplyFlag[i] = 0;
         }
         
         if(currentTabNumber == LIST_TAB){

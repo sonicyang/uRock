@@ -14,7 +14,10 @@ extern uint32_t selectedEffectStage;
 
 void tab_param_show(void* opaque){
     struct tab_param_t *tmp = (struct tab_param_t*)opaque;
-    uint32_t i;
+    struct parameter_t *parameterList[MAX_EFFECT_PARAM];
+    uint8_t paraNum;
+    char buf[32];
+    uint32_t i = 0;
 
     gwinSetVisible(tmp->label_effectTitle, TRUE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
@@ -24,6 +27,37 @@ void tab_param_show(void* opaque){
 
     gwinSetVisible(tmp->btn_back, TRUE);
     gwinSetVisible(tmp->btn_change, TRUE);
+
+    strcpy(buf, "Stage ");
+    itoa(selectedEffectStage + 1, buf + 6);
+    strcat(buf, " : ");
+
+    if (retriveStagedEffect(selectedEffectStage)){
+        strcat(buf, retriveStagedEffect(selectedEffectStage)->name);
+        gwinSetText(tmp->label_effectTitle, buf, 1);
+
+        retriveStagedEffect(selectedEffectStage)->getParam((void*)retriveStagedEffect(selectedEffectStage), parameterList, &paraNum);
+        for(;i < paraNum; i++){
+            gwinSetVisible(tmp->label_param[i], TRUE);
+            gwinSetText(tmp->label_param[i], parameterList[i]->name, 0);
+
+            gwinSetVisible(tmp->vbar_param[i], TRUE);
+            ftoa(parameterList[i]->value, buf, 2);
+            gwinSetText(tmp->vbar_param[i], buf, 1);
+            gwinProgressbarSetPosition(tmp->vbar_param[i], map(parameterList[i]->value, parameterList[i]->lowerBound, parameterList[i]->upperBound, 0, 100));
+        }
+        i = paraNum;
+    }else{
+        strcat(buf, "Empty");
+        gwinSetText(tmp->label_effectTitle, buf, 1);
+    }
+
+    for(; i < MAX_EFFECT_PARAM; i++){
+        gwinSetVisible(tmp->vbar_param[i], FALSE);
+        gwinSetVisible(tmp->label_param[i], FALSE);
+    }
+
+    return;
 
     return;
 }
@@ -46,7 +80,7 @@ void tab_param_hide(void* opaque){
 
 void tab_param_refresh(void* opaque){
     struct tab_param_t *tmp = (struct tab_param_t*)opaque;
-    struct parameter_t *parameterList[5];
+    struct parameter_t *parameterList[MAX_EFFECT_PARAM];
     uint8_t paraNum;
     char buf[32];
     uint32_t i = 0;

@@ -11,6 +11,10 @@ void LinkPot(struct parameter_t *p, float value){
     return;
 }
 
+float unLinkPot(struct parameter_t *p){
+    return map(p->value, p->lowerBound, p->upperBound, 0, 255);
+}
+
 void reverse(char s[])
 {
     int i, j;
