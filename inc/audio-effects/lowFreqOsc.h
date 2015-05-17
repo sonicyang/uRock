@@ -11,8 +11,10 @@ struct LFO_t{
     float (*next)(struct LFO_t* opaque);
     float lowerBound;
     float upperBound;
-    uint32_t period;
+    uint32_t feq;
     uint32_t ptr;
+    float cache0;
+    float cache1;
 };
 
 void new_LFO(struct LFO_t *opaque, float u, float l, uint32_t p);
