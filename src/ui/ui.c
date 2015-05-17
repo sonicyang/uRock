@@ -43,7 +43,7 @@ void UserInterface(void const *argument){
     static GListener gl;
 	GEvent* event;
 
-    uint8_t potValues[2][MAX_EFFECT_PARAM];
+    uint8_t potValues[2][MAX_EFFECT_PARAM + 1];
     uint8_t potApply[MAX_EFFECT_PARAM];
     struct parameter_t* params[MAX_EFFECT_PARAM];
     uint8_t paramNum;
@@ -70,7 +70,7 @@ void UserInterface(void const *argument){
 	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
 	SwitchTab(LIST_TAB);
 
-	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 3); //TODO: Make 4
+	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 4); //One more for pedal //TODO: Make 4 
     for(i = 0; i < CONFIG_BUTTON_NUM; i++){
         buttonPrevValue[i] = HAL_GPIO_ReadPin(CONFIG_BUTTON_PORT, CONFIG_BUTTON_PINS[i]);
     }
@@ -84,7 +84,6 @@ void UserInterface(void const *argument){
                 tabs[currentTabNumber]->bHandle(tabs[currentTabNumber], (GEventGWinButton*)event);
                 break;
 		}
-
 
         //XXX: Use Event System and Callback
         if(currentTabNumber == PARAM_TAB){
