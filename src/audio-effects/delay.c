@@ -34,8 +34,8 @@ void delete_Delay(void *opaque){
 void adjust_Delay(void *opaque, uint8_t* values){
     struct Delay_t *tmp = (struct Delay_t*)opaque;
     
-    LinkPot(&(tmp->delayTime), values[0]);  
-    LinkPot(&(tmp->attenuation), values[1]);  
+    LinkPot(&(tmp->attenuation), values[0]);  
+    LinkPot(&(tmp->delayTime), values[1]);  
     tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * Q_1);
 
     return;
