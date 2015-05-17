@@ -134,7 +134,7 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadDef(SPU_Task, SignalProcessingUnit, osPriorityRealtime, 1, 1024);
   SPU_TaskHandle = osThreadCreate(osThread(SPU_Task), NULL);
-  osThreadDef(UI_Task, UserInterface, osPriorityNormal, 1, 2048);
+  osThreadDef(UI_Task, UserInterface, osPriorityHigh, 1, 3000);
   UI_TaskHandle = osThreadCreate(osThread(UI_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
