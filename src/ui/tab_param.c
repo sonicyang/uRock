@@ -17,12 +17,12 @@ void tab_param_show(void* opaque){
     struct parameter_t *parameterList[MAX_EFFECT_PARAM];
     uint8_t paraNum;
     char buf[32];
-    uint32_t i = 0;
+    uint32_t i;
 
     gwinSetVisible(tmp->label_effectTitle, TRUE);
     for(i = 0; i < MAX_EFFECT_PARAM; i++){
         gwinSetVisible(tmp->label_param[i], FALSE);
-        gwinSetVisible(tmp->vbar_param[i], FALSE); //Let Refresh do the job
+        gwinSetVisible(tmp->vbar_param[i], FALSE);
     }
 
     gwinSetVisible(tmp->btn_back, TRUE);
@@ -37,27 +37,16 @@ void tab_param_show(void* opaque){
         gwinSetText(tmp->label_effectTitle, buf, 1);
 
         retriveStagedEffect(selectedEffectStage)->getParam((void*)retriveStagedEffect(selectedEffectStage), parameterList, &paraNum);
-        for(;i < paraNum; i++){
+        for(i = 0;i < paraNum; i++){
             gwinSetVisible(tmp->label_param[i], TRUE);
             gwinSetText(tmp->label_param[i], parameterList[i]->name, 0);
 
             gwinSetVisible(tmp->vbar_param[i], TRUE);
-            ftoa(parameterList[i]->value, buf, 2);
-            gwinSetText(tmp->vbar_param[i], buf, 1);
-            gwinProgressbarSetPosition(tmp->vbar_param[i], map(parameterList[i]->value, parameterList[i]->lowerBound, parameterList[i]->upperBound, 0, 100));
         }
-        i = paraNum;
     }else{
         strcat(buf, "Empty");
         gwinSetText(tmp->label_effectTitle, buf, 1);
     }
-
-    for(; i < MAX_EFFECT_PARAM; i++){
-        gwinSetVisible(tmp->vbar_param[i], FALSE);
-        gwinSetVisible(tmp->label_param[i], FALSE);
-    }
-
-    return;
 
     return;
 }
@@ -81,37 +70,18 @@ void tab_param_hide(void* opaque){
 void tab_param_refresh(void* opaque){
     struct tab_param_t *tmp = (struct tab_param_t*)opaque;
     struct parameter_t *parameterList[MAX_EFFECT_PARAM];
-    uint8_t paraNum;
     char buf[32];
-    uint32_t i = 0;
+    uint8_t paraNum;
+    uint32_t i;
 
-    strcpy(buf, "Stage ");
-    itoa(selectedEffectStage + 1, buf + 6);
-    strcat(buf, " : ");
 
     if (retriveStagedEffect(selectedEffectStage)){
-        strcat(buf, retriveStagedEffect(selectedEffectStage)->name);
-        gwinSetText(tmp->label_effectTitle, buf, 1);
-
         retriveStagedEffect(selectedEffectStage)->getParam((void*)retriveStagedEffect(selectedEffectStage), parameterList, &paraNum);
-        for(;i < paraNum; i++){
-            gwinSetVisible(tmp->label_param[i], TRUE);
-            gwinSetText(tmp->label_param[i], parameterList[i]->name, 0);
-
-            gwinSetVisible(tmp->vbar_param[i], TRUE);
+        for(i = 0;i < paraNum; i++){
             ftoa(parameterList[i]->value, buf, 2);
             gwinSetText(tmp->vbar_param[i], buf, 1);
             gwinProgressbarSetPosition(tmp->vbar_param[i], map(parameterList[i]->value, parameterList[i]->lowerBound, parameterList[i]->upperBound, 0, 100));
         }
-        i = paraNum;
-    }else{
-        strcat(buf, "Empty");
-        gwinSetText(tmp->label_effectTitle, buf, 1);
-    }
-
-    for(; i < MAX_EFFECT_PARAM; i++){
-        gwinSetVisible(tmp->vbar_param[i], FALSE);
-        gwinSetVisible(tmp->label_param[i], FALSE);
     }
 
     return;
