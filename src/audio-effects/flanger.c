@@ -18,13 +18,13 @@ void Flanger(q31_t* pData, void *opaque){
 
     BSP_SDRAM_ReadData(tmp->baseAddress + relativeBlock * 4 * SAMPLE_NUM, (uint32_t*)&bData, SAMPLE_NUM);
 
-    arm_scale_q31(bData, (q31_t)(0.2 * Q_1), Q_MULT_SHIFT, bData, SAMPLE_NUM);
+    arm_scale_q31(bData, (q31_t)(0.1 * Q_1), Q_MULT_SHIFT, bData, SAMPLE_NUM);
     arm_add_q31(pData, bData, pData, SAMPLE_NUM);
 
     arm_scale_q31(bData, tmp->cache, Q_MULT_SHIFT, bData, SAMPLE_NUM);
     arm_add_q31(fData, bData, fData, SAMPLE_NUM);
 
-    BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)pData, SAMPLE_NUM);
+    BSP_SDRAM_WriteData(tmp->baseAddress + tmp->blockPtr * SAMPLE_NUM * 4, (uint32_t*)fData, SAMPLE_NUM);
 
     tmp->blockPtr++;
     if(tmp->blockPtr >= 400)
@@ -50,7 +50,7 @@ void adjust_Flanger(void *opaque, uint8_t* values){
     tmp->cache = (q31_t)(powf(10, (tmp->attenuation.value * 0.1f)) * 2 * Q_1); //saving memory
 
     adjust_LFO_speed(&(tmp->lfo), tmp->speed.value);
-    tmp->lfo.upperBound = tmp->depth.value / SAMPLE_PERIOD;
+    tmp->lfo.upperBound = tmp->depth.value;
 
     return;
 }
@@ -86,10 +86,10 @@ struct Effect_t* new_Flanger(){
 
     tmp->depth.name = "Depth";
     tmp->depth.upperBound = 200.0f;
-    tmp->depth.lowerBound = 10.0;
-    tmp->depth.value = 25.0f;
+    tmp->depth.lowerBound = 40.0;
+    tmp->depth.value = 40.0f;
 
-    new_LFO(&(tmp->lfo), 25 / SAMPLE_PERIOD, 10 / SAMPLE_PERIOD, tmp->speed.value);
+    new_LFO(&(tmp->lfo), 200, 40, tmp->speed.value);
 
     tmp->blockPtr = 0;
     tmp->baseAddress = allocateDelayLine();
