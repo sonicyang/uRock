@@ -111,14 +111,17 @@ void UserInterface(void const *argument){
                            potApply[i] = paramValues;  
                         }
                     }
+                    
+                    if(paramApplyFlag[i]){
+                        if((potApply[i] - potValues[1][i]) < 0)
+                            tmp = potValues[1][i] - potApply[i];
+                        else
+                            tmp = potApply[i] - potValues[1][i];
 
-                    if((potApply[i] - potValues[1][i]) < 0)
-                        tmp = potValues[1][i] - potApply[i];
-                    else
-                        tmp = potApply[i] - potValues[1][i];
-
-                    if(tmp > 5){
-                        diff_flag++;
+                        if(tmp > 5){
+                            diff_flag++;
+                        }
+                        potValues[1][i] = potApply[i];
                     }
                 }
                 retriveStagedEffect(selectedEffectStage)->adj((void*)retriveStagedEffect(selectedEffectStage), potApply);
@@ -126,9 +129,6 @@ void UserInterface(void const *argument){
                     tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
             }
 
-            for(i = 0; i < 4; i++){
-                potValues[1][i] = potApply[i];
-            }
         }else{
             for(i = 0; i < MAX_EFFECT_PARAM; i++)
                 paramApplyFlag[i] = 0;
