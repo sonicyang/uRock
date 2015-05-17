@@ -69,7 +69,6 @@ void UserInterface(void const *argument){
         buttonPrevValue[i] = HAL_GPIO_ReadPin(CONFIG_BUTTON_PORT, CONFIG_BUTTON_PINS[i]);
     }
 
-
 	while(1) {
 		// Get an Event
 		event = geventEventWait(&gl, 50);
@@ -113,9 +112,9 @@ void UserInterface(void const *argument){
                     SaveStageSetting(currentConfig);
                     currentConfig = i;
                     ReadStageSetting(currentConfig);
+                    tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
                 }
             }
-            tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
         }
 	}
 
