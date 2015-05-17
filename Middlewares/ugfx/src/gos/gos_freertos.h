@@ -56,7 +56,7 @@ typedef portBASE_TYPE		threadpriority_t;
 
 #define MAX_SEMAPHORE_COUNT	((semcount_t)(((unsigned long)((semcount_t)(-1))) >> 1))
 #define LOW_PRIORITY		0
-#define NORMAL_PRIORITY		configMAX_PRIORITIES/2
+#define NORMAL_PRIORITY		1
 #define HIGH_PRIORITY		configMAX_PRIORITIES-1
 
 /* FreeRTOS will allocate the stack when creating the thread, so pass the size instead of a working area */
