@@ -38,7 +38,7 @@ void PeakFilter(q31_t* pData, void *opaque){
         tmp->xh1 = tmp->xh0;
 
         arm_scale_q31(&(tmp->H0), pData[i] - ap_y, Q_MULT_SHIFT, &calc_tmp, 1);
-        pData[i] = calc_tmp >> 1;
+        pData[i] += calc_tmp >> 1;
     }
     return;
 
