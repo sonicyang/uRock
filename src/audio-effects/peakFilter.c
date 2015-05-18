@@ -59,7 +59,7 @@ void adjust_PeakFilter(void *opaque, uint8_t* values){
     q31_t V0 = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * Q_1);
     tmp->H0 = V0 - Q_1;
     float Wb = 2 * 20 / (1000 * SAMPLING_RATE);
-    float Wc = 2 * 150 / (1000 * SAMPLING_RATE);
+    float Wc = 2 * 2000 / (1000 * SAMPLING_RATE);
     q31_t calc_tmp = (q31_t)(Wb * Q_1) >> 2;
     calc_tmp = calc_tmp << Q_MULT_SHIFT;
 
@@ -105,7 +105,7 @@ struct Effect_t* new_PeakFilter(){
     q31_t V0 = (q31_t)(powf(10, (tmp->gain.value * 0.1f)) * Q_1);
     tmp->H0 = V0 - Q_1;
     float Wb = 2 * 20 / (1000 * SAMPLING_RATE);
-    float Wc = 2 * 150 / (1000 * SAMPLING_RATE);
+    float Wc = 2 * 2000 / (1000 * SAMPLING_RATE);
     q31_t calc_tmp = (q31_t)(Wb * Q_1) >> 2;
     calc_tmp = calc_tmp << Q_MULT_SHIFT;
 
