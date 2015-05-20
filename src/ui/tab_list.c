@@ -15,7 +15,10 @@
 
 #include "helper.h"
 
+#include "google.h"
+
 extern uint32_t selectedEffectStage;
+static GHandle   ghImage1;
 
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
@@ -143,6 +146,15 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
         wi.text = "";
         opaque->btn_effectIndicate[i * 2 + 1] = gwinButtonCreate(NULL, &wi);
     }
+
+    gwinWidgetClearInit(&wi);
+    wi.g.show = TRUE;
+    wi.g.x = 0;
+    wi.g.y = 0;
+    wi.g.width = 200;
+    wi.g.height = 200;
+    ghImage1 = gwinImageCreate(NULL, &wi.g);
+    gwinImageOpenMemory(ghImage1, google);
 /*
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
