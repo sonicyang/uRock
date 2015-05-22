@@ -48,6 +48,7 @@ SRCDIR = src \
 
 INCDIR = inc \
 		 inc/audio-effects \
+		 inc/images \
 		 inc/ui \
 		 ./
 
