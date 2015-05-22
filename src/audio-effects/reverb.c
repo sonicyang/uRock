@@ -5,6 +5,7 @@ struct Effect_t* new_Reverb(){
     struct Delay_t *tmp = (struct Delay_t*)new_Delay();
 
     strcpy(tmp->parent.name, "Reverb");
+    tmp->parent.FXid = &ReverbId;
 
     tmp->attenuation.upperBound = -5.0f;
     tmp->attenuation.lowerBound = -30.0f;

@@ -2,6 +2,7 @@
 #define __EQUALIZER_H__
 
 #include "base-effect.h"
+#include "eq_img.h"
 
 struct Equalizer_t{
     struct Effect_t parent;
@@ -18,6 +19,7 @@ struct Effect_t* new_Equalizer();
 
 static struct EffectType_t EqualizerId __attribute__((unused)) = {
     .name = "Equalizer",
+    .image = eq,
     .Init = new_Equalizer
 };
 

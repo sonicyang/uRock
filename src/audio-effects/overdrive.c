@@ -67,6 +67,8 @@ struct Effect_t* new_Overdrive(){
     struct Overdrive_t* tmp = pvPortMalloc(sizeof(struct Overdrive_t));
 
     strcpy(tmp->parent.name, OverdriveId.name);
+    tmp->parent.FXid = &OverdriveId;
+
     tmp->parent.func = Overdrive;
     tmp->parent.del = delete_Overdrive;
     tmp->parent.adj = adjust_Overdrive;

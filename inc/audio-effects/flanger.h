@@ -3,6 +3,7 @@
 
 #include "base-effect.h"
 #include "lowFreqOsc.h"
+#include "flanger_img.h"
 
 struct Flanger_t{
     struct Effect_t parent;
@@ -19,6 +20,7 @@ struct Effect_t* new_Flanger();
 
 static struct EffectType_t FlangerId __attribute__((unused)) = {
     .name = "Flanger",
+    .image = flanger,
     .Init = new_Flanger
 };
 

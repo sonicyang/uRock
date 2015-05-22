@@ -48,6 +48,8 @@ struct Effect_t* new_Distortion(){
     struct Distortion_t* tmp = pvPortMalloc(sizeof(struct Distortion_t));
 
     strcpy(tmp->parent.name, DistortionId.name);
+    tmp->parent.FXid = &DistortionId;
+
     tmp->parent.func = Distortion;
     tmp->parent.del = delete_Distortion;
     tmp->parent.adj = adjust_Distortion;

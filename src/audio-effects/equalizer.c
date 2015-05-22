@@ -81,6 +81,8 @@ struct Effect_t* new_Equalizer(){
     struct Equalizer_t* tmp = pvPortMalloc(sizeof(struct Equalizer_t));
 
     strcpy(tmp->parent.name, EqualizerId.name);
+    tmp->parent.FXid = &EqualizerId;
+
     tmp->parent.func = Equalizer;
     tmp->parent.del = delete_Equalizer;
     tmp->parent.adj = adjust_Equalizer;
