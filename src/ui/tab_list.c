@@ -135,22 +135,23 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
         wi.g.show = FALSE;
         wi.g.x = 50;
         wi.g.y = 50 + 70 * i;
-        wi.g.width = 60;
+        wi.g.width = 48;
         wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2] = gwinButtonCreate(NULL, &wi);
+        gdispImageOpenMemory(ghImages + i * 2, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2], gwinButtonDraw_Image, ghImages + i * 2);
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
         wi.g.x = 140;
         wi.g.y = 50 + 70 * i;
-        wi.g.width = 60;
+        wi.g.width = 48;
         wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2 + 1] = gwinButtonCreate(NULL, &wi);
-
-        gdispImageOpenMemory(ghImages + i * 2, EFFECTS[0]->image);
         gdispImageOpenMemory(ghImages + i * 2 + 1, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2 + 1], gwinButtonDraw_Image, ghImages + i * 2 + 1);
     }
 
 /*
