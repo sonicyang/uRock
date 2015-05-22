@@ -18,25 +18,28 @@
 #include "google.h"
 
 extern uint32_t selectedEffectStage;
-static GHandle   ghImage1;
+gdispImage ghImages[STAGE_AVALIABLE];
 
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
-    char buf[32];
 
     for(i = 0; i < STAGE_AVALIABLE; i++){
-        itoa(i + 1, buf);
+
+        gdispImageClose(ghImages + i);
 
         if(retriveStagedEffect(i)){
-            strcat(buf, " ");
-            strcat(buf, retriveStagedEffect(i)->name);
-            buf[8] = '\0';
+            gdispImageOpenMemory(ghImages + i, retriveStagedEffect(i)->FXid->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, ghImages + i);
+            gwinuRedraw(tmp->btn_effectIndicate[i]);
+            gwinSetText(tmp->btn_effectIndicate[i], "", 0);
         }else{
-            strcat(buf, " Empty");
+            gdispImageOpenMemory(ghImages + i, EFFECTS[0]->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, ghImages + i);
+            gwinuRedraw(tmp->btn_effectIndicate[i]);
+            gwinSetText(tmp->btn_effectIndicate[i], "Empty", 0);
         }
 
-        gwinSetText(tmp->btn_effectIndicate[i], buf, 1);
     }
 
     return;
@@ -130,31 +133,26 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     for(i = 0; i < STAGE_AVALIABLE / 2; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 10;
-        wi.g.y = 50 + 60 * i;
-        wi.g.width = 100;
-        wi.g.height = 50;
+        wi.g.x = 50;
+        wi.g.y = 50 + 70 * i;
+        wi.g.width = 60;
+        wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2] = gwinButtonCreate(NULL, &wi);
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 130;
-        wi.g.y = 50 + 60 * i;
-        wi.g.width = 100;
-        wi.g.height = 50;
+        wi.g.x = 140;
+        wi.g.y = 50 + 70 * i;
+        wi.g.width = 60;
+        wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2 + 1] = gwinButtonCreate(NULL, &wi);
+
+        gdispImageOpenMemory(ghImages + i * 2, EFFECTS[0]->image);
+        gdispImageOpenMemory(ghImages + i * 2 + 1, EFFECTS[0]->image);
     }
 
-    gwinWidgetClearInit(&wi);
-    wi.g.show = TRUE;
-    wi.g.x = 0;
-    wi.g.y = 0;
-    wi.g.width = 200;
-    wi.g.height = 200;
-    ghImage1 = gwinImageCreate(NULL, &wi.g);
-    gwinImageOpenMemory(ghImage1, google);
 /*
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;

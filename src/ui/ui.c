@@ -54,7 +54,7 @@ void UserInterface(void const *argument){
 
     uint8_t currentConfig = 0;
 
-	ReadStageSetting(currentConfig);
+	//ReadStageSetting(currentConfig);
 
 	gfxInit();
 	gdispClear(Black);
