@@ -132,7 +132,7 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     for(i = 0; i < STAGE_AVALIABLE / 2; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 48;
+        wi.g.x = (i && 0x01) ? 140 : 48;
         wi.g.y = 80 + 75 * i;
         wi.g.width = 46;
         wi.g.height = 60;
@@ -143,7 +143,7 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 140;
+        wi.g.x = (i && 0x01) ? 48 : 140;
         wi.g.y = 80 + 75 * i;
         wi.g.width = 46;
         wi.g.height = 60;
