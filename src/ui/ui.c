@@ -148,8 +148,16 @@ void UserInterface(void const *argument){
             }
 
             //For Pedal
-            potApply[0] = map(potValues[0][3], 39, 85, 0, 255);
-            retriveStagedEffect(6)->adj((void*)retriveStagedEffect(6), potApply);
+            if((potValues[0][3] - potValues[1][3]) < 0)
+                tmp = potValues[1][3] - potValues[0][3];
+            else
+                tmp = potValues[0][3] - potValues[1][3];
+
+            if(tmp > 5){
+                potApply[0] = map(potValues[0][3], 39, 85, 0, 255);
+                retriveStagedEffect(6)->adj((void*)retriveStagedEffect(6), potApply);
+                potValues[1][3] = potValues[0][3];
+            }
         }
 	}
 
