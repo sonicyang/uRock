@@ -11,8 +11,9 @@
 struct tab_list_t{
     struct tab_t parent;
 
-    GHandle label_uRock;
+    GHandle ghBackGroundImage;
     GHandle btn_effectIndicate[STAGE_NUM];
+    gdispImage ghImages[STAGE_AVALIABLE];
 
     GHandle label_effectName[STAGE_NUM];
     GHandle btn_effectSwitch[STAGE_NUM];

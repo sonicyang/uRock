@@ -15,10 +15,9 @@
 
 #include "helper.h"
 
-#include "google.h"
+#include "background.bmp.h"
 
 extern uint32_t selectedEffectStage;
-gdispImage ghImages[STAGE_AVALIABLE];
 
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
@@ -26,16 +25,16 @@ void tab_list_refresh(void* opaque){
 
     for(i = 0; i < STAGE_AVALIABLE; i++){
 
-        gdispImageClose(ghImages + i);
+        gdispImageClose(tmp->ghImages + i);
 
         if(retriveStagedEffect(i)){
-            gdispImageOpenMemory(ghImages + i, retriveStagedEffect(i)->FXid->image);
-            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, ghImages + i);
+            gdispImageOpenMemory(tmp->ghImages + i, retriveStagedEffect(i)->FXid->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, tmp->ghImages + i);
             gwinuRedraw(tmp->btn_effectIndicate[i]);
             gwinSetText(tmp->btn_effectIndicate[i], "", 0);
         }else{
-            gdispImageOpenMemory(ghImages + i, EFFECTS[0]->image);
-            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, ghImages + i);
+            gdispImageOpenMemory(tmp->ghImages + i, EFFECTS[0]->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, tmp->ghImages + i);
             gwinuRedraw(tmp->btn_effectIndicate[i]);
             gwinSetText(tmp->btn_effectIndicate[i], "Empty", 0);
         }
@@ -86,7 +85,7 @@ void tab_list_show(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
 
-    gwinSetVisible(tmp->label_uRock, TRUE);
+    gwinSetVisible(tmp->ghBackGroundImage, TRUE);
     for(i = 0; i < STAGE_AVALIABLE; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], TRUE);
         //gwinSetVisible(tmp->label_effectName[i], TRUE);
@@ -103,7 +102,7 @@ void tab_list_hide(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
 
-    gwinSetVisible(tmp->label_uRock, FALSE);
+    gwinSetVisible(tmp->ghBackGroundImage, FALSE);
     for(i = 0; i < STAGE_AVALIABLE; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], FALSE);
         //gwinSetVisible(tmp->label_effectName[i], FALSE);
@@ -123,35 +122,35 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     /* StageTab */
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 30;
+    wi.g.x = 0;
     wi.g.y = 0;
     wi.g.width = 240;
-    wi.g.height = 20;
-    wi.text = "uRock : YouRock";
-    opaque->label_uRock = gwinLabelCreate(NULL, &wi);
+    wi.g.height = 320;
+    opaque->ghBackGroundImage = gwinImageCreate(NULL, &wi.g);
+    gwinImageOpenMemory(opaque->ghBackGroundImage, background);
 
     for(i = 0; i < STAGE_AVALIABLE / 2; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 50;
-        wi.g.y = 50 + 70 * i;
-        wi.g.width = 48;
+        wi.g.x = 48;
+        wi.g.y = 80 + 75 * i;
+        wi.g.width = 46;
         wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2] = gwinButtonCreate(NULL, &wi);
-        gdispImageOpenMemory(ghImages + i * 2, EFFECTS[0]->image);
-        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2], gwinButtonDraw_Image, ghImages + i * 2);
+        gdispImageOpenMemory(opaque->ghImages + i * 2, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2], gwinButtonDraw_Image, opaque->ghImages + i * 2);
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
         wi.g.x = 140;
-        wi.g.y = 50 + 70 * i;
-        wi.g.width = 48;
+        wi.g.y = 80 + 75 * i;
+        wi.g.width = 46;
         wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2 + 1] = gwinButtonCreate(NULL, &wi);
-        gdispImageOpenMemory(ghImages + i * 2 + 1, EFFECTS[0]->image);
-        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2 + 1], gwinButtonDraw_Image, ghImages + i * 2 + 1);
+        gdispImageOpenMemory(opaque->ghImages + i * 2 + 1, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2 + 1], gwinButtonDraw_Image, opaque->ghImages + i * 2 + 1);
     }
 
 /*
