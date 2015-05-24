@@ -36,8 +36,8 @@ void SignalProcessingUnit(void const * argument){
     SPUH_id = osSemaphoreCreate(osSemaphore(SPUH), 1);
 
     /* Start Transmission and reception */
-    HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], 512); //Salve goes before Master
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], 1024);
+    HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], SAMPLE_NUM * 2); //Salve goes before Master
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], SAMPLE_NUM * 2 * 2);
 
     /* Process */
     while(1){
