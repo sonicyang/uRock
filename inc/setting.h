@@ -40,7 +40,7 @@ static const uint32_t POT_PINS[4] = {POT1_PIN, POT2_PIN, POT3_PIN, POT4_PIN};
 /* Audio sample Parameter */
 #define NORM_VALUE 0x65000000 
 
-#define SAMPLING_RATE 96 /* In Kilo Hz, Make Sure it can divide 45000*/
+#define SAMPLING_RATE 48 /* In Kilo Hz, Make Sure it can divide 45000*/
 #define SAMPLE_PERIOD (1.0f / SAMPLING_RATE)
 #define SAMPLE_MAX 16384
 
