@@ -2,7 +2,7 @@
 #define __DELAY_H__
 
 #include "base-effect.h"
-#include "delay_img.h"
+#include "delay_img.bmp.h"
 
 struct Delay_t{
     struct Effect_t parent;
@@ -17,7 +17,7 @@ struct Effect_t* new_Delay();
 
 static struct EffectType_t DelayId __attribute__((unused)) = {
     .name = "Delay",
-    .image = delay,
+    .image = delay_img,
     .Init = new_Delay
 };
 

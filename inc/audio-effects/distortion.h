@@ -2,7 +2,7 @@
 #define __DISTORTION_H__
 
 #include "base-effect.h"
-#include "distortion_img.h"
+#include "distortion_img.bmp.h"
 
 struct Distortion_t{
     struct Effect_t parent;
@@ -15,7 +15,7 @@ struct Effect_t* new_Distortion();
 
 static struct EffectType_t DistortionId __attribute__((unused)) = {
     .name = "Distortion",
-    .image = distortion,
+    .image = distortion_img,
     .Init = new_Distortion
 };
 
