@@ -15,7 +15,7 @@ void NoiseGate(q31_t* pData, void *opaque){
             c++;
         }
     }
-    if (c == SAMPLE_NUM){
+    if (c >= SAMPLE_NUM / 2){
         tmp->counter += 1;
     }else{
         tmp->counter = 0;
