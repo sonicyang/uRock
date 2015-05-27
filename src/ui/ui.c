@@ -77,6 +77,7 @@ void UserInterface(void const *argument){
 
     //For pedal
     //attachEffect(6, 1);
+    attachEffect(6, 2);
 
 	while(1) {
 		// Get an Event
