@@ -76,7 +76,8 @@ void UserInterface(void const *argument){
     }
 
     //For pedal
-    attachEffect(6, 1);
+    attachEffect(7, 1);
+    attachEffect(6, 2);
 
 	while(1) {
 		// Get an Event
@@ -146,7 +147,7 @@ void UserInterface(void const *argument){
                     tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
                 }
             }
-
+            
             //For Pedal
             if((potValues[0][3] - potValues[1][3]) < 0)
                 tmp = potValues[1][3] - potValues[0][3];
@@ -154,8 +155,8 @@ void UserInterface(void const *argument){
                 tmp = potValues[0][3] - potValues[1][3];
 
             if(tmp > 5){
-                potApply[0] = map(potValues[0][3], 39, 85, 0, 255);
-                retriveStagedEffect(6)->adj((void*)retriveStagedEffect(6), potApply);
+                potApply[0] = map(potValues[0][3], 39, 75, 0, 255);
+                retriveStagedEffect(7)->adj((void*)retriveStagedEffect(7), potApply);
                 potValues[1][3] = potValues[0][3];
             }
         }

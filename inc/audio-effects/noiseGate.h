@@ -5,7 +5,6 @@
 
 struct NoiseGate_t{
     struct Effect_t parent;
-    struct parameter_t threshold;
     uint32_t counter;
 };
 
