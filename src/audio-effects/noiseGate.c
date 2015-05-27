@@ -5,7 +5,7 @@
 void NoiseGate(q31_t* pData, void *opaque){
     struct NoiseGate_t *tmp = (struct NoiseGate_t*)opaque;
     q31_t buf[SAMPLE_NUM];
-    q31_t threshold = 200 * Q_1;
+    q31_t threshold = 107 * Q_1;
     register int i;
     q31_t c = 0;
     // arm_rms_q31(pData, SAMPLE_NUM, &result);
