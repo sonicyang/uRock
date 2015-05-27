@@ -5,7 +5,8 @@ DSPSRCDIR = Drivers/CMSIS/DSP_Lib/Source/FastMathFunctions \
 			Drivers/CMSIS/DSP_Lib/Source/SupportFunctions \
 			Drivers/CMSIS/DSP_Lib/Source/FilteringFunctions \
 			Drivers/CMSIS/DSP_Lib/Source/TransformFunctions \
-			Drivers/CMSIS/DSP_Lib/Source/CommonTables
+			Drivers/CMSIS/DSP_Lib/Source/CommonTables \
+			Drivers/CMSIS/DSP_Lib/Source/StatisticsFunctions
 
 DSPINCDIR = 
 

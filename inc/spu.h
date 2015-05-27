@@ -23,6 +23,8 @@
 
 #include "peakFilter.h"
 #include "shelvingFilter.h"
+
+#include "noiseGate.h"
 static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
     &NoneId,
     &VolumeId,
@@ -32,9 +34,9 @@ static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = 
     &DelayId,
     &ReverbId,
     &FlangerId,
-    &EqualizerId,
     &PeakFilterId,
     &ShelvingFilterId,
+    &NoiseGateId,
 };
 
 void SignalProcessingUnit(void const * argument);
