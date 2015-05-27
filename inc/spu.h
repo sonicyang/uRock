@@ -22,7 +22,8 @@
 #include "flanger.h"
 
 #include "peakFilter.h"
-#include "shelvingFilter.h"
+#include "lowShelvingFilter.h"
+#include "highShelvingFilter.h"
 
 #include "noiseGate.h"
 static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
@@ -35,7 +36,8 @@ static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = 
     &ReverbId,
     &FlangerId,
     &PeakFilterId,
-    &ShelvingFilterId,
+    &LowShelvingFilterId,
+    &HighShelvingFilterId,
     &NoiseGateId,
 };
 
