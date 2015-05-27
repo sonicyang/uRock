@@ -33,16 +33,11 @@ void delete_NoiseGate(void *opaque){
 }
 
 void adjust_NoiseGate(void *opaque, uint8_t* values){
-    struct NoiseGate_t *tmp = (struct NoiseGate_t*)opaque;
-
-    LinkPot(&(tmp->threshold), values[0]);
     return;
 }
 
 void getParam_NoiseGate(void *opaque, struct parameter_t* param[], uint8_t* paramNum){
-    struct NoiseGate_t *tmp = (struct NoiseGate_t*)opaque;
-    *paramNum = 1;
-    param[0] = &tmp->threshold;
+    *paramNum = 0;
     return;
 }
 
@@ -54,11 +49,6 @@ struct Effect_t* new_NoiseGate(){
     tmp->parent.del = delete_NoiseGate;
     tmp->parent.adj = adjust_NoiseGate;
     tmp->parent.getParam = getParam_NoiseGate;
-
-    tmp->threshold.name = "Threshold";
-    tmp->threshold.upperBound = 350.0f;
-    tmp->threshold.lowerBound = 100.0f;
-    tmp->threshold.value = 100.0f;
 
     tmp->counter = 0;
     return (struct Effect_t*)tmp;
