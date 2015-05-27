@@ -4,13 +4,14 @@
 
 void NoiseGate(q31_t* pData, void *opaque){
     struct NoiseGate_t *tmp = (struct NoiseGate_t*)opaque;
-    q31_t result;
+    q31_t buf[SAMPLE_NUM];
     q31_t threshold = tmp->threshold.value * Q_1;
     register int i;
     q31_t c = 0;
     // arm_rms_q31(pData, SAMPLE_NUM, &result);
+    arm_abs_q31(pData, buf, SAMPLE_NUM);
     for(i = 0; i < SAMPLE_NUM; i++){
-        if(pData[i] < threshold){
+        if(buf[i] < threshold){
             c++;
         }
     }
@@ -55,7 +56,7 @@ struct Effect_t* new_NoiseGate(){
     tmp->parent.getParam = getParam_NoiseGate;
 
     tmp->threshold.name = "Threshold";
-    tmp->threshold.upperBound = 8192.0f;
+    tmp->threshold.upperBound = 100.0f;
     tmp->threshold.lowerBound = 0.0f;
     tmp->threshold.value = 1.0f;
 
