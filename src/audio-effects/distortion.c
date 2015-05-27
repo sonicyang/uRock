@@ -54,8 +54,8 @@ struct Effect_t* new_Distortion(){
     tmp->parent.getParam = getParam_Distortion;
 
     tmp->gain.name = "Gain";
-    tmp->gain.upperBound = 10.0f;
-    tmp->gain.lowerBound = 2.0f;
+    tmp->gain.upperBound = 3.5f;
+    tmp->gain.lowerBound = 1.0f;
     tmp->gain.value = 2.0f;
 
     tmp->volume.name = "Volume";
