@@ -34,7 +34,7 @@ void HighShelvingFilter(q31_t* pData, void *opaque){
 }
 
 void delete_HighShelvingFilter(void *opaque){
-    struct HighShelvingFilter_t *tmp = (struct ShelvingFilter_t*)opaque;
+    struct HighShelvingFilter_t *tmp = (struct HighShelvingFilter_t*)opaque;
     vPortFree(tmp); 
     return;
 }
