@@ -36,7 +36,7 @@ static const struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = 
     &DelayId,
     &ReverbId,
     &FlangerId,
-    &PeakFilterId,
+    &EqualizerId,
     &LowShelvingFilterId,
     &HighShelvingFilterId,
 };
