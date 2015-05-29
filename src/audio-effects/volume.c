@@ -39,6 +39,8 @@ struct Effect_t* new_Volume(){
     struct Volume_t* tmp = pvPortMalloc(sizeof(struct Volume_t));
 
     strcpy(tmp->parent.name, VolumeId.name);
+    tmp->parent.FXid = &VolumeId;
+
     tmp->parent.func = Volume;
     tmp->parent.del = delete_Volume;
     tmp->parent.adj = adjust_Volume;

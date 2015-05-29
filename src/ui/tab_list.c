@@ -15,25 +15,30 @@
 
 #include "helper.h"
 
+#include "background.bmp.h"
+
 extern uint32_t selectedEffectStage;
 
 void tab_list_refresh(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
-    char buf[32];
 
     for(i = 0; i < STAGE_AVALIABLE; i++){
-        itoa(i + 1, buf);
+
+        gdispImageClose(tmp->ghImages + i);
 
         if(retriveStagedEffect(i)){
-            strcat(buf, " ");
-            strcat(buf, retriveStagedEffect(i)->name);
-            buf[8] = '\0';
+            gdispImageOpenMemory(tmp->ghImages + i, retriveStagedEffect(i)->FXid->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, tmp->ghImages + i);
+            gwinuRedraw(tmp->btn_effectIndicate[i]);
+            gwinSetText(tmp->btn_effectIndicate[i], "", 0);
         }else{
-            strcat(buf, " Empty");
+            gdispImageOpenMemory(tmp->ghImages + i, EFFECTS[0]->image);
+            gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, tmp->ghImages + i);
+            gwinuRedraw(tmp->btn_effectIndicate[i]);
+            gwinSetText(tmp->btn_effectIndicate[i], "Empty", 0);
         }
 
-        gwinSetText(tmp->btn_effectIndicate[i], buf, 1);
     }
 
     return;
@@ -80,7 +85,7 @@ void tab_list_show(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
 
-    gwinSetVisible(tmp->label_uRock, TRUE);
+    gwinSetVisible(tmp->ghBackGroundImage, TRUE);
     for(i = 0; i < STAGE_AVALIABLE; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], TRUE);
         //gwinSetVisible(tmp->label_effectName[i], TRUE);
@@ -97,7 +102,7 @@ void tab_list_hide(void* opaque){
     struct tab_list_t *tmp = (struct tab_list_t*)opaque;
     uint32_t i;
 
-    gwinSetVisible(tmp->label_uRock, FALSE);
+    gwinSetVisible(tmp->ghBackGroundImage, FALSE);
     for(i = 0; i < STAGE_AVALIABLE; i++){
         gwinSetVisible(tmp->btn_effectIndicate[i], FALSE);
         //gwinSetVisible(tmp->label_effectName[i], FALSE);
@@ -117,32 +122,37 @@ struct tab_t *tab_list_init(struct tab_list_t* opaque){
     /* StageTab */
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;
-    wi.g.x = 30;
+    wi.g.x = 0;
     wi.g.y = 0;
     wi.g.width = 240;
-    wi.g.height = 20;
-    wi.text = "uRock : YouRock";
-    opaque->label_uRock = gwinLabelCreate(NULL, &wi);
+    wi.g.height = 320;
+    opaque->ghBackGroundImage = gwinImageCreate(NULL, &wi.g);
+    gwinImageOpenMemory(opaque->ghBackGroundImage, background);
 
     for(i = 0; i < STAGE_AVALIABLE / 2; i++){
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 10;
-        wi.g.y = 50 + 60 * i;
-        wi.g.width = 100;
-        wi.g.height = 50;
+        wi.g.x = (i && 0x01) ? 140 : 48;
+        wi.g.y = 80 + 75 * i;
+        wi.g.width = 46;
+        wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2] = gwinButtonCreate(NULL, &wi);
+        gdispImageOpenMemory(opaque->ghImages + i * 2, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2], gwinButtonDraw_Image, opaque->ghImages + i * 2);
 
         gwinWidgetClearInit(&wi);
         wi.g.show = FALSE;
-        wi.g.x = 130;
-        wi.g.y = 50 + 60 * i;
-        wi.g.width = 100;
-        wi.g.height = 50;
+        wi.g.x = (i && 0x01) ? 48 : 140;
+        wi.g.y = 80 + 75 * i;
+        wi.g.width = 46;
+        wi.g.height = 60;
         wi.text = "";
         opaque->btn_effectIndicate[i * 2 + 1] = gwinButtonCreate(NULL, &wi);
+        gdispImageOpenMemory(opaque->ghImages + i * 2 + 1, EFFECTS[0]->image);
+        gwinSetCustomDraw(opaque->btn_effectIndicate[i * 2 + 1], gwinButtonDraw_Image, opaque->ghImages + i * 2 + 1);
     }
+
 /*
     gwinWidgetClearInit(&wi);
     wi.g.show = FALSE;

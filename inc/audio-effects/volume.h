@@ -2,6 +2,7 @@
 #define __VOLUME_H__
 
 #include "base-effect.h"
+#include "volume_img.bmp.h"
 
 struct Volume_t{
     struct Effect_t parent;
@@ -13,6 +14,7 @@ struct Effect_t* new_Volume();
 
 static struct EffectType_t VolumeId __attribute__((unused)) = {
     .name = "Volume",
+    .image = volume_img,
     .Init = new_Volume
 };
 

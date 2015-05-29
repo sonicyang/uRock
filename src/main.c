@@ -112,8 +112,8 @@ int main(void)
   MX_ADC2_Init();
   MX_SDIO_SD_Init();
 
-  SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
-  f_mount(&FatFs, SD_Path, 1);
+  //SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+  //f_mount(&FatFs, SD_Path, 1);
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -134,7 +134,7 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadDef(SPU_Task, SignalProcessingUnit, osPriorityRealtime, 1, 1024);
   SPU_TaskHandle = osThreadCreate(osThread(SPU_Task), NULL);
-  osThreadDef(UI_Task, UserInterface, osPriorityHigh, 1, 3000);
+  osThreadDef(UI_Task, UserInterface, osPriorityHigh, 1, 4096);
   UI_TaskHandle = osThreadCreate(osThread(UI_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

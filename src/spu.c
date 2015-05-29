@@ -28,7 +28,7 @@ void SignalProcessingUnit(void const * argument){
     uint32_t i;
 
     for(i = 0; i < STAGE_NUM; i++){
-        effectList[i] = NULL;
+        attachEffect(i, 1);
     }
 
     /* Semaphore Blocker setup*/ 

@@ -12,6 +12,8 @@
 
 #include "setting.h"
 
+#include "gfx.h"
+
 uint32_t allocateDelayLine();
 void releaseDelayLine(uint32_t);
 
@@ -29,6 +31,7 @@ typedef void(*getParamFunc)(void*,struct parameter_t**, uint8_t*);
 
 struct Effect_t{
     char name[16];
+    struct EffectType_t* FXid;
     EffectFunc func;
     DeleteFunc del;
     adjustFunc adj;
@@ -39,6 +42,8 @@ typedef struct Effect_t*(*newEffectFunc)(void);
 
 struct EffectType_t{
     const char name[16];
+    const char* image;
+    gdispImage cacheImage;
     newEffectFunc   Init;
 };
 

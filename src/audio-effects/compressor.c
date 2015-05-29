@@ -62,6 +62,8 @@ struct Effect_t* new_Compressor(){
     struct Compressor_t* tmp = pvPortMalloc(sizeof(struct Compressor_t));
 
     strcpy(tmp->parent.name, CompressorId.name);
+    tmp->parent.FXid = &CompressorId;
+
     tmp->parent.func = Compressor;
     tmp->parent.del = delete_Compressor;
     tmp->parent.adj = adjust_Compressor;
