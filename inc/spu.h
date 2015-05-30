@@ -22,7 +22,8 @@
 #include "flanger.h"
 
 #include "peakFilter.h"
-#include "shelvingFilter.h"
+#include "lowShelvingFilter.h"
+#include "highShelvingFilter.h"
 
 #include "noiseGate.h"
 
@@ -36,8 +37,9 @@ static struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
     &DelayId,
     &ReverbId,
     &FlangerId,
-    &PeakFilterId,
-    &ShelvingFilterId,
+    &EqualizerId,
+    &LowShelvingFilterId,
+    &HighShelvingFilterId,
 };
 
 void SignalProcessingUnit(void const * argument);
