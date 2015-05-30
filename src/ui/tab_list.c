@@ -36,7 +36,7 @@ void tab_list_refresh(void* opaque){
             gdispImageOpenMemory(tmp->ghImages + i, EFFECTS[0]->image);
             gwinSetCustomDraw(tmp->btn_effectIndicate[i], gwinButtonDraw_Image, tmp->ghImages + i);
             gwinuRedraw(tmp->btn_effectIndicate[i]);
-            gwinSetText(tmp->btn_effectIndicate[i], "Empty", 0);
+            gwinSetText(tmp->btn_effectIndicate[i], "", 0);
         }
 
     }

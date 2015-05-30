@@ -112,8 +112,8 @@ int main(void)
   MX_ADC2_Init();
   MX_SDIO_SD_Init();
 
-  //SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
-  //f_mount(&FatFs, SD_Path, 1);
+  SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
+  f_mount(&FatFs, SD_Path, 1);
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
