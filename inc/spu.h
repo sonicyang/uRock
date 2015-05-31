@@ -38,8 +38,6 @@ static struct EffectType_t* EFFECTS[EFFECT_NUM] __attribute__((unused)) = {
     &ReverbId,
     &FlangerId,
     &EqualizerId,
-    &LowShelvingFilterId,
-    &HighShelvingFilterId,
 };
 
 void SignalProcessingUnit(void const * argument);

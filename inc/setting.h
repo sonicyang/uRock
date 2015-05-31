@@ -49,7 +49,7 @@ static const uint32_t POT_PINS[4] = {POT1_PIN, POT2_PIN, POT3_PIN, POT4_PIN};
 /* ============================
  * Effect related Configuration
  * ===========================*/
-#define EFFECT_NUM 12
+#define EFFECT_NUM 10
 #define MAX_EFFECT_PARAM 4
 
 #define MAX_CONFIG_NUM 4
