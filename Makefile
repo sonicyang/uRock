@@ -29,7 +29,7 @@ CFLAGS += -g3 -std=c99 -Wall  \
 		  -DUSER_NAME=\"$(USER)\"
 
 # Optimizations
-CFLAGS += -O3 -ffast-math \
+CFLAGS += -O0 -ffast-math \
 		  -ffunction-sections -fdata-sections \
 		  -fno-common \
 		  --param max-inline-insns-single=1000 \
