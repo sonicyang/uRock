@@ -54,7 +54,7 @@ void UserInterface(void const *argument){
 
     uint8_t currentConfig = 0;
 
-	ReadStageSetting(currentConfig);
+	//ReadStageSetting(currentConfig);
 
 	gfxInit();
 	gdispClear(Black);
@@ -63,21 +63,21 @@ void UserInterface(void const *argument){
 	gwinSetDefaultStyle(&BlackWidgetStyle, FALSE);
     geventListenerInit(&gl);
     gwinAttachListener(&gl);
-    
+
 	// create the widget
-	tabs[LIST_TAB] = tab_list_init(&listTab); 
-	tabs[PARAM_TAB] = tab_param_init(&paramTab); 
-	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab); 
+	tabs[LIST_TAB] = tab_list_init(&listTab);
+	tabs[PARAM_TAB] = tab_param_init(&paramTab);
+	tabs[SELECT_EFFECT_TAB] = tab_select_effect_init(&selectEffectTab);
 	SwitchTab(LIST_TAB);
 
-	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 4); //One more for pedal //TODO: Make 4 
+	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)potValues[0], 4); //One more for pedal //TODO: Make 4
     for(i = 0; i < CONFIG_BUTTON_NUM; i++){
         buttonPrevValue[i] = HAL_GPIO_ReadPin(CONFIG_BUTTON_PORT, CONFIG_BUTTON_PINS[i]);
     }
 
     //For pedal
     //attachEffect(7, 1);
-    attachEffect(6, 2);
+    //attachEffect(6, 2);
 
 	while(1) {
 		// Get an Event
@@ -111,10 +111,10 @@ void UserInterface(void const *argument){
                         if(tmp < 5){
                            paramApplyFlag[i] = 1;
                         }else{
-                           potApply[i] = paramValues;  
+                           potApply[i] = paramValues;
                         }
                     }
-                    
+
                     if(paramApplyFlag[i]){
                         if((potApply[i] - potValues[1][i]) < 0)
                             tmp = potValues[1][i] - potApply[i];
@@ -136,7 +136,7 @@ void UserInterface(void const *argument){
             for(i = 0; i < MAX_EFFECT_PARAM; i++)
                 paramApplyFlag[i] = 0;
         }
-        
+
         if(currentTabNumber == LIST_TAB){
             for(i = 0; i < CONFIG_BUTTON_NUM; i++){
                 if (buttonPrevValue[i] != HAL_GPIO_ReadPin(CONFIG_BUTTON_PORT, CONFIG_BUTTON_PINS[i])){
@@ -147,7 +147,7 @@ void UserInterface(void const *argument){
                     tabs[currentTabNumber]->refresh(tabs[currentTabNumber]);
                 }
             }
-           /* 
+           /*
             //For Pedal
             if((potValues[0][3] - potValues[1][3]) < 0)
                 tmp = potValues[1][3] - potValues[0][3];

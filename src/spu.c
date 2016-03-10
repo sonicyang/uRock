@@ -8,9 +8,9 @@
 extern SAI_HandleTypeDef hsai_BlockA1;
 extern SAI_HandleTypeDef hsai_BlockB1;
 
-osSemaphoreId SPUH_id; 
+osSemaphoreId SPUH_id;
 
-uint16_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2]; //L-R channels -> 2x buffer length
+uint32_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2]; //L-R channels -> 2x buffer length
 uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM];
 
 uint8_t receivePipeHead = 0;
@@ -19,7 +19,7 @@ uint8_t pipeUsage = 0;
 q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
 struct Effect_t *effectList[STAGE_NUM];
-    
+
 int16_t wavData[4200];
 
 extern uint8_t potRawValues[4];
@@ -31,7 +31,7 @@ void SignalProcessingUnit(void const * argument){
         effectList[i] = NULL;
     }
 
-    /* Semaphore Blocker setup*/ 
+    /* Semaphore Blocker setup*/
     osSemaphoreDef(SPUH);
     SPUH_id = osSemaphoreCreate(osSemaphore(SPUH), 1);
 
@@ -121,9 +121,9 @@ void attachEffect(uint32_t stage, uint32_t effectId){
 	if(effectList[stage])
 		effectList[stage]->del(effectList[stage]);
     //XXX: Probably need to return to RTOS for truly releasing memory
-    
+
     effectList[stage] = EFFECTS[effectId]->Init();
-     
+
     return;
 }
 

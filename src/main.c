@@ -110,10 +110,10 @@ int main(void)
   MX_DMA_Init();
   MX_SAI1_Init();
   MX_ADC2_Init();
-  MX_SDIO_SD_Init();
+  /*MX_SDIO_SD_Init();*/
 
-  SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);
-  f_mount(&FatFs, SD_Path, 1);
+  /*SD_DriverNum = FATFS_LinkDriver(&SD_Driver, SD_Path);*/
+  /*f_mount(&FatFs, SD_Path, 1);*/
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -144,11 +144,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
- 
+
 
   /* Start scheduler */
   osKernelStart();
-  
+
   /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
@@ -212,7 +212,7 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.Instance = SAI1_Block_A;
   hsai_BlockA1.Init.Protocol = SAI_FREE_PROTOCOL;
   hsai_BlockA1.Init.AudioMode = SAI_MODEMASTER_TX;
-  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
+  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_24;
   hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
   hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_RISINGEDGE;
   hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
@@ -224,9 +224,9 @@ void MX_SAI1_Init(void)
   hsai_BlockA1.FrameInit.FrameLength = 64;
   hsai_BlockA1.FrameInit.ActiveFrameLength = 32;
   hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_CHANNEL_IDENTIFICATION;
-  hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_HIGH;
+  hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
   hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
-  hsai_BlockA1.SlotInit.FirstBitOffset = 16;
+  hsai_BlockA1.SlotInit.FirstBitOffset = 0;
   hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
   hsai_BlockA1.SlotInit.SlotNumber = 2;
   hsai_BlockA1.SlotInit.SlotActive = 0xFFFF0000;
@@ -244,7 +244,7 @@ void MX_SAI1_Init(void)
   hsai_BlockB1.FrameInit.FrameLength = 64;
   hsai_BlockB1.FrameInit.ActiveFrameLength = 32;
   hsai_BlockB1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
-  hsai_BlockB1.FrameInit.FSPolarity = SAI_FS_ACTIVE_HIGH;
+  hsai_BlockB1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
   hsai_BlockB1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
   hsai_BlockB1.SlotInit.FirstBitOffset = 0;
   hsai_BlockB1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
@@ -258,7 +258,7 @@ void MX_ADC2_Init(void)
 {
   ADC_ChannelConfTypeDef sConfig;
   ADC_MultiModeTypeDef multimode;
- 
+
   /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc2.Instance = ADC2;
@@ -274,7 +274,7 @@ void MX_ADC2_Init(void)
   hadc2.Init.DMAContinuousRequests = ENABLE;
   hadc2.Init.EOCSelection = EOC_SINGLE_CONV;
   HAL_ADC_Init(&hadc2);
- 
+
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_11;
@@ -296,13 +296,13 @@ void MX_ADC2_Init(void)
   sConfig.Rank = 4;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   HAL_ADC_ConfigChannel(&hadc2, &sConfig);
- 
+
   /**Configure the ADC multi-mode
   */
   multimode.Mode = ADC_MODE_INDEPENDENT;
   multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_5CYCLES;
   HAL_ADCEx_MultiModeConfigChannel(&hadc2, &multimode);
- 
+
 }
 
 void MX_SDIO_SD_Init(void)
@@ -318,10 +318,10 @@ void MX_SDIO_SD_Init(void)
 
 }
 
-/** 
+/**
   * Enable DMA controller clock
   */
-void MX_DMA_Init(void) 
+void MX_DMA_Init(void)
 {
   /* DMA controller clock enable */
   __DMA2_CLK_ENABLE();
@@ -338,9 +338,9 @@ void MX_DMA_Init(void)
 
 }
 
-/** Configure pins as 
-        * Analog 
-        * Input 
+/** Configure pins as
+        * Analog
+        * Input
         * Output
         * EVENT_OUT
         * EXTI
@@ -392,10 +392,10 @@ void assert_failed(uint8_t* file, uint32_t line)
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-*/ 
+*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
