@@ -11,12 +11,12 @@ extern SAI_HandleTypeDef hsai_BlockB1;
 osSemaphoreId SPUH_id;
 
 uint32_t outputBuffer[BUFFER_NUM][SAMPLE_NUM * 2]; //L-R channels -> 2x buffer length
-uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM];
+uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM * 2];
 
 uint8_t receivePipeHead = 0;
 uint8_t transmitPipeHead = 0;
 uint8_t pipeUsage = 0;
-q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
+q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM * 2] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
 struct Effect_t *effectList[STAGE_NUM];
 
@@ -36,7 +36,7 @@ void SignalProcessingUnit(void const * argument){
     SPUH_id = osSemaphoreCreate(osSemaphore(SPUH), 1);
 
     /* Start Transmission and reception */
-    HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], SAMPLE_NUM * 2); //Salve goes before Master
+    HAL_SAI_Receive_DMA(&hsai_BlockB1, (uint8_t*)inputBuffer[0], SAMPLE_NUM * 2 * 2); //Salve goes before Master
     HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t*)outputBuffer[0], SAMPLE_NUM * 2 * 2);
 
     /* Process */
@@ -44,7 +44,7 @@ void SignalProcessingUnit(void const * argument){
         if(osSemaphoreWait(SPUH_id, osWaitForever) == osOK){
             for(i = 0; i < STAGE_NUM; i++){
                 if(effectList[i] != NULL){
-                    effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & (PIPE_LENGTH - 1)], effectList[i]); //Hack, modulating 16 -> using mask only avliable to 2^n
+                    /*effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & (PIPE_LENGTH - 1)], effectList[i]); //Hack, modulating 16 -> using mask only avliable to 2^n*/
                 }
                 //TODO: Use empty function call;
             }
@@ -57,8 +57,8 @@ void SignalProcessingUnit(void const * argument){
 void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
-    for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i] << 8) - (NORM_VALUE);
+    for(i = 0; i < SAMPLE_NUM * 2; i++)
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i]) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -70,8 +70,9 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
-    for(i = 0; i < 256; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i] << 8) - (NORM_VALUE);
+
+    for(i = 0; i < SAMPLE_NUM * 2; i++)
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i]) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -87,9 +88,8 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     if(pipeUsage <= 8)
         return;
 
-    for(i = 0; i < 256; i++){
-        outputBuffer[0][(i << 1)] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 16);
-        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 16);
+    for(i = 0; i < SAMPLE_NUM * 2; i++){
+        outputBuffer[0][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i]);
     }
 
     transmitPipeHead++;
@@ -106,9 +106,8 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
     if(pipeUsage <= 8)
         return;
 
-    for(i = 0; i < 256; i++){
-        outputBuffer[1][(i << 1)] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 16);
-        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 16);
+    for(i = 0; i < SAMPLE_NUM * 2; i++){
+        outputBuffer[1][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i]);
     }
 
     transmitPipeHead++;
