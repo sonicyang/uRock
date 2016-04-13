@@ -32,14 +32,19 @@ The Hardware to evaluate this code / 製作本效果器所需的硬體
 - Self build ultra low noise power supply with TPS4A7000
 
 Both ADC and DAC are set to operate at 96kHz sampling rate.
+
 For ADC
+
  - ADC is sampling at 24bits.
  - Master mode
  - On STM32F429I port SAI1
+
 For DAC
+
  - DAC is output at 16bits.
  - Slave mode
  - On STM32F429I port SAI2
+
 ADC and DAC shared BCK, LRCK and SCK
 
 Full Schematic will be released soon
@@ -98,9 +103,10 @@ For futhuer notice please reference the LICENSE file.
 
 更多資訊請詳見LICENSE檔案
 
-Signal Processing: sonicyang, anarchih, 
-GUI: sonicyang, The KK
-Housing:  sonicyang, Shinshipower
-Art design: 大中天
+ - System Design: Chung-Fan Yang(sonicyang)
+ - Signal Processing: sonicyang, Hao-Yi Chih(anarchih)
+ - GUI: sonicyang, The KK
+ - Housing:  sonicyang, Chih-lin Lee(Shinshipower)
+ - Art design: 大中天
 
 Copyright (c) 2014,2015
