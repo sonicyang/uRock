@@ -2,7 +2,7 @@ uRock
 =====
 
 This is a Project about Digital Guitar Effect Pedal running on ARM Cortex-M4.
-1.1 version featuring better sound quality. Require more external compoents.
+1.1 version featuring better sound quality. Curent version require more external compoents.
 For minimal cost, reference to 0.1 build.
 
 本專案是基於ARM Cortex-M4F的開源吉他效果器
@@ -10,11 +10,11 @@ For minimal cost, reference to 0.1 build.
 若您想要用做簡單的方式製作，可以參考0.1版
 
 The Source Code for 
- - Effects are under src/audio-effects/
- - Ui control under  src/ui/
+ - Effects : src/audio-effects/ and src/spu.c
+ - Ui control : src/ui/
 
 程式碼架構
- - 效果：src/audio-effects/
+ - 效果：src/audio-effects/ and src/spu.c
  - 使用者界面：src/ui
 
 Presentations & Dev-Reference / 發表會簡報與開發記錄
@@ -28,28 +28,39 @@ The Hardware to evaluate this code / 製作本效果器所需的硬體
 -------------------------
 
 - STM32F429I-DISCOVERY
-- Self build external ADC/DAC board
-- Self build ultra low noise power supply
+- Self build ADC/DAC board with PCM4201 and PCM1754
+- Self build ultra low noise power supply with TPS4A7000
 
-Self Build Boards' Schematic will be released soon
+Both ADC and DAC are set to operate at 96kHz sampling rate.
+For ADC
+ - ADC is sampling at 24bits.
+ - Master mode
+ - On STM32F429I port SAI1
+For DAC
+ - DAC is output at 16bits.
+ - Slave mode
+ - On STM32F429I port SAI2
+ADC and DAC shared BCK, LRCK and SCK
+
+Full Schematic will be released soon
 
 - STM32F429I-DISCOVERY
-- 自製 ADC/DAC 轉換板
-- 自制超低底噪電源模組
+- 自製 ADC/DAC 轉換板(PCM4201/PCM1754)
+- 自制超低底噪電源模組(TPS4A74000)
 
-自制板的線路圖將在整理後公開
+線路圖將在整理後公開
 
 The software require to build / 如何組建這份軟體
 -----------------------------
 
 * make
-* arm-gcc-none-eabi 4.8 with hard floating point support, Suggest to Linaro Version
+* arm-gcc-none-eabi 4.8 with hard floating point support, Suggest to Linaro Version 2014q2
 * openocd or st-flash
 
-Tested on MAC OSX and Ubuntu 14.14.
+Tested on MAC OSX and Ubuntu 14.14 with linaro gcc build
 
 * make
-* arm-gcc-none-eabi 4.8 需要支援hard floating，建議使用Linaro版本
+* arm-gcc-none-eabi 4.8 需要支援hard floating，建議使用Linaro版本(2014q2)
 * openocd or st-flash
 
 已經在Mac OSX與Ubuntu 14.14測試成功
@@ -87,5 +98,9 @@ For futhuer notice please reference the LICENSE file.
 
 更多資訊請詳見LICENSE檔案
 
+Signal Processing: sonicyang, anarchih, 
+GUI: sonicyang, The KK
+Housing:  sonicyang, Shinshipower
+Art design: 大中天
 
-Copyright (c) 2014,2015 sonicyang, anarchih, The KK, Shinshipower, 大中天
+Copyright (c) 2014,2015
