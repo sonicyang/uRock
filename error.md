@@ -1,0 +1,4 @@
+ - ADC should be set to Slave mode, MODE pins pull-down
+ - ADC SYNC should be tight to VDD
+ - Remove R1, too large voltage drop
+ - TPS4A700 has a basic voltage!
