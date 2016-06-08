@@ -93,8 +93,6 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     }
 
     transmitPipeHead++;
-    if(transmitPipeHead == 16)
-        transmitPipeHead = 0;
 
     pipeUsage--;
     return;
