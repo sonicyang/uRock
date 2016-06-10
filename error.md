@@ -3,3 +3,4 @@
  - Remove R1, too large voltage drop
  - TPS4A700 has a basic voltage!
  - SD Card writing is mirrored between connectors
+ - Extend custom SMD parts pads
