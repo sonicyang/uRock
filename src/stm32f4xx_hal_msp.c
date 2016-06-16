@@ -111,7 +111,8 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
     hdma_sai1_a.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_sai1_a.Init.Mode = DMA_CIRCULAR;
     hdma_sai1_a.Init.Priority = DMA_PRIORITY_VERY_HIGH;
-    hdma_sai1_a.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    hdma_sai1_a.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+    hdma_sai1_a.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
     HAL_DMA_Init(&hdma_sai1_a);
 
     /* Several peripheral DMA handle pointers point to the same DMA handle.
@@ -155,7 +156,8 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
     hdma_sai1_b.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_sai1_b.Init.Mode = DMA_CIRCULAR;
     hdma_sai1_b.Init.Priority = DMA_PRIORITY_VERY_HIGH;
-    hdma_sai1_b.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    hdma_sai1_b.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+    hdma_sai1_b.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
     HAL_DMA_Init(&hdma_sai1_b);
 
     /* Several peripheral DMA handle pointers point to the same DMA handle.
