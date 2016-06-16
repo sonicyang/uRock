@@ -58,7 +58,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
     for(i = 0; i < SAMPLE_NUM * 2; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i]) - (NORM_VALUE);
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i] << 8) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -72,7 +72,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
     for(i = 0; i < SAMPLE_NUM * 2; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i]) - (NORM_VALUE);
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i] << 8) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -89,7 +89,7 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < SAMPLE_NUM * 2; i++){
-        outputBuffer[0][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i]);
+        outputBuffer[0][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
     }
 
     transmitPipeHead++;
@@ -105,7 +105,7 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
         return;
 
     for(i = 0; i < SAMPLE_NUM * 2; i++){
-        outputBuffer[1][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i]);
+        outputBuffer[1][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
     }
 
     transmitPipeHead++;
