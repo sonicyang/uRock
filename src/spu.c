@@ -16,7 +16,7 @@ uint32_t inputBuffer[BUFFER_NUM][SAMPLE_NUM * 2];
 uint8_t receivePipeHead = 0;
 uint8_t transmitPipeHead = 0;
 uint8_t pipeUsage = 0;
-q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM * 2] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
+q31_t signalPipe[PIPE_LENGTH][SAMPLE_NUM] __attribute__ ((section (".ccmram"))) = {{255, 255, 255}};
 
 struct Effect_t *effectList[STAGE_NUM];
 
@@ -57,8 +57,9 @@ void SignalProcessingUnit(void const * argument){
 void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
-    for(i = 0; i < SAMPLE_NUM * 2; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i] << 8) - (NORM_VALUE);
+    for(i = 0; i < SAMPLE_NUM; i++){
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[0][i << 1] << 8) - (NORM_VALUE);
+    }
 
     receivePipeHead++;
 
@@ -71,8 +72,8 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai){
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai){
     uint16_t i;
 
-    for(i = 0; i < SAMPLE_NUM * 2; i++)
-        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i] << 8) - (NORM_VALUE);
+    for(i = 0; i < SAMPLE_NUM; i++)
+        signalPipe[receivePipeHead & (PIPE_LENGTH - 1)][i] = (inputBuffer[1][i << 1] << 8) - (NORM_VALUE);
 
     receivePipeHead++;
 
@@ -88,8 +89,9 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai){
     if(pipeUsage <= 8)
         return;
 
-    for(i = 0; i < SAMPLE_NUM * 2; i++){
-        outputBuffer[0][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
+    for(i = 0; i < SAMPLE_NUM; i++){
+        outputBuffer[0][i << 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
+        outputBuffer[0][(i << 1) + 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
     }
 
     transmitPipeHead++;
@@ -104,8 +106,9 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai){
     if(pipeUsage <= 8)
         return;
 
-    for(i = 0; i < SAMPLE_NUM * 2; i++){
-        outputBuffer[1][i] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
+    for(i = 0; i < SAMPLE_NUM; i++){
+        outputBuffer[1][i << 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
+        outputBuffer[1][(i << 1) + 1] = (signalPipe[transmitPipeHead & (PIPE_LENGTH - 1)][i] >> 8);
     }
 
     transmitPipeHead++;
