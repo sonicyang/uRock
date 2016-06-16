@@ -44,7 +44,7 @@ void SignalProcessingUnit(void const * argument){
         if(osSemaphoreWait(SPUH_id, osWaitForever) == osOK){
             for(i = 0; i < STAGE_NUM; i++){
                 if(effectList[i] != NULL){
-                    /*effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & (PIPE_LENGTH - 1)], effectList[i]); //Hack, modulating 16 -> using mask only avliable to 2^n*/
+                    effectList[i]->func(signalPipe[(receivePipeHead - 1 - i) & (PIPE_LENGTH - 1)], effectList[i]); //Hack, modulating 16 -> using mask only avliable to 2^n
                 }
                 //TODO: Use empty function call;
             }
